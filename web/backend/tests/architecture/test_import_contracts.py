@@ -20,6 +20,4 @@ def test_import_contracts_pass() -> None:
         text=True,
         cwd=".",  # run from web/backend/
     )
-    assert result.returncode == 0, (
-        f"Import contracts failed:\n{result.stdout}\n{result.stderr}"
-    )
+    assert result.returncode == 0, f"Import contracts failed:\n{result.stdout}\n{result.stderr}"

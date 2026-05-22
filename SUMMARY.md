@@ -7,6 +7,22 @@ issues were resolved.
 
 ---
 
+## [2026-05-22 00:02] Commit Summary
+
+**Change Type:** Feature
+**Scope:** backend/architecture
+
+**Summary:**
+Configure four import-linter contracts in pyproject.toml — one per domain (auth, goals, users, weight_tracking). Each contract forbids domain and application sub-layers from importing fastapi, sqlalchemy, pydantic, alembic, or starlette. The include_external_packages = true flag is required by import-linter 2.x when forbidding packages outside the root. All four contracts are verified KEPT by lint-imports and the architecture smoke test goes green.
+
+**Rationale:**
+The import contracts make the Clean Architecture dependency rule machine-verifiable: any future code that accidentally pulls a framework import into a domain or application layer will fail the test suite immediately, not in code review.
+
+**References:**
+- Issue: Phase 4 backend architecture
+
+---
+
 ## [2026-05-22 00:01] Commit Summary
 
 **Change Type:** Test

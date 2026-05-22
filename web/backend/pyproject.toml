@@ -62,3 +62,50 @@ asyncio_mode = "auto"
 
 [tool.coverage.run]
 branch = true
+
+# ---------------------------------------------------------------------------
+# import-linter: Clean Architecture dependency contracts (SRS §4.2)
+#
+# Rule: domain and application layers must not import framework packages.
+# Infrastructure and interface layers may import any package.
+# ---------------------------------------------------------------------------
+
+[tool.importlinter]
+root_packages = ["weighttogo"]
+include_external_packages = true
+
+[[tool.importlinter.contracts]]
+name = "auth: domain and application must not import frameworks"
+type = "forbidden"
+source_modules = [
+    "weighttogo.auth.domain",
+    "weighttogo.auth.application",
+]
+forbidden_modules = ["fastapi", "sqlalchemy", "pydantic", "alembic", "starlette"]
+
+[[tool.importlinter.contracts]]
+name = "goals: domain and application must not import frameworks"
+type = "forbidden"
+source_modules = [
+    "weighttogo.goals.domain",
+    "weighttogo.goals.application",
+]
+forbidden_modules = ["fastapi", "sqlalchemy", "pydantic", "alembic", "starlette"]
+
+[[tool.importlinter.contracts]]
+name = "users: domain and application must not import frameworks"
+type = "forbidden"
+source_modules = [
+    "weighttogo.users.domain",
+    "weighttogo.users.application",
+]
+forbidden_modules = ["fastapi", "sqlalchemy", "pydantic", "alembic", "starlette"]
+
+[[tool.importlinter.contracts]]
+name = "weight_tracking: domain and application must not import frameworks"
+type = "forbidden"
+source_modules = [
+    "weighttogo.weight_tracking.domain",
+    "weighttogo.weight_tracking.application",
+]
+forbidden_modules = ["fastapi", "sqlalchemy", "pydantic", "alembic", "starlette"]
