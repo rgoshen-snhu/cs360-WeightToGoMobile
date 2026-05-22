@@ -25,13 +25,14 @@ describe('LoginPage', () => {
     );
   });
 
-  it('has an accessible heading', () => {
+  it('has at least one accessible heading', () => {
     render(
       <Wrapper>
         <LoginPage />
       </Wrapper>,
     );
-    expect(screen.getByRole('heading')).toBeInTheDocument();
+    // AuthLayout adds an h1 branding heading; the page adds its own h5.
+    expect(screen.getAllByRole('heading').length).toBeGreaterThan(0);
   });
 });
 
@@ -44,12 +45,12 @@ describe('RegisterPage', () => {
     );
   });
 
-  it('has an accessible heading', () => {
+  it('has at least one accessible heading', () => {
     render(
       <Wrapper>
         <RegisterPage />
       </Wrapper>,
     );
-    expect(screen.getByRole('heading')).toBeInTheDocument();
+    expect(screen.getAllByRole('heading').length).toBeGreaterThan(0);
   });
 });
