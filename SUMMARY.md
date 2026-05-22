@@ -101,6 +101,16 @@ issues were resolved.
   identifiers, the `.env.example`, the Docker Compose definition, and
   the SRS examples were all updated to match. The preserved Android
   artifact keeps its own `weightogo` package and is unaffected.
+- A subsequent maximum-effort review pass — five finder angles plus a
+  gap sweep — surfaced thirteen further findings, all addressed before
+  merge. The substantive fixes: application settings are now built
+  lazily, so a misconfigured environment no longer crashes every
+  importer; the Alembic environment passes the database URL straight to
+  the engine, immune to ConfigParser interpolation of characters such
+  as a percent sign; end-to-end specs are type-checked; ESLint enforces
+  React JSX rules through eslint-plugin-react, which moved ESLint to the
+  current stable 9 line; and the pre-commit, Playwright, Docker Compose,
+  and CI configurations were each hardened.
 
 ---
 
