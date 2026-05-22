@@ -70,10 +70,16 @@ WeighToGo/
 │   ├── ddr/              #   Design Decision Records
 │   ├── specs/            #   Software Requirements Specification
 │   ├── plans/            #   Implementation briefs
+│   ├── standards/        #   Engineering standards and checklists
 │   ├── architecture/     #   Android database and system architecture
 │   ├── design/           #   UI/UX design specifications
 │   ├── requirements/     #   Original course requirements (historical)
-│   └── history/          #   Android development journal
+│   ├── testing/          #   Android testing guides (historical)
+│   ├── history/          #   Android development journal
+│   ├── api/              #   API documentation (web rebuild, generated later)
+│   └── user-guide/       #   End-user documentation (future)
+├── previews/             # Android UI preview images
+├── scripts/              # Developer utility scripts
 ├── .github/              # CI workflows, issue and pull-request templates
 ├── README.md
 ├── CONTRIBUTING.md
@@ -141,7 +147,9 @@ cd WeighToGo/android
 
 Open the **`android/`** directory — not the repository root — in Android Studio,
 since the Gradle project root moved there during the monorepo restructure.
-The debug APK is written to
+Android Studio generates `android/local.properties` (the SDK location)
+automatically; for command-line builds, set the `ANDROID_HOME` environment
+variable or create that file yourself. The debug APK is written to
 `android/weightogo/build/outputs/apk/debug/weightogo-debug.apk`.
 
 To run on an emulator, create a device (API 34) in **Tools → Device Manager**

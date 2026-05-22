@@ -1849,7 +1849,7 @@ The original six ADRs in `/docs/adr/` remain in place and continue to inform the
 | ADR-0005 | Dependency Injection for Testing (Package-Private Setter Injection) | Accepted |
 | ADR-0006 | Emulator SMS Testing | Accepted |
 
-### 17.2 Planned ADRs (Web Rebuild)
+### 17.2 Web Rebuild ADRs
 
 The following ADRs are written as their decisions are made. They build on the existing six, with cross-references where the web decision supersedes or extends a mobile one.
 

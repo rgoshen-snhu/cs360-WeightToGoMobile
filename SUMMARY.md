@@ -30,7 +30,7 @@ issues were resolved.
   Phase 1 — the broken `TODO.md` links and the stale project-structure tree.
 - Pointed the CONTRIBUTING Android setup instructions at the new `android/`
   path.
-- Delivered on branch `feature/m2-phase-2-repo-restructure`.
+- Delivered as PR #19, branch `feature/m2-phase-2-repo-restructure`.
 
 **How it was done**
 
@@ -46,6 +46,8 @@ issues were resolved.
   and the documentation updates each as their own commit.
 - A documentation sweep was run as the pre-push gate, updating the README,
   CONTRIBUTING, the SRS, and this log.
+- Three review passes — code, adversarial, and security — were run on PR #19;
+  their findings are recorded below.
 
 **Issues encountered**
 
@@ -58,6 +60,11 @@ issues were resolved.
   independently of the renumbering.
 - Several historical testing documents under `docs/testing/` contain stale
   Gradle paths.
+- The review passes flagged three documentation and configuration gaps: the
+  expanded `.gitignore` did not ignore `.env` files; the README
+  repository-layout tree omitted several directories; and the SRS ADR-index
+  subsection was still headed "Planned" although two of its ADRs are now
+  written.
 
 **How issues were resolved**
 
@@ -72,6 +79,10 @@ issues were resolved.
 - The `docs/testing/` staleness predates this phase and is unrelated to the
   restructure; it was left for a later consolidated documentation pass and
   noted on the pull request rather than expanding this phase's scope.
+- The three review findings were resolved on the PR: an `.env` ignore rule was
+  added (with `.env.example` kept tracked), the README layout tree was
+  completed, and the SRS subsection heading was corrected. The security pass
+  found no vulnerabilities.
 
 ---
 
