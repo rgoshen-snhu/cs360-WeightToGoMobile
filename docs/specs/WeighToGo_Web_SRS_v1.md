@@ -411,7 +411,7 @@ The restructure is performed in a single feature branch and merged via pull requ
 
 | Step | Action | Verification |
 | --- | --- | --- |
-| 1 | Create branch `feature/repo-restructure-polyglot-monorepo` | `git branch` shows the new branch |
+| 1 | Create a feature branch from `main` | `git branch` shows the new branch |
 | 2 | Use `git mv` to move every Android file under `/android/` | `git log --follow android/app/...` shows full history |
 | 3 | Update the Android CI workflow to reference `/android/` as the working directory | Workflow runs successfully on the branch |
 | 4 | Create empty `/web/frontend/` and `/web/backend/` folders with `.gitkeep` | Folders exist in `git status` |
@@ -1563,14 +1563,14 @@ A new contributor should be able to clone, set up, and run the application in un
 
 | Command | Purpose |
 | --- | --- |
-| `uvicorn weighttogo.main:app --reload` | Development server with auto-reload |
-| `pytest` | Run all backend tests |
-| `pytest --cov=weighttogo --cov-report=html` | Run tests with coverage report |
-| `ruff check .` | Lint check |
-| `ruff format .` | Apply formatting |
-| `mypy src` | Type check |
-| `alembic upgrade head` | Apply all pending migrations |
-| `alembic revision --autogenerate -m "message"` | Generate a new migration |
+| `uv run uvicorn weighttogo.main:app --reload` | Development server with auto-reload |
+| `uv run pytest` | Run all backend tests |
+| `uv run pytest --cov=weighttogo --cov-report=html` | Run tests with coverage report |
+| `uv run ruff check .` | Lint check |
+| `uv run ruff format .` | Apply formatting |
+| `uv run mypy src` | Type check |
+| `uv run alembic upgrade head` | Apply all pending migrations |
+| `uv run alembic revision --autogenerate -m "message"` | Generate a new migration |
 
 #### 12.3.2 Frontend Commands
 
@@ -1651,11 +1651,7 @@ volumes:
 
 The repository uses Conventional Commits (`feat:`, `fix:`, `refactor:`, `test:`, `docs:`, `chore:`, `perf:`, `ci:`). This convention is already established in the Android codebase and is carried forward.
 
-#### 12.7.2 Branch Names
-
-Feature branches follow the pattern `feature/<short-kebab-description>`. Fix branches use `fix/`. Documentation branches use `docs/`.
-
-#### 12.7.3 File Naming
+#### 12.7.2 File Naming
 
 | Stack | Convention | Example |
 | --- | --- | --- |

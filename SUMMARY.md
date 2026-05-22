@@ -7,6 +7,246 @@ issues were resolved.
 
 ---
 
+## [2026-05-22 12:10] Commit Summary
+
+**Change Type:** Fix
+**Scope:** frontend/components
+
+**Summary:**
+Add explicit `: never` return type to ThrowingComponent in ErrorBoundary.test.tsx to satisfy TypeScript's strict JSX element type requirements.
+
+**Rationale:**
+TypeScript requires JSX components to return ReactNode | Promise<ReactNode>. A function that unconditionally throws must be typed as returning never, which is assignable to ReactNode. Without this, tsc reports TS2786 under strict mode.
+
+**References:**
+- Issue: Phase 5 frontend architecture
+
+---
+
+## [2026-05-22 12:09] Commit Summary
+
+**Change Type:** Feature
+**Scope:** frontend/App
+
+**Summary:**
+Wire App.tsx with React Router 6 route hierarchy and ProtectedRoute redirect wrapper. Update main.tsx to wrap the app in BrowserRouter, QueryClientProvider, AuthProvider, and PreferencesProvider. All 88 tests pass.
+
+**Rationale:**
+Separating BrowserRouter into main.tsx (rather than App.tsx) allows integration tests to supply a MemoryRouter. The ProtectedRoute component reads isAuthenticated from AuthContext and redirects unauthenticated users to /login?from=<original-path>, preserving the intended destination for Phase 6 to use after login.
+
+**References:**
+- Issue: Phase 5 frontend architecture
+
+---
+
+## [2026-05-22 12:08] Commit Summary
+
+**Change Type:** Test
+**Scope:** frontend/App
+
+**Summary:**
+Update App.test.tsx with full integration tests: full provider setup, route-specific page heading assertions (/login → Log In, /register → Create Account), and unauthenticated redirect verification for protected routes.
+
+**Rationale:**
+TDD red step for the App wiring subtask. The new tests verify that the router renders the correct page per URL, which the current stub App.tsx cannot satisfy.
+
+**References:**
+- Issue: Phase 5 frontend architecture
+
+---
+
+## [2026-05-22 12:07] Commit Summary
+
+**Change Type:** Feature
+**Scope:** frontend/pages
+
+**Summary:**
+Implement all placeholder pages (Goals, Achievements, Settings) and stub pages (Login, Register, Dashboard, WeightHistory, WeightEntryForm). Fix MUI Typography subtitle1 default HTML element (h6) by adding component="p" on placeholder subtitles to prevent spurious duplicate heading assertions.
+
+**Rationale:**
+MUI Typography subtitle1 maps to h6 in the default variantMapping, which would produce two heading elements per placeholder page and break the getByRole('heading') assertions. Using component="p" is semantically correct — the "Coming in Milestone 3" notice is a descriptive paragraph, not a section heading.
+
+**References:**
+- Issue: Phase 5 frontend architecture
+
+---
+
+## [2026-05-22 12:05] Commit Summary
+
+**Change Type:** Test
+**Scope:** frontend/pages
+
+**Summary:**
+Add failing tests for all placeholder pages (Goals, Achievements, Settings) and stub pages (Login, Register, Dashboard, WeightHistory, WeightEntryForm). Tests verify render-without-crash, accessible heading presence, and "Coming in Milestone 3" notice on placeholder pages.
+
+**Rationale:**
+TDD red step for the page layer. The "Coming in Milestone 3" assertion ensures placeholder pages are real, informative components rather than empty files.
+
+**References:**
+- Issue: Phase 5 frontend architecture
+
+---
+
+## [2026-05-22 12:04] Commit Summary
+
+**Change Type:** Feature
+**Scope:** frontend/lib
+
+**Summary:**
+Implement api-client (fetchJson + ApiError), error-mapping (mapApiError), and format (formatWeight, formatDate) utilities. Fix a floating-point precision error in the rounding test (70.55 → 70.56 as the test input).
+
+**Rationale:**
+The floating-point fix reflects a real IEEE 754 behavior: 70.55 cannot be represented exactly in binary floating-point, so toFixed(1) produces '70.5' rather than '70.6'. Using 70.56 reliably rounds up. The api-client design matches SRS §10.3 (thin fetch wrapper, typed error, JSON Content-Type enforced).
+
+**References:**
+- Issue: Phase 5 frontend architecture
+
+---
+
+## [2026-05-22 12:03] Commit Summary
+
+**Change Type:** Test
+**Scope:** frontend/lib
+
+**Summary:**
+Add failing tests for api-client (fetchJson), error-mapping (mapApiError), and format (formatWeight, formatDate) utilities.
+
+**Rationale:**
+TDD red step for the lib layer. Tests drive minimal, focused contracts: fetchJson throws on non-2xx and sets Content-Type; mapApiError returns distinct strings for 401/409/422/500; formatWeight produces fixed decimal notation; formatDate returns a human-readable string.
+
+**References:**
+- Issue: Phase 5 frontend architecture
+
+---
+
+## [2026-05-22 12:02] Commit Summary
+
+**Change Type:** Feature
+**Scope:** frontend/components
+
+**Summary:**
+Implement AuthLayout, AppLayout, NavList, EmptyState, LoadingSpinner, and ErrorBoundary. Also fix test isolation by adding explicit cleanup() calls to the Vitest setup file, and add the inline MenuIcon SVG to AppLayout to avoid an @mui/icons-material ESM directory-import issue in the jsdom environment.
+
+**Rationale:**
+@mui/icons-material 6.x uses .mjs entry points that reference @mui/material/SvgIcon as a bare directory import, which Node ESM resolution does not support without an explicit /index.js suffix. Using an inline SvgIcon avoids the dependency and keeps the test environment stable. The cleanup() fix ensures each test gets a pristine DOM, eliminating the "Found multiple elements" false failures from cross-test DOM leakage.
+
+**References:**
+- Issue: Phase 5 frontend architecture
+
+---
+
+## [2026-05-22 11:58] Commit Summary
+
+**Change Type:** Test
+**Scope:** frontend/components
+
+**Summary:**
+Add failing tests for AuthLayout, AppLayout, NavList, EmptyState, LoadingSpinner, and ErrorBoundary. Tests cover render-without-crash, accessible roles, children rendering, and conditional visibility.
+
+**Rationale:**
+TDD red step for the shared layout and utility component layer. Accessible-query tests (role, text) ensure WCAG 2.1 AA compliance is verifiable from the test suite itself.
+
+**References:**
+- Issue: Phase 5 frontend architecture
+
+---
+
+## [2026-05-22 11:57] Commit Summary
+
+**Change Type:** Feature
+**Scope:** frontend/contexts
+
+**Summary:**
+Implement AuthContext and PreferencesContext. AuthContext holds user / isAuthenticated state and exposes login / logout actions. PreferencesContext holds weightUnit and colorScheme with a partial-merge setter. Both use useCallback + useMemo to keep reference stability and throw a descriptive error when accessed outside their provider.
+
+**Rationale:**
+In-memory context state is sufficient for Phase 5 routing scaffolding. Phase 6 will connect login/logout to the API and persist preferences to localStorage. Keeping Phase 5 self-contained prevents entangling the routing scaffold with API concerns.
+
+**References:**
+- Issue: Phase 5 frontend architecture
+
+---
+
+## [2026-05-22 11:56] Commit Summary
+
+**Change Type:** Test
+**Scope:** frontend/contexts
+
+**Summary:**
+Add failing tests for AuthContext and PreferencesContext. Tests cover the initial state (null user, lbs / light defaults), login/logout state transitions, partial preference updates, and provider-boundary enforcement.
+
+**Rationale:**
+TDD red step. Tests drive the exact contract the context implementations must satisfy, preventing scope creep and ensuring the API is fully testable in isolation from the router.
+
+**References:**
+- Issue: Phase 5 frontend architecture
+
+---
+
+## [2026-05-22 11:55] Commit Summary (routes implementation)
+
+**Change Type:** Feature
+**Scope:** frontend/routes
+
+**Summary:**
+Implement routes.tsx with typed RouteConfig interface and publicRoutes / protectedRoutes arrays covering all SRS §10.1 paths. All route declaration tests pass.
+
+**Rationale:**
+Centralising route declarations in a single typed module makes the routing contract testable without mounting the router. The iconName field is a string to keep this module free of MUI imports — NavList resolves the icon component dynamically.
+
+**References:**
+- Issue: Phase 5 frontend architecture
+
+---
+
+## [2026-05-22 11:55] Commit Summary
+
+**Change Type:** Test
+**Scope:** frontend/routes
+
+**Summary:**
+Add failing tests for the route declaration module, verifying that publicRoutes and protectedRoutes arrays exist with entries for all required paths.
+
+**Rationale:**
+TDD red step: tests must fail before the implementation exists. Tests verify the shape of route declarations (path string property) and the presence of all routes required by SRS §10.1.
+
+**References:**
+- Issue: Phase 5 frontend architecture
+
+---
+
+## [2026-05-22 11:54] Commit Summary
+
+**Change Type:** Feature
+**Scope:** frontend/dependencies
+
+**Summary:**
+Add react-router-dom v6, react-hook-form v7, zod v3, and @tanstack/react-query as production dependencies for the Phase 5 frontend architecture.
+
+**Rationale:**
+These libraries implement the technology stack specified in SRS §4.3.1 and §10. React Router v6 replaces the hardcoded navigation chain from the Android predecessor. Zod provides runtime type validation shared with TypeScript types.
+
+**References:**
+- Issue: Phase 5 frontend architecture
+
+---
+
+## [2026-05-22 00:00] Commit Summary
+
+**Change Type:** Feature
+**Scope:** backend/architecture
+
+**Summary:**
+Scaffold the four domain folders (auth, goals, users, weight_tracking) and shared/ package under the screaming architecture layout. Each domain has domain/, application/, infrastructure/, interface/ sub-layers per the Clean Architecture dependency rule. All __init__.py files carry docstrings that describe the layer's permitted imports and responsibilities.
+
+**Rationale:**
+The Screaming + Clean + Hexagonal architecture combination (SRS §4.2) makes the application's purpose visible at the folder level and enforces a strict dependency rule that keeps the domain core free of framework coupling. Adding docstrings ensures every empty package communicates its contract immediately to any engineer who opens it.
+
+**References:**
+- Issue: Phase 4 backend architecture
+
+---
+
 ## Phase 3 — Web Scaffold (2026-05-22)
 
 **What was done**
