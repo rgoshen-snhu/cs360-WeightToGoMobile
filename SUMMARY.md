@@ -7,6 +7,87 @@ issues were resolved.
 
 ---
 
+## Phase 2 — Repository Restructure (2026-05-21)
+
+**What was done**
+
+- Restructured the repository from an Android-only layout into a polyglot
+  monorepo: the entire Android Gradle project moved from the repository root
+  into `android/`, and `web/frontend/` and `web/backend/` were created as
+  tracked placeholders for the web rebuild.
+- Tagged `v1.0.0-android` on the final pre-restructure commit of `main`,
+  marking the end of the Android-only era. The restructure commit itself is not
+  separately tagged — it is a structural change, not a release.
+- Updated the Android CI workflow to build from `android/`, corrected its
+  report and artifact paths, and path-filtered its triggers so it runs only for
+  Android changes.
+- Extended `.gitignore` with Python and Node sections ahead of the web stack.
+- Added ADR-0007 (rebuild as a full-stack web application) and ADR-0008
+  (polyglot monorepo); renumbered the SRS ADR index and every in-text ADR
+  reference to the seven-ADR M2 set.
+- Rewrote the root `README.md` around the monorepo layout and the mobile-to-web
+  narrative, resolving the two pre-existing `README.md` defects flagged in
+  Phase 1 — the broken `TODO.md` links and the stale project-structure tree.
+- Pointed the CONTRIBUTING Android setup instructions at the new `android/`
+  path.
+- Delivered as PR #19, branch `feature/m2-phase-2-repo-restructure`.
+
+**How it was done**
+
+- Branched `feature/m2-phase-2-repo-restructure` from the latest `main`.
+- Every Android file was relocated with `git mv` so the move is recorded as a
+  set of pure renames; `git log --follow` confirmed that history, blame, and
+  log all trace through the move.
+- The relocated Android build was verified before any further change:
+  `./gradlew test`, `lint`, and `assembleDebug` all pass at the new path with
+  no source modifications.
+- The work was committed as a sequence of small, atomic commits — the move, the
+  CI change, the web scaffold, the ignore rules, the ADRs, the SRS renumber,
+  and the documentation updates each as their own commit.
+- A documentation sweep was run as the pre-push gate, updating the README,
+  CONTRIBUTING, the SRS, and this log.
+- Three review passes — code, adversarial, and security — were run on PR #19;
+  their findings are recorded below.
+
+**Issues encountered**
+
+- `local.properties` was listed for relocation but is machine-specific and
+  git-ignored, so it could not be moved with `git mv`.
+- The Android CI workflow's report and artifact paths referred to a module
+  named `app`, but the actual module is `weightogo` — a stale reference that
+  predated this phase.
+- The SRS carried two ADR cross-references that pointed at the wrong ADR
+  independently of the renumbering.
+- A thorough documentation sweep surfaced pre-existing documentation debt wider
+  than this phase's scope: corrupted command snippets in `docs/testing/`, live
+  AI-tool references and project-instruction-file citations in several committed
+  documents, and retired tracker references.
+- The review passes flagged three documentation and configuration gaps: the
+  expanded `.gitignore` did not ignore `.env` files; the README
+  repository-layout tree omitted several directories; and the SRS ADR-index
+  subsection was still headed "Planned" although two of its ADRs are now
+  written.
+
+**How issues were resolved**
+
+- `local.properties` was excluded from the tracked move and copied into
+  `android/` instead, where the existing ignore rule still covers it; the
+  Android build locates the SDK correctly at the new path.
+- The CI paths were corrected to `android/weightogo/build/...` in the same
+  change that repointed the workflow at the new directory, fixing the stale
+  module name and the new path layer together.
+- The two mis-targeted SRS references were corrected to their proper ADRs while
+  the index was renumbered, leaving the SRS internally consistent.
+- That debt predates this phase. It is tracked as Phase 2 follow-on work in
+  issue #20 — a dedicated documentation-hygiene pass delivered as its own pull
+  request — rather than expanding the restructure PR.
+- The three review findings were resolved on the PR: an `.env` ignore rule was
+  added (with `.env.example` kept tracked), the README layout tree was
+  completed, and the SRS subsection heading was corrected. The security pass
+  found no vulnerabilities.
+
+---
+
 ## Phase 1 — Tracking Log Scaffold (2026-05-21)
 
 **What was done**

@@ -3,8 +3,14 @@ name: Android CI
 on:
   push:
     branches: [main, develop]
+    paths:
+      - 'android/**'
+      - '.github/workflows/android-ci.yml'
   pull_request:
     branches: [main]
+    paths:
+      - 'android/**'
+      - '.github/workflows/android-ci.yml'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -14,6 +20,10 @@ permissions:
   contents: read
   actions: read
   checks: write
+
+defaults:
+  run:
+    working-directory: android
 
 jobs:
   lint:
@@ -49,7 +59,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: lint-results
-          path: app/build/reports/lint-results-*.html
+          path: android/weightogo/build/reports/lint-results-*.html
           retention-days: 7
           if-no-files-found: warn
 
@@ -86,7 +96,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: unit-test-results
-          path: app/build/reports/tests/
+          path: android/weightogo/build/reports/tests/
           retention-days: 7
 
       - name: Upload Test Report
@@ -94,7 +104,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: unit-test-report
-          path: app/build/test-results/
+          path: android/weightogo/build/test-results/
           retention-days: 7
 
   build:
@@ -130,5 +140,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: debug-apk
-          path: app/build/outputs/apk/debug/app-debug.apk
+          path: android/weightogo/build/outputs/apk/debug/weightogo-debug.apk
           retention-days: 14

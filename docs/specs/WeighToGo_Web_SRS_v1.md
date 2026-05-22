@@ -214,7 +214,7 @@ A use case in `application/` accepts a repository interface from `domain/`. The 
 
 Framework integrations live at the edges. The FastAPI router is an adapter for the HTTP port. The SQLAlchemy repository is an adapter for the persistence port. The bcrypt utility is an adapter for the password-hashing port. The domain knows about ports (interfaces) and never about adapters (implementations).
 
-This blend is documented in `[ADR-0007]` (planned). The decision builds on the existing six ADRs in the Android repository.
+This blend is documented in `[ADR-0012]` (planned). The decision builds on the existing six ADRs in the Android repository.
 
 ### 4.3 Technology Stack
 
@@ -417,7 +417,7 @@ The restructure is performed in a single feature branch and merged via pull requ
 | 4 | Create empty `/web/frontend/` and `/web/backend/` folders with `.gitkeep` | Folders exist in `git status` |
 | 5 | Move existing requirements docs into `/docs/requirements/` | Documents appear at new path |
 | 6 | Update README to describe the polyglot structure and link to mobile-to-web narrative | README renders correctly on GitHub |
-| 7 | Write ADR-0007 documenting the restructure decision | ADR exists at `/docs/adr/0007-polyglot-monorepo.md` |
+| 7 | Write ADR-0007 and ADR-0008 documenting the restructure decision | ADRs exist at `/docs/adr/0007-rebuild-as-full-stack-web-application.md` and `/docs/adr/0008-polyglot-monorepo.md` |
 | 8 | Update `.gitignore` to cover Python (`__pycache__`, `.venv`, etc.) and Node (`node_modules`, `dist`, etc.) | `git status` is clean after dependency install |
 | 9 | Run the existing Android test suite | All 373 Android tests pass against the new path |
 | 10 | Open pull request, run all CI workflows | All checks green |
@@ -433,7 +433,7 @@ The repository name `cs360-WeightToGoMobile` is bound to the original course and
 | `WeighToGo` | Permanent name, decoupled from any course, matches the product name | **Preferred for portfolio durability** |
 | `cs499-WeighToGo` | Matches the existing `cs360-` prefix convention used on the SNHU GitHub org | Acceptable if course traceability is preferred |
 
-This decision is documented in `[ADR-0007]` alongside the polyglot monorepo decision.
+This decision is documented in `[ADR-0008]` alongside the polyglot monorepo decision.
 
 ### 5.5 Git History Preservation
 
@@ -441,12 +441,11 @@ All file moves use `git mv` (or equivalent index operations) so that `git log --
 
 ### 5.6 Branch and Tag Strategy
 
-The Android artifact's final commit before the restructure is tagged `v1.0.0-android` to mark the mobile-only era. The first commit after the restructure is tagged `v1.1.0-polyglot`. Subsequent web milestones receive their own tags as they ship.
+The Android artifact's final commit before the restructure is tagged `v1.0.0-android` to mark the mobile-only era. The restructure itself is a structural change and is not separately tagged. Subsequent web milestones receive their own tags as they ship.
 
 | Tag | Meaning |
 | --- | --- |
 | `v1.0.0-android` | Final state of Android-only repository, before restructure |
-| `v1.1.0-polyglot` | Repository restructured into monorepo, no web code yet |
 | `v2.0.0-m2` | Milestone 2 deliverable (auth + weight entry vertical slice) |
 | `v2.1.0-m3` | Milestone 3 deliverable (algorithms enhancement) |
 | `v2.2.0-m4` | Milestone 4 deliverable (database enhancement) |
@@ -473,7 +472,7 @@ The system shall allow new users to create an account by providing a valid email
 - Successful registration returns 201 Created with a session cookie
 - Duplicate email returns 409 Conflict with a generic error message that does not confirm whether the email is already registered (see FR-A-9)
 
-`[ADR-0008]` Email as primary identifier (planned).
+`[ADR-0009]` Email as primary identifier (planned).
 
 #### FR-A-2: User Login `[MUST]` `[M2]`
 
@@ -539,7 +538,7 @@ The system shall return generic error messages for authentication failures that 
 
 This requirement directly addresses the username enumeration finding in the Android code review where `UserDAO` line 59 exposed the attempted username in its exception message.
 
-`[ADR-0009]` Generic authentication error policy (planned).
+`[ADR-0010]` Generic authentication error policy (planned).
 
 #### FR-A-10: PII-Aware Logging `[MUST]` `[M2]`
 
@@ -547,7 +546,7 @@ The system shall log authentication events without exposing personally identifia
 
 This requirement directly addresses the PII logging findings in the Android code review where `SessionManager` lines 139, 190, and 229 logged usernames in plain text, and `UserDAO` line 329 logged phone numbers.
 
-`[ADR-0010]` PII masking strategy in logs (planned).
+`[ADR-0011]` PII masking strategy in logs (planned).
 
 ### 6.2 Weight Tracking (FR-W)
 
@@ -577,7 +576,7 @@ The system shall return a paginated list of the authenticated user's weight entr
 - Soft-deleted entries are excluded
 - Response includes `next_cursor` when more results exist
 
-The cursor-based approach is documented in `[ADR-0011]` (planned, finalized in Milestone 3).
+The cursor-based approach is documented in `[ADR-0014]` (planned, finalized in Milestone 3).
 
 #### FR-W-3: Update Weight Entry `[MUST]` `[M2]`
 
@@ -983,7 +982,7 @@ CREATE INDEX idx_refresh_tokens_user_active
 CREATE INDEX idx_refresh_tokens_family ON refresh_tokens(family_id);
 ```
 
-The `family_id` enables family-level revocation when token reuse is detected, which is a recognized refresh-token rotation security pattern. The full rotation policy is documented in `[ADR-0012]` (planned).
+The `family_id` enables family-level revocation when token reuse is detected, which is a recognized refresh-token rotation security pattern. The full rotation policy is documented in `[ADR-0013]` (planned).
 
 #### 8.2.3 `weight_entries` (Milestone 2)
 
@@ -1676,13 +1675,13 @@ Milestone 2 delivers the architectural foundation and a single vertical slice th
 
 #### 13.1.1 Deliverables
 
-1. **Repository restructure complete.** All Android code moved under `/android/`, web folders created, ADR-0007 documenting the polyglot monorepo decision committed.
+1. **Repository restructure complete.** All Android code moved under `/android/`, web folders created, ADR-0007 and ADR-0008 documenting the web rebuild and polyglot monorepo decisions committed.
 2. **Backend skeleton with auth and weight entry CRUD.** FastAPI application running locally with all endpoints from sections 9.3 and 9.4 implemented and tested.
 3. **Frontend skeleton with auth and weight entry CRUD.** React application running locally with all routes from section 10.1 implemented, including placeholder pages for deferred features.
 4. **PostgreSQL schema for M2 entities.** Alembic migrations `0001` and `0002` applied, tables verified against the spec.
 5. **Full CI pipeline.** GitHub Actions workflows for backend, frontend, and the preserved Android workflow all green.
 6. **Test coverage at thresholds.** Backend domain at 95%, frontend at 75% lines.
-7. **ADRs 0007 through 0010 committed.** Polyglot monorepo, email as identifier, generic auth errors, PII masking in logs.
+7. **ADRs 0007 through 0013 committed.** Web rebuild rationale, polyglot monorepo, email as identifier, generic auth errors, PII masking in logs, three-pattern backend architecture, refresh token rotation.
 8. **README rewritten.** Tells the mobile-to-web story, includes setup instructions, links to ADRs and this SRS.
 
 #### 13.1.2 In-Scope Functional Requirements
@@ -1849,24 +1848,25 @@ The original six ADRs in `/docs/adr/` remain in place and continue to inform the
 | ADR-0005 | Dependency Injection for Testing (Package-Private Setter Injection) | Accepted |
 | ADR-0006 | Emulator SMS Testing | Accepted |
 
-### 17.2 Planned ADRs (Web Rebuild)
+### 17.2 Web Rebuild ADRs
 
 The following ADRs are written as their decisions are made. They build on the existing six, with cross-references where the web decision supersedes or extends a mobile one.
 
 | ID | Title | Milestone |
 | --- | --- | --- |
-| ADR-0007 | Polyglot Monorepo for Mobile-Web Artifact | M2 |
-| ADR-0008 | Email as Primary User Identifier (Supersedes Username Primary from Android) | M2 |
-| ADR-0009 | Generic Authentication Error Policy | M2 |
-| ADR-0010 | PII Masking Strategy in Logs | M2 |
-| ADR-0011 | Three-Pattern Backend Architecture (Screaming + Clean + Hexagonal) | M2 |
-| ADR-0012 | Refresh Token Rotation with Family-Based Revocation | M2 |
-| ADR-0013 | Cursor-Based Pagination for Time-Series Data | M3 |
-| ADR-0014 | TTL-Based Server-Side Caching Strategy | M3 |
-| ADR-0015 | Milestone Detection Algorithm | M3 |
-| ADR-0016 | Composite Index Strategy for Trend Queries | M3 |
-| ADR-0017 | Audit Log Schema and Write Strategy | M4 |
-| ADR-0018 | CHECK Constraint Inventory and Database-Level Validation Policy | M4 |
+| ADR-0007 | Rebuild Weigh to Go! as a Full-Stack Web Application | M2 |
+| ADR-0008 | Polyglot Monorepo for the Mobile-Web Artifact | M2 |
+| ADR-0009 | Email as Primary User Identifier (Supersedes Username Primary from Android) | M2 |
+| ADR-0010 | Generic Authentication Error Policy | M2 |
+| ADR-0011 | PII Masking Strategy in Logs | M2 |
+| ADR-0012 | Three-Pattern Backend Architecture (Screaming + Clean + Hexagonal) | M2 |
+| ADR-0013 | Refresh Token Rotation with Family-Based Revocation | M2 |
+| ADR-0014 | Cursor-Based Pagination for Time-Series Data | M3 |
+| ADR-0015 | TTL-Based Server-Side Caching Strategy | M3 |
+| ADR-0016 | Milestone Detection Algorithm | M3 |
+| ADR-0017 | Composite Index Strategy for Trend Queries | M3 |
+| ADR-0018 | Audit Log Schema and Write Strategy | M4 |
+| ADR-0019 | CHECK Constraint Inventory and Database-Level Validation Policy | M4 |
 
 ---
 
