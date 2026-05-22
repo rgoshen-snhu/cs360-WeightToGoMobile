@@ -25,7 +25,7 @@
 
 ## Overview
 
-This plan addresses all 48 violations identified in the Code Quality Audit Report. Each phase follows **CLAUDE.md's TDD workflow**:
+This plan addresses all 48 violations identified in the Code Quality Audit Report. Each phase follows a strict test-driven workflow:
 1. Write failing tests first (RED)
 2. Implement minimal fix (GREEN)
 3. Refactor for quality (REFACTOR)
@@ -33,7 +33,7 @@ This plan addresses all 48 violations identified in the Code Quality Audit Repor
 
 ### Execution Principles
 
-✅ **Follow CLAUDE.md strictly** - No deviations
+✅ **Follow the project engineering standards strictly** - No deviations
 ✅ **TDD at all times** - Tests before implementation
 ✅ **One violation per commit** - Clear git history
 ✅ **Run full test suite** - `./gradlew test` before each commit
@@ -52,7 +52,7 @@ This plan addresses all 48 violations identified in the Code Quality Audit Repor
 **File**: `app/src/main/java/com/example/weighttogo/database/UserDAO.java`
 **Line**: 329
 **Severity**: 🔴 HIGH
-**CLAUDE.md Violation**: Security by Default - "No hard-coded secrets or credentials"
+**Principle Violated**: Security by Default - "No hard-coded secrets or credentials"
 
 #### Current Code
 ```java
@@ -103,8 +103,7 @@ git commit -m "fix(security): mask phone number in UserDAO logs
 - Prevents PII exposure in logs (GDPR/CCPA compliance)
 - Adds test to verify phone masking in logs
 
-Fixes: CODE_QUALITY_AUDIT.md Issue #1
-CLAUDE.md: Security by Default"
+Fixes: CODE_QUALITY_AUDIT.md Issue #1"
 ```
 
 **Estimated Time**: 15 minutes
@@ -116,7 +115,7 @@ CLAUDE.md: Security by Default"
 **File**: `app/src/main/java/com/example/weighttogo/utils/SessionManager.java`
 **Lines**: 139, 190, 229
 **Severity**: 🔴 HIGH
-**CLAUDE.md Violation**: Security by Default - "Validate all inputs; sanitize all outputs"
+**Principle Violated**: Security by Default - "Validate all inputs; sanitize all outputs"
 
 #### Current Code
 ```java
@@ -222,8 +221,7 @@ git commit -m "fix(security): remove username from SessionManager logs
 - Prevents PII exposure and account enumeration attacks
 - Adds tests to verify no usernames in logs
 
-Fixes: CODE_QUALITY_AUDIT.md Issue #2
-CLAUDE.md: Security by Default"
+Fixes: CODE_QUALITY_AUDIT.md Issue #2"
 ```
 
 **Estimated Time**: 15 minutes
@@ -234,7 +232,7 @@ CLAUDE.md: Security by Default"
 
 **File**: `project_summary.md`
 **Severity**: 🔴 HIGH (documentation)
-**CLAUDE.md Violation**: Technical Debt Documentation
+**Principle Violated**: Technical Debt Documentation
 
 #### Action Required
 
@@ -290,8 +288,7 @@ git commit -m "docs(security): document SHA-256 password hashing technical debt
 - Outline remaining mitigation work
 - Set timeline for SHA-256 deprecation
 
-Fixes: CODE_QUALITY_AUDIT.md Issue #3
-CLAUDE.md: Technical Debt Documentation"
+Fixes: CODE_QUALITY_AUDIT.md Issue #3"
 ```
 
 **Estimated Time**: 30 minutes
@@ -323,7 +320,7 @@ CLAUDE.md: Technical Debt Documentation"
 **File**: `app/src/main/java/com/example/weighttogo/activities/WeightEntryActivity.java`
 **Lines**: 720-760 (createNewEntry), 769-804 (updateExistingEntry)
 **Severity**: 🔴 HIGH
-**CLAUDE.md Violation**: MVC - Model layer accessed directly from Controller
+**Principle Violated**: MVC - Model layer accessed directly from Controller
 
 #### Problem
 ```java
@@ -676,8 +673,7 @@ git commit -m "fix(performance): move database operations off UI thread
 - Add loading indicators during async operations
 - Add integration tests for background execution
 
-Fixes: CODE_QUALITY_AUDIT.md Issue #7
-CLAUDE.md: MVC Architecture, TDD"
+Fixes: CODE_QUALITY_AUDIT.md Issue #7"
 ```
 
 **Estimated Time**: 4 hours
@@ -709,7 +705,7 @@ CLAUDE.md: MVC Architecture, TDD"
 **Lines**: 380-513 (buttons 4, 5, 6, 7, 8, 9, decimal, 0)
 **Severity**: 🔴 HIGH
 **WCAG Guideline**: WCAG 1.1.1 (Non-text Content - Level A)
-**CLAUDE.md Violation**: Accessibility & Inclusivity - "Follow WCAG 2.1 AA standards"
+**Principle Violated**: Accessibility & Inclusivity - "Follow WCAG 2.1 AA standards"
 
 #### TDD Fix Steps
 
@@ -842,8 +838,7 @@ git commit -m "fix(accessibility): add contentDescription to numpad buttons
 - Add Espresso tests to verify contentDescription presence
 - Fixes WCAG 1.1.1 violation (Non-text Content - Level A)
 
-Fixes: CODE_QUALITY_AUDIT.md Issues #23
-CLAUDE.md: Accessibility & Inclusivity (WCAG 2.1 AA)"
+Fixes: CODE_QUALITY_AUDIT.md Issues #23"
 ```
 
 **Estimated Time**: 1 hour
@@ -855,7 +850,7 @@ CLAUDE.md: Accessibility & Inclusivity (WCAG 2.1 AA)"
 **Files**: Multiple XML layouts
 **Severity**: 🔴 HIGH
 **WCAG Guideline**: WCAG 2.5.5 (Target Size)
-**CLAUDE.md Violation**: Accessibility & Inclusivity
+**Principle Violated**: Accessibility & Inclusivity
 
 #### Sub-violation 3.2a: Edit/Delete Buttons in Weight Entry Item
 
@@ -936,8 +931,7 @@ git commit -m "fix(accessibility): increase edit/delete button touch targets to 
 - Adjust padding to maintain visual icon size
 - Add tests to verify minimum touch targets
 
-Fixes: CODE_QUALITY_AUDIT.md Issue #24
-CLAUDE.md: Accessibility & Inclusivity (WCAG 2.1 AA)"
+Fixes: CODE_QUALITY_AUDIT.md Issue #24"
 ```
 
 **Estimated Time**: 1 hour
@@ -972,8 +966,7 @@ git commit -m "fix(accessibility): increase all ImageButton touch targets to 48d
 - Quick adjust buttons: height 40dp → 48dp (activity_weight_entry.xml)
 - All buttons now meet WCAG 2.5.5 minimum touch target
 
-Fixes: CODE_QUALITY_AUDIT.md Issues #25, #26, #27
-CLAUDE.md: Accessibility & Inclusivity (WCAG 2.1 AA)"
+Fixes: CODE_QUALITY_AUDIT.md Issues #25, #26, #27"
 ```
 
 **Estimated Time**: 1.5 hours
@@ -1090,8 +1083,7 @@ git commit -m "fix(accessibility): improve color contrast to meet WCAG AA standa
 - Add contrast ratio calculation tests
 - All text now meets WCAG 1.4.3 (4.5:1 minimum)
 
-Fixes: CODE_QUALITY_AUDIT.md Issues #33-35
-CLAUDE.md: Accessibility & Inclusivity (WCAG 2.1 AA)"
+Fixes: CODE_QUALITY_AUDIT.md Issues #33-35"
 ```
 
 **Estimated Time**: 2 hours
@@ -1125,7 +1117,7 @@ CLAUDE.md: Accessibility & Inclusivity (WCAG 2.1 AA)"
 **File**: `app/src/main/java/com/example/weighttogo/activities/SettingsActivity.java`
 **Lines**: 91-92, 162-177, 192-210
 **Severity**: 🔴 HIGH
-**CLAUDE.md Violation**: MVC Architecture, Memory Leak Prevention
+**Principle Violated**: MVC Architecture, Memory Leak Prevention
 
 #### TDD Fix Steps
 
@@ -1347,8 +1339,7 @@ git commit -m "fix(memory): use ViewModel to prevent data loss on configuration 
 - Proper cleanup in ViewModel.onCleared()
 - Add tests for configuration change survival
 
-Fixes: CODE_QUALITY_AUDIT.md Issue #10
-CLAUDE.md: MVC Architecture, Memory Leak Prevention"
+Fixes: CODE_QUALITY_AUDIT.md Issue #10"
 ```
 
 **Estimated Time**: 4 hours
@@ -1379,7 +1370,7 @@ CLAUDE.md: MVC Architecture, Memory Leak Prevention"
 **File**: `app/src/main/java/com/example/weighttogo/activities/MainActivity.java`
 **Lines**: 402-427
 **Severity**: 🟡 MEDIUM
-**CLAUDE.md Violation**: MVC - Business logic in Controller
+**Principle Violated**: MVC - Business logic in Controller
 
 #### TDD Steps
 
@@ -1512,8 +1503,7 @@ git commit -m "refactor(mvc): extract progress calculation to Model layer
 - Add comprehensive unit tests for all edge cases
 - Improves testability and follows MVC pattern
 
-Fixes: CODE_QUALITY_AUDIT.md Issue #8
-CLAUDE.md: MVC Architecture, TDD"
+Fixes: CODE_QUALITY_AUDIT.md Issue #8"
 ```
 
 **Estimated Time**: 2 hours
@@ -1571,7 +1561,7 @@ Each follows:
 
 **Files**: All DAO classes (5 files with ~150 lines of duplication)
 **Severity**: 🟡 MEDIUM
-**CLAUDE.md Violation**: DRY Principle
+**Principle Violated**: DRY Principle
 
 #### TDD Steps
 
@@ -1765,8 +1755,7 @@ git commit -m "refactor(dry): create CursorMapper utility to eliminate duplicati
 - Single source of truth for cursor handling
 - Add comprehensive tests for all data types
 
-Fixes: CODE_QUALITY_AUDIT.md Issue #16
-CLAUDE.md: DRY Principle"
+Fixes: CODE_QUALITY_AUDIT.md Issue #16"
 ```
 
 **Estimated Time**: 4 hours
@@ -1817,7 +1806,7 @@ Following same pattern:
 
 **File**: `SMSNotificationManager.java` (432 lines, 5 responsibilities)
 **Severity**: 🟡 MEDIUM
-**CLAUDE.md Violation**: SOLID - Single Responsibility Principle
+**Principle Violated**: SOLID - Single Responsibility Principle
 
 #### Approach
 
@@ -1980,7 +1969,7 @@ open app/build/reports/jacoco/test/html/index.html
 
 ### Before Starting ANY Phase:
 
-- [ ] **Read CLAUDE.md Section 5 (TDD)** - Understand Red-Green-Refactor
+- [ ] **Review the project's TDD workflow** - Understand Red-Green-Refactor
 - [ ] **Approve Phase Scope** - Review violations being fixed
 - [ ] **Approve Effort Estimate** - Agree on time allocation
 - [ ] **Approve Testing Strategy** - Understand test requirements

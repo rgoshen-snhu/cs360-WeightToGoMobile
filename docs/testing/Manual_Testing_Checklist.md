@@ -352,7 +352,7 @@
 | E8.2 | Enter weight: `999.9` | Entry saves (max reasonable weight) | ☐ | |
 | E8.3 | Try to enter weight: `1000.0` or more | Input validation (if implemented) or displays correctly | ☐ | |
 | E8.4 | Enter password: `Pass1!` (minimum length) | Validation passes (or fails if too short per requirements) | ☐ | |
-| E8.5 | Enter username: `ab` (2 chars) | Validation fails (minimum 3 chars per CLAUDE.md) | ☐ | |
+| E8.5 | Enter username: `ab` (2 chars) | Validation fails (minimum 3 chars) | ☐ | |
 
 ---
 

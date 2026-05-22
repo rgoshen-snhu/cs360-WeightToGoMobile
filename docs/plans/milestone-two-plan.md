@@ -31,9 +31,6 @@ Read these before generating the detailed plan. The SRS is the source of truth w
 | Document | Location | Key Sections for M2 |
 | --- | --- | --- |
 | **Software Requirements Specification** | `/docs/specs/WeighToGo_Web_SRS_v1.md` | §4 Architecture, §5 Restructure Plan, §6 Functional Requirements (M2-tagged), §7 Non-Functional Requirements, §10 Frontend Specification, §11 Quality Engineering, §14 Acceptance Criteria, Appendix A (ADR Index) |
-| **Project CLAUDE.md** | `/CLAUDE.md` | Cross-stack conventions: planning workflow, branching, TDD, ADR/DDR practice, commit rules |
-| **Web CLAUDE.md** | `/web/CLAUDE.md` | Web stack details: code style, security baseline, test frameworks, API conventions |
-| **Android CLAUDE.md** | `/android/CLAUDE.md` | Read only if M2 work touches the Android codebase (typically not in M2) |
 | **CS 499 Code Review Checklist** | `/docs/standards/cs499_code_review_checklist.md` | Program-standard review framework. Applied as self-review gate during Step 7 before tagging `v2.0.0-m2`. |
 | **Existing ADRs** | `/docs/adr/0001-*.md` through `/docs/adr/0006-*.md` | Context on Android-era decisions. New ADRs build on or supersede these where the rebuild changes the answer. |
 | **Android Database Architecture** | `/docs/architecture/WeighToGo_Database_Architecture.md` | Original schema. Informs the web rebuild's data model. Superseded by SRS §8 for the web side. |
@@ -94,7 +91,7 @@ SRS Appendix A is updated to reflect this numbering.
 
 ## 5. M2-Specific Constraints
 
-Project-wide constraints (TDD discipline, security baseline, strict typing, import linters, branching strategy, lint/test gates, commit conventions) are documented in `/CLAUDE.md` and `/web/CLAUDE.md`. Refer to them for execution rules.
+Project-wide constraints — TDD discipline, security baseline, strict typing, import linters, branching strategy, lint/test gates, and commit conventions — are specified in the SRS (§7 Non-Functional Requirements and §12 DevOps and Tooling) and the repository's contribution guidelines. Refer to them for execution rules.
 
 M2-specific additions:
 
