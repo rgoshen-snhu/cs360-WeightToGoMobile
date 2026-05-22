@@ -10,7 +10,7 @@ function Wrapper({ children }: { children: React.ReactNode }) {
 }
 
 /** Component that throws on first render. */
-function ThrowingComponent() {
+function ThrowingComponent(): never {
   throw new Error('Test render error');
 }
 
