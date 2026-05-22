@@ -68,7 +68,8 @@ python3 scripts/generate_test_weight_entries.py --count 200 --start-weight 180 -
 
 # Apply to database
 adb push test_data.sql /sdcard/
-adb shell run-as weightogosqlite3 /data/data/weightogodatabases/WeighToGo.db
+adb shell run-as com.example.weightogo
+sqlite3 /data/data/com.example.weightogo/databases/weigh_to_go.db
 .read /sdcard/test_data.sql
 .exit
 exit
