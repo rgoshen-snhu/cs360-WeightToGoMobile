@@ -94,7 +94,7 @@ exit
 
 3. **After Testing**:
    - Complete Test Summary section in checklist
-   - Update `project_summary.md` with findings
+   - Record the findings in `../../SUMMARY.md`
    - Create GitHub issues for bugs found
    - Attach checklist to final documentation
 
@@ -184,7 +184,6 @@ These manual tests **complement** (not replace) automated tests:
 ## Related Documentation
 
 - **Android Development Journal**: `../history/android_summary.md`
-- **TODO**: `../../TODO.md` - Phase 9.6 completion tracking
 - **Database Architecture**: `../architecture/WeighToGo_Database_Architecture.md`
 - **Design Specifications**: `../design/Weight_Tracker_Figma_Design_Specifications.md`
 - **Requirements**: `../requirements/CS360_Project_Three_Requirements.md`
