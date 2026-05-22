@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from weighttogo.config import Settings
+from weighttogo.config import Settings, get_settings
 
 
 def test_settings_defaults_environment_to_development(
@@ -29,3 +29,11 @@ def test_settings_provides_a_default_database_url(
     settings = Settings()
 
     assert settings.database_url.startswith("postgresql+psycopg://")
+
+
+def test_get_settings_returns_a_cached_settings_instance() -> None:
+    first = get_settings()
+    second = get_settings()
+
+    assert isinstance(first, Settings)
+    assert first is second
