@@ -412,3 +412,17 @@ v6 is outdated. Using the latest stable version of all dependencies is a securit
 
 **References:**
 - Issue: Phase 5 frontend architecture
+
+## [2026-05-22 21:10] Commit Summary
+
+**Change Type:** Fix
+**Scope:** frontend/dependencies
+
+**Summary:**
+Run npm update to bring all frontend dependencies to their latest resolved versions per lockfile. Backend Python packages confirmed already at latest via uv sync --upgrade.
+
+**Rationale:**
+All dependencies should track latest stable releases. Using outdated packages is a security and maintenance risk.
+
+**References:**
+- Issue: Phase 5 frontend architecture
