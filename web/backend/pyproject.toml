@@ -44,7 +44,7 @@ convention = "google"
 
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = ["D"]
-"alembic/versions/*" = ["D"]
+"alembic/versions/*" = ["D", "F401"]
 
 [tool.mypy]
 python_version = "3.12"
