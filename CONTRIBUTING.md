@@ -145,7 +145,7 @@ Ready to write some code? Here's what we need help with:
 
 1. Open Android Studio
 2. Select **File → Open**
-3. Navigate to your cloned directory
+3. Navigate to the `android/` directory inside your clone (the Gradle project root)
 4. Wait for Gradle sync to complete
 
 ### 2. Configure Code Style
@@ -164,9 +164,12 @@ Or manually configure:
 
 ### 3. Run Tests
 
-Ensure all tests pass before making changes:
+Ensure all Android tests pass before making changes. The Android project lives
+under `android/`, so run Gradle from there:
 
 ```bash
+cd android
+
 # Unit tests
 ./gradlew test
 
