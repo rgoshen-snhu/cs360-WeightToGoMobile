@@ -16,25 +16,33 @@ issues were resolved.
   prepended at the top.
 - Seeded the log with two entries — this Phase 1 entry and the Phase 0 entry
   below it — so the record is complete from the start of the milestone.
-- Delivered on branch `docs/m2-phase-1-summary-scaffold`.
+- Delivered as PR #18, branch `docs/m2-phase-1-summary-scaffold`.
 
 **How it was done**
 
 - Branched `docs/m2-phase-1-summary-scaffold` from the latest `main`.
 - The Phase 0 entry was carried forward from the breakdown prepared at the close
-  of Phase 0 and recorded on the Phase 1 tracking issue, then verified against
-  the merged Phase 0 pull request before inclusion; no changes were needed.
+  of Phase 0 and recorded on the Phase 1 tracking issue (#7), then verified
+  against the merged Phase 0 pull request before inclusion; no changes were
+  needed.
+- The file was checked through the GitHub Markdown renderer to confirm both
+  entries display correctly.
 - A documentation sweep was run as the pre-push gate. It confirmed `SUMMARY.md`
   is the only document this phase needs to add or change. The sweep also noted
   pre-existing staleness in the root `README.md` — a project-structure tree
-  predating the repository restructure, and two links to the retired
-  task-tracker file — which is out of scope for this phase and is left for the
-  README revisions already scheduled in the restructure and closeout phases.
+  predating the repository restructure, and two links to the retired `TODO.md`
+  task tracker — which is out of scope for this phase and is left for the README
+  revisions scheduled in the repository-restructure phase (Phase 2) and the
+  documentation-closeout phase (Phase 9).
+- Three review passes — code, adversarial, and security — were run on PR #18.
 
 **Issues encountered**
 
-- None. This phase adds a single documentation file with no application code,
-  test, or build impact, and no blockers arose.
+- None arose in this phase's own work: adding a single documentation file raised
+  no blocker or defect, and there is no application code, test, or build impact.
+  The documentation sweep's observation about pre-existing `README.md` staleness,
+  noted above under "How it was done", is a deferred out-of-scope item rather
+  than an issue in this phase.
 
 **How issues were resolved**
 
