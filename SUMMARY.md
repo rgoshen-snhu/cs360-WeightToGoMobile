@@ -7,6 +7,22 @@ issues were resolved.
 
 ---
 
+## [2026-05-22 00:03] Commit Summary
+
+**Change Type:** Test
+**Scope:** backend/shared
+
+**Summary:**
+Add failing unit tests for the two shared utilities: test_logging.py asserts that get_logger() returns a structlog BoundLogger, supports bind(), and that mask_pii() correctly redacts email addresses; test_exceptions.py asserts the DomainError hierarchy and that all concrete types can be caught as DomainError. Tests fail RED because weighttogo.shared.logging and weighttogo.shared.exceptions modules do not exist yet.
+
+**Rationale:**
+TDD red phase: the tests pin the expected public API of the shared utilities before any implementation is written, ensuring the implementation is shaped by observable behavior rather than internal structure.
+
+**References:**
+- Issue: Phase 4 backend architecture
+
+---
+
 ## [2026-05-22 00:02] Commit Summary
 
 **Change Type:** Feature
