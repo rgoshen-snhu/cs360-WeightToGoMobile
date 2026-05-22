@@ -22,8 +22,8 @@ export function GoalsPlaceholderPage() {
           Coming in Milestone 3
         </Typography>
         <Typography variant="body1" color="text.secondary">
-          The Goals feature will let you set a target weight and track your
-          progress over time with visual charts and milestone celebrations.
+          The Goals feature will let you set a target weight and track your progress over time with
+          visual charts and milestone celebrations.
         </Typography>
       </Paper>
     </Box>

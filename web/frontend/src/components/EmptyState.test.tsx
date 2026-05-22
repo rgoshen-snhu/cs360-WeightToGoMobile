@@ -46,8 +46,6 @@ describe('EmptyState', () => {
         />
       </Wrapper>,
     );
-    expect(
-      screen.getByRole('button', { name: /add item/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /add item/i })).toBeInTheDocument();
   });
 });

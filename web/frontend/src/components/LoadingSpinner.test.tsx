@@ -35,8 +35,6 @@ describe('LoadingSpinner', () => {
         <LoadingSpinner label="Loading your data" />
       </Wrapper>,
     );
-    expect(
-      screen.getByRole('progressbar', { name: /loading your data/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole('progressbar', { name: /loading your data/i })).toBeInTheDocument();
   });
 });

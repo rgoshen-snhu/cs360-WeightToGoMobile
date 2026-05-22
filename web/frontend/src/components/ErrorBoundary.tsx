@@ -23,10 +23,7 @@ interface ErrorBoundaryState {
 /**
  * Catches render errors anywhere in the child tree and displays a fallback.
  */
-export class ErrorBoundary extends Component<
-  ErrorBoundaryProps,
-  ErrorBoundaryState
-> {
+export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   constructor(props: ErrorBoundaryProps) {
     super(props);
     this.state = { hasError: false };
@@ -61,8 +58,7 @@ export class ErrorBoundary extends Component<
             Something went wrong
           </Typography>
           <Typography variant="body1" color="text.secondary">
-            An unexpected error occurred. Please refresh the page or try again
-            later.
+            An unexpected error occurred. Please refresh the page or try again later.
           </Typography>
         </Box>
       );

@@ -8,14 +8,7 @@
  * SRS §10.4 governs the auth-state management strategy.
  */
 
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useMemo,
-  useState,
-  type ReactNode,
-} from 'react';
+import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
 
 /**
  * Minimal representation of an authenticated user.

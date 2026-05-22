@@ -5,12 +5,8 @@ import { PreferencesProvider, usePreferences } from './PreferencesContext';
 
 describe('usePreferences', () => {
   it('throws when used outside PreferencesProvider', () => {
-    const spy = vi
-      .spyOn(console, 'error')
-      .mockImplementation(() => undefined);
-    expect(() => renderHook(() => usePreferences())).toThrow(
-      /PreferencesProvider/,
-    );
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    expect(() => renderHook(() => usePreferences())).toThrow(/PreferencesProvider/);
     spy.mockRestore();
   });
 

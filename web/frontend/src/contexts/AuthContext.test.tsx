@@ -13,12 +13,8 @@ const stubUser = {
 describe('useAuth', () => {
   it('throws when used outside AuthProvider', () => {
     // Suppress the expected console.error from React.
-    const spy = vi
-      .spyOn(console, 'error')
-      .mockImplementation(() => undefined);
-    expect(() => renderHook(() => useAuth())).toThrow(
-      /AuthProvider/,
-    );
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    expect(() => renderHook(() => useAuth())).toThrow(/AuthProvider/);
     spy.mockRestore();
   });
 

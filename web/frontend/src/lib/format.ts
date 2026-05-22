@@ -17,10 +17,7 @@ import type { Preferences } from '../contexts/PreferencesContext';
  * formatWeight(70, 'kg')      // '70.0 kg'
  * formatWeight(154.4, 'lbs')  // '154.4 lbs'
  */
-export function formatWeight(
-  value: number,
-  unit: Preferences['weightUnit'],
-): string {
+export function formatWeight(value: number, unit: Preferences['weightUnit']): string {
   return `${value.toFixed(1)} ${unit}`;
 }
 

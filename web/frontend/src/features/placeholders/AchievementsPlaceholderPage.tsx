@@ -22,8 +22,8 @@ export function AchievementsPlaceholderPage() {
           Coming in Milestone 3
         </Typography>
         <Typography variant="body1" color="text.secondary">
-          The Achievements feature will award badges and recognition when you
-          reach important milestones on your weight-management journey.
+          The Achievements feature will award badges and recognition when you reach important
+          milestones on your weight-management journey.
         </Typography>
       </Paper>
     </Box>

@@ -19,8 +19,7 @@ const ERROR_MESSAGES: Readonly<Record<number, string>> = {
   503: 'The service is temporarily unavailable. Please try again later.',
 };
 
-const FALLBACK_MESSAGE =
-  'An unexpected error occurred. Please try again later.';
+const FALLBACK_MESSAGE = 'An unexpected error occurred. Please try again later.';
 
 /**
  * Returns a user-friendly string for the given HTTP status code.

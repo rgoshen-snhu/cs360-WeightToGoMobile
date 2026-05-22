@@ -426,3 +426,17 @@ All dependencies should track latest stable releases. Using outdated packages is
 
 **References:**
 - Issue: Phase 5 frontend architecture
+
+## [2026-05-22 21:25] Commit Summary
+
+**Change Type:** Fix
+**Scope:** frontend/formatting
+
+**Summary:**
+Run Prettier across all frontend source files to fix formatting violations that caused CI to fail.
+
+**Rationale:**
+17 files written by the Phase 5 scaffold agent were not Prettier-formatted. Pre-commit hooks were not installed at the time. CI format:check step correctly caught these. Pre-commit is now installed to prevent this going forward.
+
+**References:**
+- Issue: Phase 5 frontend architecture

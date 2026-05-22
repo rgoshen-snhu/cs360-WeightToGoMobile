@@ -17,19 +17,11 @@ import { useAuth } from './contexts/AuthContext';
 import { DashboardPage } from './features/dashboard/pages/DashboardPage';
 import { LoginPage } from './features/auth/pages/LoginPage';
 import { RegisterPage } from './features/auth/pages/RegisterPage';
-import {
-  AchievementsPlaceholderPage,
-} from './features/placeholders/AchievementsPlaceholderPage';
-import {
-  GoalsPlaceholderPage,
-} from './features/placeholders/GoalsPlaceholderPage';
-import {
-  SettingsPlaceholderPage,
-} from './features/placeholders/SettingsPlaceholderPage';
+import { AchievementsPlaceholderPage } from './features/placeholders/AchievementsPlaceholderPage';
+import { GoalsPlaceholderPage } from './features/placeholders/GoalsPlaceholderPage';
+import { SettingsPlaceholderPage } from './features/placeholders/SettingsPlaceholderPage';
 import { WeightHistoryPage } from './features/weight/pages/WeightHistoryPage';
-import {
-  WeightEntryFormPage,
-} from './features/weight/pages/WeightEntryFormPage';
+import { WeightEntryFormPage } from './features/weight/pages/WeightEntryFormPage';
 
 /**
  * Wraps a route element so that unauthenticated users are redirected to
@@ -74,10 +66,7 @@ export function App() {
         <Route path="/weight/new" element={<WeightEntryFormPage />} />
         <Route path="/weight/:entryId/edit" element={<WeightEntryFormPage />} />
         <Route path="/goals" element={<GoalsPlaceholderPage />} />
-        <Route
-          path="/achievements"
-          element={<AchievementsPlaceholderPage />}
-        />
+        <Route path="/achievements" element={<AchievementsPlaceholderPage />} />
         <Route path="/settings" element={<SettingsPlaceholderPage />} />
       </Route>
 

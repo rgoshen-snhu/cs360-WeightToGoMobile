@@ -7,14 +7,7 @@
  * SRS §10.4 governs the preferences management strategy.
  */
 
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useMemo,
-  useState,
-  type ReactNode,
-} from 'react';
+import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
 
 export interface Preferences {
   /**
@@ -43,16 +36,13 @@ const DEFAULT_PREFERENCES: Preferences = {
   colorScheme: 'light',
 };
 
-const PreferencesContext = createContext<PreferencesContextValue | undefined>(
-  undefined,
-);
+const PreferencesContext = createContext<PreferencesContextValue | undefined>(undefined);
 
 /**
  * Wrap the component tree that needs access to user preferences.
  */
 export function PreferencesProvider({ children }: { children: ReactNode }) {
-  const [preferences, setPreferencesState] =
-    useState<Preferences>(DEFAULT_PREFERENCES);
+  const [preferences, setPreferencesState] = useState<Preferences>(DEFAULT_PREFERENCES);
 
   const setPreferences = useCallback((partial: Partial<Preferences>) => {
     setPreferencesState((prev) => ({ ...prev, ...partial }));
@@ -63,11 +53,7 @@ export function PreferencesProvider({ children }: { children: ReactNode }) {
     [preferences, setPreferences],
   );
 
-  return (
-    <PreferencesContext.Provider value={value}>
-      {children}
-    </PreferencesContext.Provider>
-  );
+  return <PreferencesContext.Provider value={value}>{children}</PreferencesContext.Provider>;
 }
 
 /**

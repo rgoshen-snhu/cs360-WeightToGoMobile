@@ -46,19 +46,13 @@ describe('fetchJson', () => {
   it('throws an error on a 5xx response', async () => {
     vi.stubGlobal(
       'fetch',
-      vi.fn(() =>
-        Promise.resolve(
-          makeResponse({ message: 'Server error' }, { status: 500 }),
-        ),
-      ),
+      vi.fn(() => Promise.resolve(makeResponse({ message: 'Server error' }, { status: 500 }))),
     );
     await expect(fetchJson('/api/broken')).rejects.toThrow();
   });
 
   it('sets the Content-Type header to application/json by default', async () => {
-    const mockFetch = vi.fn(() =>
-      Promise.resolve(makeResponse({ ok: true })),
-    );
+    const mockFetch = vi.fn(() => Promise.resolve(makeResponse({ ok: true })));
     vi.stubGlobal('fetch', mockFetch);
 
     await fetchJson('/api/test', { method: 'POST', body: { name: 'test' } });

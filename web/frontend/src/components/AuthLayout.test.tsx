@@ -39,8 +39,6 @@ describe('AuthLayout', () => {
         </AuthLayout>
       </Wrapper>,
     );
-    expect(
-      screen.getByText(/weigh to go/i),
-    ).toBeInTheDocument();
+    expect(screen.getByText(/weigh to go/i)).toBeInTheDocument();
   });
 });

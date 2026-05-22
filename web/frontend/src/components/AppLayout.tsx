@@ -62,10 +62,7 @@ export function AppLayout() {
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>
       {/* ─── Top bar ───────────────────────────────────────────────── */}
-      <AppBar
-        position="fixed"
-        sx={{ zIndex: (t) => t.zIndex.drawer + 1 }}
-      >
+      <AppBar position="fixed" sx={{ zIndex: (t) => t.zIndex.drawer + 1 }}>
         <Toolbar>
           {!isDesktop && (
             <IconButton

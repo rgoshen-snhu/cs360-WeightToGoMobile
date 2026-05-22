@@ -28,9 +28,7 @@ describe('ErrorBoundary', () => {
 
   it('renders a fallback message when a child throws', () => {
     // Suppress React's console.error for expected error output.
-    const spy = vi
-      .spyOn(console, 'error')
-      .mockImplementation(() => undefined);
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
 
     render(
       <Wrapper>
@@ -45,9 +43,7 @@ describe('ErrorBoundary', () => {
   });
 
   it('fallback contains a user-friendly message', () => {
-    const spy = vi
-      .spyOn(console, 'error')
-      .mockImplementation(() => undefined);
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
 
     render(
       <Wrapper>
@@ -57,9 +53,7 @@ describe('ErrorBoundary', () => {
       </Wrapper>,
     );
 
-    expect(
-      screen.getByText(/something went wrong/i),
-    ).toBeInTheDocument();
+    expect(screen.getByText(/something went wrong/i)).toBeInTheDocument();
     spy.mockRestore();
   });
 });

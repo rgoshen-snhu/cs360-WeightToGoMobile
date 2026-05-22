@@ -22,9 +22,8 @@ export function SettingsPlaceholderPage() {
           Coming in Milestone 3
         </Typography>
         <Typography variant="body1" color="text.secondary">
-          The Settings page will let you update your profile, choose your
-          preferred weight unit (lbs or kg), and personalise the application
-          appearance.
+          The Settings page will let you update your profile, choose your preferred weight unit (lbs
+          or kg), and personalise the application appearance.
         </Typography>
       </Paper>
     </Box>
