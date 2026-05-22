@@ -384,3 +384,31 @@ issues were resolved.
 - A README was added for `docs/history/`, resolving N1.
 - Broader `docs/` indexing was captured as a separate tracked issue (#17) under
   the M2 epic rather than expanding Phase 0 further.
+
+## [2026-05-22 20:45] Commit Summary
+
+**Change Type:** Fix
+**Scope:** frontend/dependencies
+
+**Summary:**
+Remove unused @mui/icons-material package that caused CI peer dependency conflict.
+
+**Rationale:**
+@mui/icons-material was added by the scaffold agent but is not imported anywhere in the source — only referenced in comments. Its v9 peer requirement conflicts with the project's @mui/material v6. Removing it resolves the CI ERESOLVE failure without changing any application code.
+
+**References:**
+- Issue: Phase 5 frontend architecture
+
+## [2026-05-22 21:00] Commit Summary
+
+**Change Type:** Fix
+**Scope:** frontend/dependencies
+
+**Summary:**
+Upgrade @mui/material from v6.5.0 to v9.0.1, add @mui/icons-material@9.0.1. Remove unused @mui/icons-material placeholder that was causing CI peer dependency conflict.
+
+**Rationale:**
+v6 is outdated. Using the latest stable version of all dependencies is a security and maintenance requirement. All 88 tests pass and typecheck is clean with no breaking changes on the Phase 5 scaffold.
+
+**References:**
+- Issue: Phase 5 frontend architecture
