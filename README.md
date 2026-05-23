@@ -12,7 +12,6 @@ the new web codebase under `web/`.
 ![Frontend CI](https://github.com/rgoshen-snhu/WeighToGo/actions/workflows/frontend-ci.yml/badge.svg)
 ![E2E](https://github.com/rgoshen-snhu/WeighToGo/actions/workflows/e2e.yml/badge.svg)
 ![Security Audit](https://github.com/rgoshen-snhu/WeighToGo/actions/workflows/security-audit.yml/badge.svg)
-![Release](https://github.com/rgoshen-snhu/WeighToGo/actions/workflows/release.yml/badge.svg)
 ![Android](https://img.shields.io/badge/Android-14+-3DDC84?style=flat&logo=android&logoColor=white)
 ![Java](https://img.shields.io/badge/Java-21-ED8B00?style=flat&logo=openjdk&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-blue.svg)
@@ -88,7 +87,6 @@ WeighToGo/
 ├── .github/              # CI workflows, issue and pull-request templates
 ├── README.md
 ├── ARCHITECTURE.md       # 30-second orientation; SRS §4 is authoritative
-├── CHANGELOG.md          # User-facing release notes (Keep a Changelog)
 ├── CONTRIBUTING.md
 ├── SUMMARY.md            # Narrative log of what changed and why
 └── LICENSE.md
@@ -302,7 +300,6 @@ and the complete set of functional and non-functional requirements.
 | [Android Database Architecture](docs/architecture/WeighToGo_Database_Architecture.md) | SQLite schema, ER diagrams, SQL scripts, and DAO patterns |
 | [UI/UX Design Specifications](docs/design/) | Figma design specifications and quick-start guide |
 | [OpenAPI Snapshot](docs/api/openapi.json) | Generated REST API contract for the web backend |
-| [`CHANGELOG.md`](CHANGELOG.md) | User-facing release notes per version, Keep-a-Changelog format |
 | [`SUMMARY.md`](SUMMARY.md) | Reverse-chronological narrative log of what changed and why |
 
 ---
