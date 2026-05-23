@@ -7,6 +7,19 @@ issues were resolved.
 
 ---
 
+## [2026-05-23] Task 14 — Playwright webServer config
+
+**Change Type:** Chore
+**Scope:** web/frontend/playwright.config.ts
+
+**Summary:**
+Updated Playwright config to start both the FastAPI backend (port 8000) and Vite dev server (port 5173) via webServer blocks. reuseExistingServer=true locally so the backend started in G2 is reused. Added fullyParallel: false to avoid port conflicts.
+
+**References:**
+- Issue: #13
+
+---
+
 ## [2026-05-23] Task 12 — UserMenu in AppBar
 
 **Change Type:** Feature
