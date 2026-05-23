@@ -7,6 +7,34 @@ issues were resolved.
 
 ---
 
+## [2026-05-23 Phase 9] ci(release): add release-on-tag workflow
+
+**Change Type:** CI / Release automation
+**Scope:** New `.github/workflows/release.yml`; `README.md` adds release badge
+
+**Summary:**
+Added a GitHub Actions workflow that fires on every stable semver tag push (`v*.*.*`) and publishes a GitHub Release whose body is the CHANGELOG section for that exact tag. The workflow:
+
+- Runs only when the tag does **not** contain a hyphen (`!contains(github.ref_name, '-')`) — this excludes the `v1.0.0-android` mobile artifact and any future pre-release tags (`v0.1.0-rc1`) from auto-publishing a stable GitHub Release.
+- Checks out with `fetch-depth: 0` so git-cliff can see the full commit history.
+- Uses `orhun/git-cliff-action@v4.8.0` (pinned to commit SHA per repo convention) with `args: --latest --strip header` to extract exactly the section for the pushed tag, no header noise.
+- Publishes via `gh release create --verify-tag --notes-file RELEASE_NOTES.md` — `--verify-tag` blocks publication if the tag pushed isn't actually in the remote (defensive against tag spoofing or partial pushes).
+- Concurrency group is keyed on the tag ref with `cancel-in-progress: false` — releases are one-shot and must not be cancelled mid-publish.
+- Permissions are narrowed to `contents: write` only.
+
+Updated `README.md` to add the Release workflow badge alongside the existing five CI badges.
+
+**Rationale:**
+The user explicitly asked to automate the release as much as possible. With this workflow in place, future milestone releases (`v0.2.0`, `v0.3.0`, `v1.0.0`) require zero manual steps beyond `git push snhu vX.Y.Z` — the changelog regenerates the matching section and the GitHub Release publishes automatically with that section as its body. The `-` exclusion guards against the obvious foot-guns (the existing `v1.0.0-android` tag, and any future RC tags) while keeping the trigger pattern simple.
+
+Considered using `softprops/action-gh-release` instead of `gh release create`, but the latter is shipped with the GitHub-hosted runner already and avoids an extra pinned dependency for a one-line operation.
+
+**References:**
+- Action: <https://github.com/orhun/git-cliff-action>
+- Issue: GH-15
+
+---
+
 ## [2026-05-23 Phase 9] chore(release): add git-cliff config and seed CHANGELOG.md
 
 **Change Type:** Chore (release tooling) + Docs

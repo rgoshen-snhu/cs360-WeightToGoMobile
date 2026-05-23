@@ -12,6 +12,7 @@ the new web codebase under `web/`.
 ![Frontend CI](https://github.com/rgoshen-snhu/WeighToGo/actions/workflows/frontend-ci.yml/badge.svg)
 ![E2E](https://github.com/rgoshen-snhu/WeighToGo/actions/workflows/e2e.yml/badge.svg)
 ![Security Audit](https://github.com/rgoshen-snhu/WeighToGo/actions/workflows/security-audit.yml/badge.svg)
+![Release](https://github.com/rgoshen-snhu/WeighToGo/actions/workflows/release.yml/badge.svg)
 ![Android](https://img.shields.io/badge/Android-14+-3DDC84?style=flat&logo=android&logoColor=white)
 ![Java](https://img.shields.io/badge/Java-21-ED8B00?style=flat&logo=openjdk&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-blue.svg)
