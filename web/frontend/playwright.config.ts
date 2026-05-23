@@ -1,5 +1,10 @@
 import { defineConfig, devices } from '@playwright/test';
 
+// Allow overriding the backend port so the dev server and CI can coexist with
+// other services already bound to :8000.  Set VITE_API_PORT=8001 when port
+// 8000 is occupied.
+const API_PORT = process.env.VITE_API_PORT ?? '8000';
+
 export default defineConfig({
   testDir: './e2e',
   fullyParallel: false,
@@ -7,13 +12,13 @@ export default defineConfig({
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   webServer: [
     {
-      command: 'cd ../backend && uv run uvicorn weighttogo.main:app --port 8000',
-      url: 'http://localhost:8000/health',
+      command: `cd ../backend && uv run uvicorn weighttogo.main:app --port ${API_PORT}`,
+      url: `http://localhost:${API_PORT}/api/v1/auth/me`,
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,
     },
     {
-      command: 'npm run dev',
+      command: `VITE_API_PORT=${API_PORT} npm run dev`,
       url: 'http://localhost:5173',
       reuseExistingServer: !process.env.CI,
     },

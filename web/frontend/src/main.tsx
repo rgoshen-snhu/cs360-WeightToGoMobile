@@ -37,13 +37,20 @@ const queryClient = new QueryClient({
   },
 });
 
+const PUBLIC_PATHS = ['/login', '/register'];
+
 installAuthRefreshInterceptor({
   refresh: async () => {
     await authClient.refresh();
   },
   onLogout: () => {
     queryClient.setQueryData(['auth', 'me'], null);
-    window.location.assign('/login');
+    // Only hard-redirect to /login if the user is not already on a public page.
+    // Redirecting unconditionally would interrupt the /me probe that runs on
+    // every initial page load and force /login when visiting /register cold.
+    if (!PUBLIC_PATHS.includes(window.location.pathname)) {
+      window.location.assign('/login');
+    }
   },
 });
 

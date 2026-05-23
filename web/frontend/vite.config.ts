@@ -1,8 +1,21 @@
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vitest/config';
 
+// Allow the backend port to be overridden via VITE_API_PORT in the shell or
+// .env.local.  Defaults to 8000 (the standard dev port).
+const apiPort = process.env['VITE_API_PORT'] ?? '8000';
+
 export default defineConfig({
   plugins: [react()],
+  server: {
+    proxy: {
+      // Forward all /api/* requests to the FastAPI backend.
+      '/api': {
+        target: `http://localhost:${apiPort}`,
+        changeOrigin: true,
+      },
+    },
+  },
   // Pre-bundle React, Emotion, and MUI together and dedupe React so a single
   // React instance reaches MUI's ThemeProvider. Without this the dev server
   // splits React across pre-bundles and ThemeProvider's hooks fail at runtime.
