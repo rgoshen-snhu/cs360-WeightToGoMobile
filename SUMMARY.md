@@ -7,6 +7,28 @@ issues were resolved.
 
 ---
 
+## [2026-05-23 Phase 9] docs(contributing): add web stack contribution guidelines
+
+**Change Type:** Docs
+**Scope:** `CONTRIBUTING.md`
+
+**Summary:**
+Added web-stack contribution sections parallel to the existing Android ones, without rewriting the Android content:
+
+- **Prerequisites:** split into "Shared", "Android", and "Web" subsections. Web prereqs list Python 3.12+/uv, Node.js 20.19+/22+, and Docker.
+- **Development Setup:** new `Web Backend` and `Web Frontend` subsections covering the dev loop (env file, install, dev server) and every quality gate (`ruff`, `mypy`, `pytest --cov`, `eslint`, `prettier`, `tsc`, `vitest`, `playwright`). The Android setup section remains as-is. Added a stack-agnostic `pre-commit install` step at the top.
+- **Code Style Guidelines:** new `Python Style (Web Backend)` and `TypeScript Style (Web Frontend)` subsections placed before the existing Java guide. Notes the ADR-0012 dependency rule for backend domain code (enforced by `import-linter`) and the ADR-0014 server-state pattern for the frontend.
+- **Bug Report Template:** added a `Stack` field, kept Android environment fields, added parallel `Environment (Web)` fields (browser/OS/backend commit/console excerpts).
+- **Resources:** grouped into Project-specific (SRS, ADR/DDR indexes), Web stack (FastAPI, SQLAlchemy, Pydantic, React, TanStack Query, MUI, Playwright), Android stack, and Workflow.
+
+**Rationale:**
+CONTRIBUTING described only the Android workflow even though the M2 vertical slice landed five new web-stack CI workflows. A new web contributor following CONTRIBUTING would have hit dead ends at every step (no install instructions, no commands, no style guidance). The fix is parallel sections, not a rewrite — Android is still maintained and its guidance still applies. Kept the Python/TypeScript style sections light because `ruff`, `prettier`, `eslint`, and `mypy` are the source of truth for formatting and typing; the doc records only the conventions tooling does not auto-fix.
+
+**References:**
+- Issue: GH-15
+
+---
+
 ## [2026-05-23 Phase 9] docs(readme): final pass — web CI badges, M2 status, docs index link
 
 **Change Type:** Docs
