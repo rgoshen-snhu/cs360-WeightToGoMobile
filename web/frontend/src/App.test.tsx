@@ -106,6 +106,26 @@ describe('App (integration)', () => {
     expect(screen.getByText(/loading/i)).toBeInTheDocument();
   });
 
+  it('renders protected route content when user is authenticated', async () => {
+    vi.spyOn(authClient, 'me').mockResolvedValueOnce({
+      user_id: 1,
+      email: 'user@example.com',
+      display_name: 'User',
+      created_at: '2026-05-23T00:00:00Z',
+    });
+    render(
+      <FullProviders>
+        <MemoryRouter initialEntries={['/']}>
+          <App />
+        </MemoryRouter>
+      </FullProviders>,
+    );
+    await waitFor(() =>
+      expect(screen.getByRole('heading', { name: /dashboard/i })).toBeInTheDocument(),
+    );
+    expect(screen.queryByRole('heading', { name: /log in/i })).not.toBeInTheDocument();
+  });
+
   it('redirects to /login after auth hydration when unauthenticated', async () => {
     render(
       <FullProviders>

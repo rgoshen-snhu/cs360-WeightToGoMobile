@@ -20,6 +20,16 @@ function wrapper({ children }: { children: React.ReactNode }) {
   );
 }
 
+describe('useAuth (guard)', () => {
+  it('throws when called outside an AuthProvider', () => {
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    expect(() => renderHook(() => useAuth())).toThrow(
+      'useAuth must be used inside an AuthProvider',
+    );
+    errorSpy.mockRestore();
+  });
+});
+
 describe('AuthContext', () => {
   beforeEach(() => {
     vi.spyOn(authClient, 'me').mockReset();

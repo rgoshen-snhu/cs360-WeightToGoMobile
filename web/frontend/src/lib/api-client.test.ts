@@ -194,6 +194,31 @@ describe('auth refresh interceptor', () => {
     expect(onLogout).toHaveBeenCalledTimes(1);
   });
 
+  it('throws ValidationError when refresh succeeds but retry returns 422', async () => {
+    const onLogout = vi.fn();
+    installAuthRefreshInterceptor({
+      refresh: vi.fn().mockResolvedValue(undefined),
+      onLogout,
+    });
+
+    const body422 = {
+      type: 'about:blank',
+      title: 'Validation failed',
+      status: 422,
+      detail: 'Post-refresh validation error.',
+      instance: '/api/v1/weight-entries',
+      errors: [{ field: 'weight', code: 'value_error', message: 'Must be positive.' }],
+    };
+    (globalThis.fetch as ReturnType<typeof vi.fn>)
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ detail: 'Not authenticated.' }), { status: 401 }),
+      )
+      .mockResolvedValueOnce(new Response(JSON.stringify(body422), { status: 422 }));
+
+    await expect(fetchJson('/api/v1/weight-entries')).rejects.toBeInstanceOf(ValidationError);
+    expect(onLogout).not.toHaveBeenCalled();
+  });
+
   it('does not attempt refresh when the failing URL is /api/v1/auth/refresh itself', async () => {
     const refresh = vi.fn();
     const onLogout = vi.fn();

@@ -862,7 +862,7 @@ Features are developed test-first. The commit history reflects red-green-refacto
 
 #### NFR-T-2: Test Coverage Thresholds `[MUST]` `[M2]`
 
-The backend maintains at least 85% line coverage and 80% branch coverage on the domain and application layers. The frontend maintains at least 75% line coverage on components, hooks, and utilities.
+The backend maintains at least 85% line coverage and 80% branch coverage on the domain and application layers. The frontend maintains at least 90% line and branch coverage on components, hooks, and utilities.
 
 #### NFR-T-3: Test Pyramid `[MUST]` `[M2]`
 
@@ -1499,9 +1499,9 @@ Playwright tests cover happy-path user journeys across real browsers. End-to-end
 | Backend application | 90% | 85% |
 | Backend infrastructure | 80% | 75% |
 | Backend interface | 80% | 75% |
-| Frontend components | 75% | 70% |
-| Frontend hooks | 85% | 80% |
-| Frontend utilities | 90% | 85% |
+| Frontend components | 90% | 90% |
+| Frontend hooks | 90% | 90% |
+| Frontend utilities | 90% | 90% |
 
 CI builds fail when coverage drops below threshold on any layer.
 
@@ -1676,7 +1676,7 @@ Milestone 2 delivers the architectural foundation and a single vertical slice th
 3. **Frontend skeleton with auth and weight entry CRUD.** React application running locally with all routes from section 10.1 implemented, including placeholder pages for deferred features.
 4. **PostgreSQL schema for M2 entities.** Alembic migrations `0001` and `0002` applied, tables verified against the spec.
 5. **Full CI pipeline.** GitHub Actions workflows for backend, frontend, and the preserved Android workflow all green.
-6. **Test coverage at thresholds.** Backend domain at 95%, frontend at 75% lines.
+6. **Test coverage at thresholds.** Backend domain at 95%, frontend at 90% lines and branches.
 7. **ADRs 0007 through 0013 committed.** Web rebuild rationale, polyglot monorepo, email as identifier, generic auth errors, PII masking in logs, three-pattern backend architecture, refresh token rotation.
 8. **README rewritten.** Tells the mobile-to-web story, includes setup instructions, links to ADRs and this SRS.
 

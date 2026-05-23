@@ -79,6 +79,20 @@ describe('useLogin', () => {
     );
   });
 
+  it('sets generic formError when ApiError status is not 401, 423, or 429', async () => {
+    vi.spyOn(authClient, 'login').mockRejectedValueOnce(new ApiError(500, 'Server error'));
+    const { result } = renderHook(() => useLogin(), { wrapper });
+    result.current.submit({ email: 'a@b.co', password: 'pass' }, makeHelpers());
+    await waitFor(() => expect(result.current.formError).toMatch(/something went wrong/i));
+  });
+
+  it('sets generic formError when error is not an ApiError or ValidationError', async () => {
+    vi.spyOn(authClient, 'login').mockRejectedValueOnce(new Error('Network failure'));
+    const { result } = renderHook(() => useLogin(), { wrapper });
+    result.current.submit({ email: 'a@b.co', password: 'pass' }, makeHelpers());
+    await waitFor(() => expect(result.current.formError).toMatch(/something went wrong/i));
+  });
+
   it('isPending flips status to submitting while in flight', async () => {
     let resolve!: (v: AuthUser) => void;
     vi.spyOn(authClient, 'login').mockReturnValueOnce(

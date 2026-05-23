@@ -1457,3 +1457,17 @@ Root cause: the post-refresh retry path fell through to a bare `throw new ApiErr
 
 **References:**
 - PR: #29 code review comment
+
+## [2026-05-23] Raise frontend coverage threshold to 90% and close branch gaps
+
+**Change Type:** Chore / Test
+**Scope:** web/frontend/vite.config.ts, web/frontend/src/, docs/specs/WeighToGo_Web_SRS_v1.md
+
+**Summary:**
+Configured Vitest coverage thresholds at 90% for statements, branches, functions, and lines (excluding main.tsx as the entry point). Added 6 tests across 5 files to close the branch gap from 86.17% to 94.68%: 422 on retry path in api-client, both else branches in useLogin (unknown ApiError status, non-ApiError error), non-409 ApiError in useRegister, useAuth outside AuthProvider guard, and authenticated ProtectedRoute children in App. Updated SRS §11.5 and §11 prose from 75-85% per-layer frontend thresholds to a uniform 90% floor.
+
+**Rationale:**
+The previous 75% frontend threshold was below the global CLAUDE.md standard of 80% and the SRS §11.5 table entries were inconsistent across layers. Raising to 90% enforces a meaningful quality gate and ensures the Vitest config fails the build rather than silently accepting low coverage. The SRS is updated to reflect the enforced standard.
+
+**References:**
+- Issue: post code-review threshold alignment

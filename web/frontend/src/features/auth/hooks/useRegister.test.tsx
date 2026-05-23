@@ -77,6 +77,13 @@ describe('useRegister', () => {
     );
   });
 
+  it('sets generic formError when ApiError status is not 409', async () => {
+    vi.spyOn(authClient, 'register').mockRejectedValueOnce(new ApiError(500, 'Server error'));
+    const { result } = renderHook(() => useRegister(), { wrapper });
+    result.current.submit(validValues, vi.fn());
+    await waitFor(() => expect(result.current.formError).toMatch(/something went wrong/i));
+  });
+
   it('sets generic formError on unexpected network error', async () => {
     vi.spyOn(authClient, 'register').mockRejectedValueOnce(new Error('Network error'));
     const { result } = renderHook(() => useRegister(), { wrapper });
