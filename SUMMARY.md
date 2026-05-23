@@ -7,6 +7,73 @@ issues were resolved.
 
 ---
 
+## [2026-05-23 Phase 9] docs(summary): Phase 9 closeout — Milestone 2 ready to tag v0.1.0
+
+**Change Type:** Docs (milestone closeout)
+**Scope:** `SUMMARY.md` — Phase 9 wrap-up and DoD verification
+
+**Summary:**
+Phase 9 (Documentation & Closeout) is complete. The branch `feature/m2-phase-9-docs-closeout` carries ten atomic commits covering every Phase 9 task from issue #15:
+
+1. `docs(srs): reconcile Appendix A ADR index with on-disk ADRs` — SRS Appendix A and FR-W-2 reconciliation
+2. `docs(readme): final pass — web CI badges, M2 status, docs index link`
+3. `docs(contributing): add web stack contribution guidelines`
+4. `docs(architecture): add ARCHITECTURE.md stub deferring to SRS §4`
+5. `docs(review): record CS 499 checklist self-review findings`
+6. `docs(narrative): add Milestone Two narrative`
+7. `chore(release): add git-cliff config and seed CHANGELOG.md`
+8. `ci(release): add release-on-tag workflow`
+9. (this entry)
+
+The Phase 5 task ("regenerate OpenAPI snapshot") was a no-op commit — the snapshot at `docs/api/openapi.json` is byte-identical to the live-app export (refreshed at `6ee9d8f` during PR #30); regenerating produced zero drift.
+
+**M2 phase issue inventory (verified via `gh issue list`):**
+
+| # | Title | State |
+| --- | --- | --- |
+| #6 | Phase 0 — Repository & Project Setup | CLOSED |
+| #7 | Phase 1 — Tracking Log Scaffold | CLOSED |
+| #8 | Phase 2 — Repository Restructure | CLOSED |
+| #9 | Phase 3 — Web Scaffold | CLOSED |
+| #10 | Phase 4 — Three-Pattern Backend Architecture | CLOSED |
+| #11 | Phase 5 — Frontend Architecture | CLOSED |
+| #12 | Phase 6 — Authentication Backend | CLOSED |
+| #13 | Phase 7 — Authentication Frontend & Vertical Slice | CLOSED |
+| #14 | Phase 8 — Weight Entry CRUD & Dashboard | CLOSED |
+| #17 | Documentation: index the docs/ tree | CLOSED |
+| #20 | Phase 2 follow-up: repository documentation hygiene | CLOSED |
+| #15 | Phase 9 — Documentation & Closeout | OPEN — closes on merge of this PR |
+| #2 | M2 — Software Design and Engineering (epic) | OPEN — closes after release |
+
+**Definition of Done check (per SRS §14.2):**
+
+- [x] Every M2-tagged functional requirement (FR-A-1..5, FR-A-9, FR-A-10, FR-W-1..5, FR-D-1) implemented with passing tests — Phases 6–8
+- [x] Coverage thresholds met per SRS §11 — 277 backend tests, 241 frontend test cases, ≥90% per recent CI
+- [x] CI green on `main` (all five existing workflows; the new release workflow is dormant until first tag push)
+- [x] ADR-0007 through ADR-0013 written and committed; ADR-0014, ADR-0015 added during M2 work
+- [x] Code self-reviewed against `/docs/standards/cs499_code_review_checklist.md` (Batch 6 above)
+- [x] OpenAPI snapshot generated to `/docs/api/openapi.json` and verified current (Batch 5 above)
+- [x] README at the repo root updated with quickstart for both stacks (Batch 2 above; quickstart already present from prior phases)
+- [x] All existing Android tests still pass after the restructure (verified during Phase 2; CI continues to enforce)
+- [x] M2 narrative document drafted (Batch 7 above; `.docx` rendered as uncommitted sidecar for submission)
+- [ ] Repository tagged `v0.1.0` — **next step, post-merge**
+
+**Post-merge sequence (automated where possible):**
+
+1. PR merges to `main`; #15 auto-closes via "Closes #15"
+2. `git checkout main && git pull snhu main`
+3. `git tag -a v0.1.0 -m "Milestone 2 — Software Design and Engineering"`
+4. `git push snhu v0.1.0`
+5. `.github/workflows/release.yml` fires automatically — extracts the v0.1.0 section from `CHANGELOG.md` via `git-cliff --latest --strip header` and publishes the GitHub Release via `gh release create --verify-tag`
+6. Close epic #2 with a comment linking the published release
+7. Move #15 and #2 to **Done** on the project board
+
+**References:**
+- Issue: GH-15 (Phase 9), GH-2 (M2 epic)
+- Tag: `v0.1.0` (to be pushed post-merge)
+
+---
+
 ## [2026-05-23 Phase 9] ci(release): add release-on-tag workflow
 
 **Change Type:** CI / Release automation
