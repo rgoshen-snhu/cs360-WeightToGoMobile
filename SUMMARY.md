@@ -1426,3 +1426,17 @@ Decision records must precede the implementation commits they affect. TanStack Q
 
 **References:**
 - Issue: #13
+
+## [2026-05-23] Fix 1 — Use repo-relative path in screenshot spec
+
+**Change Type:** Fix
+**Scope:** web/frontend/e2e/screenshot-phase7.spec.ts
+
+**Summary:**
+Replace hardcoded absolute local path with a `path.resolve(__dirname, '../../../docs/screenshots/phase-7')` relative path. Add `fs.mkdirSync(OUT, { recursive: true })` in a `test.beforeAll` so Playwright creates the directory on any machine. The reviewer suggested `../../docs/screenshots/phase-7` but the spec lives three directories deep (`web/frontend/e2e/`), so the correct depth is three levels up.
+
+**Rationale:**
+The absolute path was machine-specific and could never succeed on CI or any other developer's workstation. The `--grep-invert "Phase 7 screenshots"` CI exclusion masked the failure rather than fixing it. Now the spec is portable.
+
+**References:**
+- PR: #29 code review comment

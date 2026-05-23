@@ -1,11 +1,17 @@
+import fs from 'fs';
+import path from 'path';
+
 import { expect, test } from '@playwright/test';
 
-const OUT = '/Users/richardgoshen/workspaces/snhu/WeightToGoMobile/docs/screenshots/phase-7';
+const OUT = path.resolve(__dirname, '../../../docs/screenshots/phase-7');
 const unique = Date.now();
 const email = `screenshot-${unique}@example.com`;
 const password = 'Aa1!aaaaaaaa';
 
 test.describe.serial('Phase 7 screenshots', () => {
+  test.beforeAll(() => {
+    fs.mkdirSync(OUT, { recursive: true });
+  });
   test('01-register-page', async ({ page }) => {
     await page.goto('/register');
     await page.waitForLoadState('networkidle');
