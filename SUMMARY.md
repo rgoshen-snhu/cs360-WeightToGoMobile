@@ -7,6 +7,22 @@ issues were resolved.
 
 ---
 
+## [2026-05-22 10:02] Commit Summary
+
+**Change Type:** Fix
+**Scope:** auth/application/refresh_session
+
+**Summary:**
+After saving the new refresh token, `RefreshSession.execute()` now sets `existing.replaced_by = saved_new.token_id` and persists the update. The rotation chain audit trail is now complete.
+
+**Rationale:**
+The `replaced_by` field existed in the domain entity, ORM model, and migration but was never written, making the rotation chain unauditable. PR #27 code review finding C3.
+
+**References:**
+- PR: #27 (C3)
+
+---
+
 ## [2026-05-22 10:01] Commit Summary
 
 **Change Type:** Fix

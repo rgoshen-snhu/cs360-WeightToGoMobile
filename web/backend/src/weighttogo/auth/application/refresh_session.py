@@ -112,6 +112,10 @@ class RefreshSession:
             family_id=existing.family_id,  # same family
             expires_at=datetime.now(UTC) + self._refresh_ttl,
         )
-        self._token_repo.save(new_record)
+        saved_new = self._token_repo.save(new_record)
+
+        # Record the rotation chain so the audit trail is complete.
+        existing.replaced_by = saved_new.token_id
+        self._token_repo.save(existing)
 
         return TokenPair(access_token=access_token, raw_refresh_token=raw_refresh)
