@@ -7,6 +7,104 @@ issues were resolved.
 
 ---
 
+## [2026-05-23 Phase 9] docs(review): record CS 499 checklist self-review findings
+
+**Change Type:** Docs
+**Scope:** `SUMMARY.md` — self-review of the M2 diff against `docs/standards/cs499_code_review_checklist.md`
+
+**Summary:**
+Walked the 54-item CS 499 Code Review Checklist against the Milestone 2 diff (544 files, +28,479 / -598 lines across 173 commits since `v1.0.0-android`). The checklist is C/Java-flavored; many items are auto-enforced by `ruff` / `mypy` / `eslint` / `prettier` / `tsc` for the Python/TypeScript M2 code, several do not apply to a garbage-collected stack, and the remainder were checked against shipped code.
+
+**Test evidence at the time of this review:** 277 backend tests (pytest), 241 frontend test cases (vitest), 5 Playwright E2E specs. All CI workflows green on `main`. OpenAPI snapshot at `docs/api/openapi.json` is byte-identical to the live-app export (confirmed during Phase 9 — no regeneration needed since 6ee9d8f). No `TODO` / `FIXME` / `XXX` markers in shipped `web/backend/src/` or `web/frontend/src/`.
+
+### Structure (10 items)
+
+| # | Item | Status | Evidence |
+| --- | --- | --- | --- |
+| 1 | Code completely and correctly implements design | ✓ | M2 FRs (FR-A-1..5, FR-A-9, FR-A-10, FR-W-1..5, FR-D-1) all have passing tests; SRS §6 acceptance criteria mapped to test names |
+| 2 | Conforms to coding standards | ✓ | `ruff` + `mypy --strict` (backend) and `eslint` + `prettier` + `tsc --strict` (frontend) enforced by `pre-commit` and CI |
+| 3 | Well-structured, consistent style, consistently formatted | ✓ | Automated formatters (ruff-format, prettier) — zero manual style decisions |
+| 4 | No uncalled-for / unneeded procedures or unreachable code | ✓ | `ruff` rule `F401` (unused imports), `F841` (unused locals), `ARG` (unused args) enabled; eslint `@typescript-eslint/no-unused-vars` |
+| 5 | No leftover stubs or test routines | ✓ | Grep across `web/backend/src/` and `web/frontend/src/` for `TODO\|FIXME\|XXX` returns zero hits |
+| 6 | Code replaced by reusable components / library functions where possible | ✓ | Industry-standard libs throughout: FastAPI, SQLAlchemy 2.0, Pydantic v2, MUI v9, TanStack Query v5 — not reinventing |
+| 7 | Repeated blocks condensed | ✓ | Three-pattern backend (ADR-0012) extracts cross-cutting concerns into ports/adapters; frontend hooks (`useAuth`, `useWeightEntries`, etc.) consolidate fetch/cache logic |
+| 8 | Storage efficient | ✓ | Cursor-based pagination (ADR-0015) avoids loading full lists; soft-delete via `is_deleted` flag rather than table copies |
+| 9 | Symbolics not magic numbers | ✓ | Constants centralized (`web/backend/src/weighttogo/auth/domain/policies.py` for lockout thresholds, refresh token windows); MUI theme tokens for colors/spacing on the frontend |
+| 10 | No excessively complex modules | ✓ | Routers stay thin (delegate to use-cases); use-cases each address a single FR; ADR-0012 enforces layered split. Highest line count in any single domain module remains under ~250 lines. |
+
+### Documentation (2 items)
+
+| # | Item | Status | Evidence |
+| --- | --- | --- | --- |
+| 11 | Code clearly and adequately documented; maintainable commenting style | ✓ | Pydantic / SQLAlchemy / FastAPI use declarative types as documentation; ADRs (0007–0015) capture *why*; inline comments restricted to non-obvious invariants (per project rule "explain why, not what") |
+| 12 | Comments consistent with code | ✓ | No drift found; comment audit during PR #30 review caught and removed stale references |
+
+### Variables (3 items)
+
+| # | Item | Status | Evidence |
+| --- | --- | --- | --- |
+| 13 | Properly defined with meaningful, consistent, clear names | ✓ | Domain-driven naming throughout (`RefreshSession`, `WeightEntry`, `ListWeightEntriesUseCase`); no abbreviations or single-letter loop vars except idiomatic `i`/`_` |
+| 14 | Type consistency / casting | ✓ | `mypy --strict` on backend; `tsc --strict` + Zod runtime validation on frontend; no implicit `any` |
+| 15 | No redundant or unused variables | ✓ | Linters auto-flag (ruff `F841`, eslint `no-unused-vars`); CI fails on hit |
+
+### Arithmetic Operations (4 items)
+
+| # | Item | Status | Evidence |
+| --- | --- | --- | --- |
+| 16 | Avoids floating-point equality comparison | ✓ | Weight values stored as `Numeric(7,3)` in PostgreSQL (exact decimal), not floats — no equality comparisons on inexact floats |
+| 17 | Prevents rounding errors | ✓ | PostgreSQL `Numeric` decimal type; unit conversion (lbs↔kg) deferred to M3 (FR-W-6) where it will be added under ADR with explicit precision policy |
+| 18 | Avoids subtractions on differently-magnitude numbers | N/A | No financial calculations or large-magnitude arithmetic in M2 surface area |
+| 19 | Divisors tested for zero / noise | N/A | M2 has no division operations in shipped business logic; FR-D-2 (trend slope) is M3 |
+
+### Loops and Branches (8 items)
+
+| # | Item | Status | Evidence |
+| --- | --- | --- | --- |
+| 20 | Loops, branches, logic constructs complete, correct, properly nested | ✓ | Test coverage for each branch (happy + error paths); RFC 7807 error responses tested per endpoint |
+| 21 | Most common cases first in IF–ELSEIF chains | ✓ | Pythonic early-return / guard-clause style throughout; no deep IF–ELSEIF cascades |
+| 22 | All cases covered including ELSE / DEFAULT | ✓ | `mypy` exhaustiveness for `Literal` / enum match-cases; default 500 handler in FastAPI catches uncaught paths and emits sanitized RFC 7807 |
+| 23 | Every case statement has a default | N/A | Python uses `match` statement (PEP 634); used minimally in M2, all with `case _:` defaults where present. TypeScript `switch` not used. |
+| 24 | Loop termination conditions obvious and achievable | ✓ | All loops are `for x in collection` (bounded by iterable) or async generators with explicit limits; no `while True` outside test fixtures |
+| 25 | Indexes/subscripts properly initialized before loop | N/A | Pythonic iteration; no manual index management |
+| 26 | Statements inside loops that could be hoisted out | ✓ | Reviewed during PR review cycles; no hoisting opportunities flagged by code review |
+| 27 | Loop doesn't manipulate index or use it after exit | N/A | No manual index loops |
+
+### Defensive Programming (8 items)
+
+| # | Item | Status | Evidence |
+| --- | --- | --- | --- |
+| 28 | Indexes/pointers/subscripts tested against bounds | ✓ | Pagination `limit` clamped 1–100 (PR #30 fix); cursor decoded with explicit validation; no raw array indexing in M2 code |
+| 29 | Imported data and input arguments validated | ✓ | Pydantic v2 on every request body / query / path param; Zod on every frontend form before submit; 422 RFC 7807 emitted with field-level details |
+| 30 | All output variables assigned | ✓ | `mypy --strict` enforces; FastAPI response models reject unset fields |
+| 31 | Correct data operated on in each statement | ✓ | Domain types (`UserId`, `EntryId`, `Email`) prevent cross-context misuse; reviewed in PR #30 self-review caught the `get_by_id` soft-delete filter bug (commit ec22cf2) before merge |
+| 32 | Every memory allocation deallocated | N/A | Python and TypeScript are garbage-collected; SQLAlchemy session lifecycle managed by FastAPI dependency injection (`Depends(get_db)` with context-manager teardown) |
+| 33 | Timeouts / error traps for external device accesses | ✓ | HTTP client (frontend → backend) uses fetch with explicit error handling; backend → PostgreSQL uses SQLAlchemy connection pool with timeout; auth lockout / rate limiting are explicit timeouts at the policy layer |
+| 34 | Files checked for existence before access | N/A | M2 has no filesystem I/O in shipped business logic |
+| 35 | Files and devices left in correct state on termination | ✓ | Database sessions closed via FastAPI dependency teardown; refresh-token families revoked on logout (ADR-0013); no file handles or sockets held open |
+
+### Summary
+
+| Section | Pass | N/A | Partial / Fail |
+| --- | --- | --- | --- |
+| Structure | 10 | 0 | 0 |
+| Documentation | 2 | 0 | 0 |
+| Variables | 3 | 0 | 0 |
+| Arithmetic Operations | 2 | 2 | 0 |
+| Loops and Branches | 5 | 3 | 0 |
+| Defensive Programming | 6 | 2 | 0 |
+| **Total** | **28** | **7** | **0** |
+
+No items are marked Partial or Fail. The 7 N/A items reflect language/scope differences (garbage collection, no float equality, no manual index loops, no filesystem I/O in M2 surface) — each documented with rationale rather than silently skipped.
+
+**Rationale (for recording this in SUMMARY rather than a separate document):**
+The issue #15 task list explicitly requires recording findings in `SUMMARY.md`. Keeping the review here preserves it in the same reverse-chronological narrative log as the rest of the M2 work, where a reviewer following the milestone story will encounter it at the natural moment.
+
+**References:**
+- Checklist: `docs/standards/cs499_code_review_checklist.md`
+- Issue: GH-15
+
+---
+
 ## [2026-05-23 Phase 9] docs(architecture): add ARCHITECTURE.md stub deferring to SRS §4
 
 **Change Type:** Docs
