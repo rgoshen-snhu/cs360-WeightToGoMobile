@@ -7,6 +7,23 @@ issues were resolved.
 
 ---
 
+## [2026-05-23] Task 13 — RFC 7807 validation error handler
+
+**Change Type:** Feature
+**Scope:** web/backend/src/weighttogo/shared, web/backend/src/weighttogo/main.py
+
+**Summary:**
+Added a FastAPI `RequestValidationError` handler that emits the SRS §9.2 RFC 7807 shape instead of FastAPI's default `{"detail": [...]}` format. Each validation error surfaces as `{field, code, message}` which the frontend's api-client already parses.
+
+**Rationale:**
+The frontend ValidationError class maps `errors[].field` → form field errors. Without this handler, 422 responses from the backend would have an incompatible shape and the form field error wiring would silently fail.
+
+**References:**
+- Issue: #13
+- SRS §9.2
+
+---
+
 ## [2026-05-22 10:14] Commit Summary
 
 **Change Type:** Fix

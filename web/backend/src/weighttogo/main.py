@@ -8,6 +8,7 @@ Security headers and CORS middleware are applied here per SRS §NFR-S-8,
 """
 
 from fastapi import FastAPI, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
@@ -16,6 +17,7 @@ from slowapi.middleware import SlowAPIMiddleware
 from weighttogo.auth.interface.router import limiter
 from weighttogo.auth.interface.router import router as auth_router
 from weighttogo.config import get_settings
+from weighttogo.shared.error_handlers import validation_exception_handler
 from weighttogo.shared.logging import configure_logging
 
 configure_logging()
@@ -27,6 +29,10 @@ app = FastAPI(
     redoc_url="/api/redoc",
     openapi_url="/api/v1/openapi.json",
 )
+
+# ── RFC 7807 validation error handler (SRS §9.2) ─────────────────────────────
+
+app.add_exception_handler(RequestValidationError, validation_exception_handler)  # type: ignore[arg-type]
 
 # ── Rate limiting ──────────────────────────────────────────────────────────────
 

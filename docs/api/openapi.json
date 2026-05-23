@@ -1,0 +1,369 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Weigh to Go! API",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/api/v1/auth/register": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Register a new user account (FR-A-1)",
+        "description": "Create a new user account and return a session cookie.\n\nArgs:\n    payload: Validated registration fields.\n    response: The outgoing HTTP response (used to set cookies).\n    session: The active database session.\n    password_adapter: Bcrypt password hashing adapter.\n    jwt_adapter: JWT issuance adapter.\n\nReturns:\n    The newly created user's public data.\n\nRaises:\n    HTTPException: 409 when the email is already registered (generic message).\n    HTTPException: 422 when validation fails.",
+        "operationId": "register_api_v1_auth_register_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/login": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Authenticate and receive session cookies (FR-A-2)",
+        "description": "Verify credentials and issue session cookies.\n\nArgs:\n    request: The incoming HTTP request (required by slowapi).\n    payload: Validated login fields.\n    response: The outgoing HTTP response (used to set cookies).\n    session: The active database session.\n    password_adapter: Bcrypt verification adapter.\n    jwt_adapter: JWT issuance adapter.\n\nReturns:\n    The authenticated user's public data.\n\nRaises:\n    HTTPException: 401 for any credential failure (generic message).\n    HTTPException: 423 when the account is locked.",
+        "operationId": "login_api_v1_auth_login_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/logout": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "End the current session (FR-A-3)",
+        "description": "Revoke the refresh token family and clear session cookies.\n\nDoes not require a valid access token \u2014 clients must be able to log out\neven after the 15-minute access token has expired.  Auth cookies are always\ncleared regardless of token state.\n\nArgs:\n    request: The incoming HTTP request (required by slowapi rate limiting).\n    response: The outgoing HTTP response (used to clear cookies).\n    refresh_token: The refresh token from the cookie (optional).\n    session: The active database session.\n    jwt_adapter: JWT adapter used for token hashing.",
+        "operationId": "logout_api_v1_auth_logout_post",
+        "parameters": [
+          {
+            "name": "refresh_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Refresh Token"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/refresh": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Rotate the refresh token and issue a new access token (FR-A-4)",
+        "description": "Rotate the refresh token.\n\nArgs:\n    request: The incoming HTTP request (required by slowapi).\n    response: The outgoing HTTP response (used to set cookies).\n    refresh_token: The current refresh token from the cookie.\n    session: The active database session.\n    jwt_adapter: JWT issuance adapter.\n\nReturns:\n    The user's public data with refreshed cookies.\n\nRaises:\n    HTTPException: 401 when no valid refresh token is present.",
+        "operationId": "refresh_api_v1_auth_refresh_post",
+        "parameters": [
+          {
+            "name": "refresh_token",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Refresh Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/me": {
+      "get": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Return the current user's identity (FR-A-5)",
+        "description": "Return the current authenticated user's public data.\n\nArgs:\n    session: The active database session.\n    current_user_id: The authenticated user's ID from the access token.\n\nReturns:\n    The current user's public identity.\n\nRaises:\n    HTTPException: 401 when no valid access token is present.",
+        "operationId": "me_api_v1_auth_me_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "summary": "Health",
+        "description": "Report service liveness and the active environment.",
+        "operationId": "health_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object",
+                  "title": "Response Health Health Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "LoginRequest": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "title": "Email"
+          },
+          "password": {
+            "type": "string",
+            "maxLength": 72,
+            "minLength": 1,
+            "title": "Password"
+          }
+        },
+        "type": "object",
+        "required": [
+          "email",
+          "password"
+        ],
+        "title": "LoginRequest",
+        "description": "Request body for POST /api/v1/auth/login (SRS \u00a79.3.2, FR-A-2).\n\nAttributes:\n    email: The user's email address; normalised to lowercase at the boundary.\n    password: The plain-text password."
+      },
+      "RegisterRequest": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "title": "Email"
+          },
+          "password": {
+            "type": "string",
+            "maxLength": 72,
+            "minLength": 12,
+            "title": "Password"
+          },
+          "display_name": {
+            "type": "string",
+            "maxLength": 50,
+            "minLength": 2,
+            "title": "Display Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "email",
+          "password",
+          "display_name"
+        ],
+        "title": "RegisterRequest",
+        "description": "Request body for POST /api/v1/auth/register (SRS \u00a79.3.1, FR-A-1).\n\nAttributes:\n    email: RFC 5322 email address; normalised to lowercase at the boundary.\n    password: Plain-text password meeting complexity requirements.\n    display_name: Human-readable name (2\u201350 chars, trimmed)."
+      },
+      "UserResponse": {
+        "properties": {
+          "user_id": {
+            "type": "integer",
+            "title": "User Id"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email"
+          },
+          "display_name": {
+            "type": "string",
+            "title": "Display Name"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "user_id",
+          "email",
+          "display_name",
+          "created_at"
+        ],
+        "title": "UserResponse",
+        "description": "Response body for register, login, and /me endpoints (SRS \u00a79.3.3, FR-A-5).\n\nContains only the fields the user themselves provided plus metadata.\nNo PII is added beyond what the user submitted (SRS \u00a7NFR-Priv-2).\n\nAttributes:\n    user_id: The opaque numeric user identifier.\n    email: The user's email address.\n    display_name: The user's display name.\n    created_at: UTC timestamp of account creation."
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}
