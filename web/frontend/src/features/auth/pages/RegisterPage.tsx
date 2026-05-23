@@ -1,27 +1,35 @@
 /**
- * Registration page stub.
+ * Registration page.
  *
- * The registration form (display name, email, password, confirm password,
- * validation, API call) is implemented in Phase 6.
+ * Composes AuthLayout, RegisterForm, and useRegister to provide a fully wired
+ * registration screen. Redirects authenticated users immediately to the app root.
  *
  * Requirements: SRS §3.1 FR-03.
  */
 
 import { Typography } from '@mui/material';
+import { Navigate } from 'react-router-dom';
 import { AuthLayout } from '../../../components/AuthLayout';
+import { useAuth } from '../../../contexts/AuthContext';
+import { RegisterForm } from '../components/RegisterForm';
+import { useRegister } from '../hooks/useRegister';
 
 /**
- * Placeholder registration page rendered at /register.
+ * Renders the registration page at /register.
  */
 export function RegisterPage() {
+  const { isAuthenticated, isLoading } = useAuth();
+  const { submit, status, formError } = useRegister();
+
+  if (isLoading) return null;
+  if (isAuthenticated) return <Navigate to="/" replace />;
+
   return (
     <AuthLayout>
-      <Typography variant="h5" component="h1" gutterBottom>
+      <Typography variant="h5" component="h2" gutterBottom>
         Create Account
       </Typography>
-      <Typography variant="body2" color="text.secondary">
-        Registration form is implemented in Phase 6.
-      </Typography>
+      <RegisterForm onSubmit={submit} status={status} formError={formError} />
     </AuthLayout>
   );
 }

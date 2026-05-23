@@ -59,7 +59,9 @@ describe('App (integration)', () => {
       </FullProviders>,
     );
     // LoginPage renders an h5 heading "Log In" inside AuthLayout.
-    await waitFor(() => expect(screen.getByText(/log in/i)).toBeInTheDocument());
+    await waitFor(() =>
+      expect(screen.getByRole('heading', { name: /log in/i })).toBeInTheDocument(),
+    );
   });
 
   it('navigating to /register renders the Create Account heading', async () => {
@@ -70,7 +72,9 @@ describe('App (integration)', () => {
         </MemoryRouter>
       </FullProviders>,
     );
-    await waitFor(() => expect(screen.getByText(/create account/i)).toBeInTheDocument());
+    await waitFor(() =>
+      expect(screen.getByRole('heading', { name: /create account/i })).toBeInTheDocument(),
+    );
   });
 
   it('navigating to /goals when unauthenticated redirects to /login', async () => {
@@ -111,6 +115,8 @@ describe('App (integration)', () => {
       </FullProviders>,
     );
     // After hydration completes (me() rejects → unauthenticated), redirect occurs
-    await waitFor(() => expect(screen.getByText(/log in/i)).toBeInTheDocument());
+    await waitFor(() =>
+      expect(screen.getByRole('heading', { name: /log in/i })).toBeInTheDocument(),
+    );
   });
 });

@@ -7,6 +7,22 @@ issues were resolved.
 
 ---
 
+## [2026-05-23] Task 11 — Wire LoginPage and RegisterPage
+
+**Change Type:** Feature
+**Scope:** src/features/auth/pages/
+
+**Summary:**
+Rewrote LoginPage and RegisterPage to compose the form components and mutation hooks. Both pages redirect authenticated users to / immediately, and show null during auth hydration. Updated AuthPages tests to use waitFor so they work with the async auth check. Fixed three App integration tests that used getByText(/log in/i) — now the full form renders both a heading and a button with matching text, so the tests were updated to use getByRole('heading') for specificity.
+
+**Rationale:**
+Thin page components keep the wiring clear: the page handles auth-state-based redirects; the form handles submission; the hook handles mutation + error mapping.
+
+**References:**
+- Issue: #13
+
+---
+
 ## [2026-05-23] Task 10 — useLogin, useRegister, useLogout mutations
 
 **Change Type:** Feature
