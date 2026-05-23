@@ -37,18 +37,21 @@ const queryClient = new QueryClient({
   },
 });
 
-const PUBLIC_PATHS = ['/login', '/register'];
-
 installAuthRefreshInterceptor({
   refresh: async () => {
     await authClient.refresh();
   },
   onLogout: () => {
+    // Only hard-redirect when the user had an active session that just expired.
+    // If the query cache has no user yet (null | undefined) we are still in the
+    // initial /me probe — React Router's ProtectedRoute will redirect to
+    // /login?from=<path> on its own, and firing window.location.assign here
+    // would override that redirect and strip the ?from= query parameter.
+    const hadSession =
+      queryClient.getQueryData<{ user_id: number } | null>(['auth', 'me']) !== null &&
+      queryClient.getQueryData<{ user_id: number } | null>(['auth', 'me']) !== undefined;
     queryClient.setQueryData(['auth', 'me'], null);
-    // Only hard-redirect to /login if the user is not already on a public page.
-    // Redirecting unconditionally would interrupt the /me probe that runs on
-    // every initial page load and force /login when visiting /register cold.
-    if (!PUBLIC_PATHS.includes(window.location.pathname)) {
+    if (hadSession) {
       window.location.assign('/login');
     }
   },

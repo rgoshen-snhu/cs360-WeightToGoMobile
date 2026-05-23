@@ -2,13 +2,14 @@
  * Login page.
  *
  * Composes AuthLayout, LoginForm, and useLogin to provide a fully wired
- * login screen. Redirects authenticated users immediately to the app root.
+ * login screen. Redirects authenticated users immediately to the app root
+ * (or to the ?from= destination if present).
  *
  * Requirements: SRS §3.1 FR-01, FR-02.
  */
 
 import { Typography } from '@mui/material';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useSearchParams } from 'react-router-dom';
 import { AuthLayout } from '../../../components/AuthLayout';
 import { useAuth } from '../../../contexts/AuthContext';
 import { LoginForm } from '../components/LoginForm';
@@ -20,9 +21,17 @@ import { useLogin } from '../hooks/useLogin';
 export function LoginPage() {
   const { isAuthenticated, isLoading } = useAuth();
   const { submit, status, formError } = useLogin();
+  const [searchParams] = useSearchParams();
 
   if (isLoading) return null;
-  if (isAuthenticated) return <Navigate to="/" replace />;
+  // Redirect already-authenticated users to the ?from= destination (or the
+  // dashboard).  Using the same destination as useLogin prevents a race where
+  // the page re-renders with isAuthenticated=true after login and overrides the
+  // navigate() call in useLogin.
+  if (isAuthenticated) {
+    const dest = searchParams.get('from') ?? '/';
+    return <Navigate to={dest} replace />;
+  }
 
   return (
     <AuthLayout>
