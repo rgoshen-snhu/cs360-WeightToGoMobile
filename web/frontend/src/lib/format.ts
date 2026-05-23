@@ -44,3 +44,15 @@ export function formatDate(isoDate: string): string {
     timeZone: 'UTC',
   }).format(date);
 }
+
+/**
+ * Format an ISO 8601 observation-date string for display in the weight history.
+ *
+ * Alias for {@link formatDate} with a domain-specific name that makes call
+ * sites in weight-entry components read naturally.
+ *
+ * @param isoDate - An ISO 8601 date string, e.g. '2026-05-22'.
+ */
+export function formatObservationDate(isoDate: string): string {
+  return formatDate(isoDate);
+}

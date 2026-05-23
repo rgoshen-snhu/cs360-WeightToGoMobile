@@ -7,6 +7,23 @@ issues were resolved.
 
 ---
 
+## [2026-05-23 Phase 8 Subtasks 23–26] feat(frontend): add weight schemas, API clients, format helpers, and hooks
+
+**Change Type:** Feature
+**Scope:** Frontend — weight and dashboard features
+
+**Summary:**
+Created `weightEntrySchema` (Zod, 14 tests), `weight-client.ts` (5 API methods), `dashboard-client.ts`, `formatObservationDate` helper, 5 TanStack Query weight hooks (`useWeightEntries`, `useWeightEntry`, `useCreateWeightEntry`, `useUpdateWeightEntry`, `useDeleteWeightEntry`), and `useDashboardSummary`. All mutations invalidate `['weight-entries']` and `['dashboard-summary']` cache keys on success. 181 frontend tests passing at 96.4% coverage (branches 92.15%).
+
+**Rationale:**
+Mutation hooks invalidate both weight-entries and dashboard-summary queries so the dashboard stays consistent after any write without manual refetches (TanStack Query pattern from ADR-0014).
+
+**References:**
+- SRS §10.3, ADR-0014
+- Phase 8 Implementation Plan subtasks 23–26
+
+---
+
 ## [2026-05-23 Phase 8 Subtasks 20–22] feat(dashboard): add dashboard summary slice (FR-D-1)
 
 **Change Type:** Feature

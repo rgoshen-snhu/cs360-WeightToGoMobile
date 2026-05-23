@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { formatDate, formatWeight } from './format';
+import { formatDate, formatObservationDate, formatWeight } from './format';
 
 describe('formatWeight', () => {
   it('formats a weight in kg with one decimal place', () => {
@@ -33,5 +33,15 @@ describe('formatDate', () => {
   it('includes the year in the formatted output', () => {
     const result = formatDate('2026-05-22');
     expect(result).toContain('2026');
+  });
+});
+
+describe('formatObservationDate', () => {
+  it('returns the same value as formatDate for the same input', () => {
+    expect(formatObservationDate('2026-05-22')).toBe(formatDate('2026-05-22'));
+  });
+
+  it('includes the year in the formatted output', () => {
+    expect(formatObservationDate('2026-05-20')).toContain('2026');
   });
 });
