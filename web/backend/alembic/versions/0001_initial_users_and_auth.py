@@ -92,7 +92,7 @@ def upgrade() -> None:
             nullable=False,
         ),
         sa.Column("token_hash", sa.Text(), nullable=False),
-        sa.Column("family_id", postgresql.UUID(as_uuid=False), nullable=False),
+        sa.Column("family_id", sa.UUID(as_uuid=True), nullable=False),
         sa.Column(
             "issued_at",
             sa.DateTime(timezone=True),

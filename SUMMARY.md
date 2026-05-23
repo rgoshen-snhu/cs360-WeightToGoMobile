@@ -7,6 +7,22 @@ issues were resolved.
 
 ---
 
+## [2026-05-22 10:14] Commit Summary
+
+**Change Type:** Fix
+**Scope:** auth/infrastructure/models, alembic/versions/0001
+
+**Summary:**
+Changed `Integer` → `BigInteger().with_variant(Integer(), "sqlite")` on PKs and FK columns in ORM models so PostgreSQL gets `BIGINT` and SQLite gets `INTEGER` (required for rowid aliasing/auto-increment). Changed `UUID(as_uuid=True)` on `family_id` to SQLAlchemy-core `Uuid(as_uuid=True, native_uuid=True)`. Fixed migration's `postgresql.UUID(as_uuid=False)` → `sa.UUID(as_uuid=True)`.
+
+**Rationale:**
+Migration used `BigInteger` for PKs and `postgresql.UUID(as_uuid=False)` while the ORM used `Integer` and `UUID(as_uuid=True)`. This caused spurious `alembic revision --autogenerate` diffs and UUID type mismatches on non-CITEXT engines. PR #27 code review finding C15.
+
+**References:**
+- PR: #27 (C15)
+
+---
+
 ## [2026-05-22 10:13] Commit Summary
 
 **Change Type:** Fix

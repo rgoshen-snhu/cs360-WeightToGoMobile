@@ -13,8 +13,12 @@ from __future__ import annotations
 import uuid
 from datetime import UTC, datetime
 
-from sqlalchemy import UUID, Boolean, DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy import BigInteger, Boolean, DateTime, ForeignKey, Integer, String, Text, Uuid
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+
+# SQLite auto-increments only INTEGER PKs (not BIGINT).  Use BigInteger on
+# PostgreSQL and fall back to Integer on SQLite so tests remain functional.
+_BigInt = BigInteger().with_variant(Integer(), "sqlite")
 
 
 class Base(DeclarativeBase):
@@ -33,7 +37,7 @@ class UserModel(Base):
 
     __tablename__ = "users"
 
-    user_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(_BigInt, primary_key=True, autoincrement=True)
     email: Mapped[str] = mapped_column(Text, nullable=False, unique=True, index=True)
     password_hash: Mapped[str] = mapped_column(Text, nullable=False)
     display_name: Mapped[str] = mapped_column(String(50), nullable=False)
@@ -64,19 +68,21 @@ class RefreshTokenModel(Base):
 
     __tablename__ = "refresh_tokens"
 
-    token_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    token_id: Mapped[int] = mapped_column(_BigInt, primary_key=True, autoincrement=True)
     user_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("users.user_id", ondelete="CASCADE"), nullable=False
+        _BigInt, ForeignKey("users.user_id", ondelete="CASCADE"), nullable=False
     )
     token_hash: Mapped[str] = mapped_column(Text, nullable=False, unique=True)
-    family_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
+    family_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid(as_uuid=True, native_uuid=True), nullable=False
+    )
     issued_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC)
     )
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     replaced_by: Mapped[int | None] = mapped_column(
-        Integer, ForeignKey("refresh_tokens.token_id"), nullable=True
+        _BigInt, ForeignKey("refresh_tokens.token_id"), nullable=True
     )
 
     user: Mapped[UserModel] = relationship("UserModel", back_populates="refresh_tokens")
