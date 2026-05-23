@@ -151,12 +151,20 @@ ability to communicate engineering decisions in writing to multiple
 audiences (engineers, reviewers, stakeholders).
 
 **Outcome 3 (algorithmic principles and trade-offs) — Partial.** Milestone
-Two intentionally defers the algorithm-heavy work to Milestone Three
-(trend smoothing, milestone detection, composite index strategy). The
-cursor-based pagination decision (ADR-0015) is the one M2 contribution to
-this outcome — the trade-offs between offset and cursor pagination, and
-between transparent and opaque cursors, are documented with the chosen
-alternative justified.
+Two intentionally defers most of the algorithm and data-structure work to
+Milestone Three. The M3 backlog, named explicitly in the M2 implementation
+brief (§7 Out of Scope) and the SRS, includes a **sliding-window moving
+average** for trend smoothing on the weight chart (FR-D-2), a
+**milestone-detection algorithm** for goal-progress achievements
+(FR-Ach-2), a **streak-detection algorithm** for consecutive-day logging
+at 7 and 30 days (FR-Ach-3), a **composite-index strategy** for trend
+queries on the time-series table, and **TTL-based server-side caching**
+for the dashboard read model. The M2 contribution to Outcome 3 is the
+**opaque compound cursor for weight-entry pagination** (ADR-0015), where
+the trade-offs between offset and cursor pagination, and between
+transparent and opaque cursors, are documented with the chosen
+alternative justified; the cursor design is intended to generalize to the
+broader time-series pagination work scheduled for M3.
 
 **Outcome 1 (collaborative environments) — Partial.** The ADRs, the code
 review checklist self-application, and the README written for an external
