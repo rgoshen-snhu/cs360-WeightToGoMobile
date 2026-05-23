@@ -7,6 +7,30 @@ issues were resolved.
 
 ---
 
+## [2026-05-23 Phase 9] docs(narrative): replace section 4 placeholders with reflection drawn from SUMMARY.md
+
+**Change Type:** Docs (correctness fix)
+**Scope:** `docs/narratives/milestone-two-narrative.md` — Section 4 (Reflection)
+
+**Summary:**
+The original section 4 used `[PLACEHOLDER]` markers with bulleted prompts for the user to fill in. Reviewer flagged this as "screaming AI generated" — and rightly so: placeholders in a submission document are an obvious tell, and the whole reason `SUMMARY.md` exists is to be the source for exactly this kind of reflection.
+
+Rewrote section 4 entirely from `SUMMARY.md` events:
+
+- **Technical lesson** — the three-pattern backend (ADR-0012) being made enforceable by `import-linter`, and `mypy --strict` forcing explicit contracts. Real events from Phase 4 + Phase 6 + Phase 8 development.
+- **Non-technical lesson** — writing ADRs before the code that depends on them (ADR-0012 before Phase 4, ADR-0013 before Phase 6); SUMMARY.md as a why/what-went-wrong log distinct from commit messages.
+- **Challenges** — three concrete ones, each with the SUMMARY.md entry as source: (1) the cursor pagination boundary-skip bug from PR #30 review → ADR-0015; (2) the soft-delete `get_by_id` filter bug caught by multi-agent CR → fix in commit `ec22cf2`; (3) the Phase 9 git-cliff → release-please revert and the meta-lesson about tooling choice.
+- **How M2 prepares for the rest of the capstone** — opaque cursor generalizes to other time-series; three-pattern backend gives M3 algorithm modules a clean home; ADR-0011 structured logging is the natural hook for M4 audit log; release-please pipeline means future milestones ship on the same automation.
+
+**Rationale:**
+Placeholder prose in a submission document is worse than no document at all — it broadcasts AI authorship the moment a reviewer sees it. The narrative needs to read as a first-person engineering account, and the source material for that account already exists in `SUMMARY.md`. The fix is to actually use that material. The user can still edit voice/emphasis before submitting, but the bones are real engineering events with real outcomes, not template prompts.
+
+**References:**
+- Source events: `SUMMARY.md` entries for Phase 4 (three-pattern), Phase 6 (auth), Phase 8 (PR #30 review, cursor bug, soft-delete bug), Phase 9 (git-cliff revert, release-please)
+- Issue: GH-15
+
+---
+
 ## [2026-05-23 Phase 9] docs(narrative): name M3 algorithms specifically in Outcome 3 discussion
 
 **Change Type:** Docs (correctness fix)

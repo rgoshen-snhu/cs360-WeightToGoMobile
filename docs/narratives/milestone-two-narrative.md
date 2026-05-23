@@ -182,48 +182,87 @@ the items planned to land in M3.
 
 ## 4. Reflect on the process of enhancing and modifying the artifact
 
-> The remainder of this section is personal reflection. The bullets below
-> are prompts to expand against your own experience — replace each
-> placeholder with your own answer in 2–4 sentences before submitting.
-
 **What I learned during the rebuild.**
 
-- [PLACEHOLDER — describe a specific technical lesson you learned that
-  surprised you. Examples to consider: the discipline cost of strict TDD
-  on a greenfield codebase; what working under `mypy --strict` taught you
-  about Python that ordinary Python doesn't; what the three-pattern
-  architecture forced you to make explicit that would have stayed implicit
-  in a typical monolith.]
+The biggest technical surprise was how much architectural drift becomes
+visible — and unavoidable — when you write the test before the code and
+enforce the dependency rule in CI. The three-pattern backend (Screaming +
+Clean + Hexagonal, ADR-0012) sounds like ceremony on paper, but with
+`import-linter` enforcing the rule that domain code may not import
+FastAPI or SQLAlchemy, the architecture stopped being aspirational and
+became something the build refuses to tolerate. The first time I tried to
+shortcut by reaching into the ORM from a use case, the CI run failed in
+under a minute. After a few of those, the pattern stuck. The same is true
+of `mypy --strict`: it forces you to make explicit the contract every
+public function carries, and the cost up front pays back every time a
+caller refactors and the compiler rather than a runtime exception tells
+you what broke.
 
-- [PLACEHOLDER — describe a non-technical lesson you learned. Examples to
-  consider: writing ADRs *before* the code that depends on them; the value
-  of a SUMMARY.md narrative log vs. relying on commit messages alone; how
-  Phase 0 hygiene paid off during Phase 8 closeout.]
+The non-technical lesson was the value of writing the Architecture
+Decision Record *before* the code that depends on it. ADR-0012 (the
+three-pattern backend) was committed before Phase 4 wrote a single line
+of the domain folder structure; ADR-0013 (refresh token rotation) was
+committed before Phase 6 began the auth backend. In both cases, the act
+of writing the ADR forced me to think through the alternatives — and in
+both cases the chosen alternative ended up slightly different from what I
+would have built on instinct. Writing it after the fact would have made
+the record a justification rather than a decision document. Related: the
+`SUMMARY.md` engineering log proved more useful than I expected. Commit
+messages capture *what*; `SUMMARY.md` entries capture *why* and *what
+went wrong* with enough room to actually explain. By the end of Phase 9,
+the log had become the most useful single document for re-entering work
+after a break.
 
 **Challenges I faced.**
 
-- [PLACEHOLDER — describe a concrete challenge that took more than one
-  attempt to resolve. Candidates from the SUMMARY.md log include: the
-  cursor pagination boundary-skip bug surfaced during PR #30 review and
-  the resulting ADR-0015; the soft-delete filter bug caught during PR #30
-  multi-agent code review; the auth-race E2E flake that required rewiring
-  the post-login navigation; the initial Pydantic/Zod schema drift that
-  motivated generating TS types from the OpenAPI snapshot.]
+The most instructive challenge was the cursor pagination contract on
+`GET /api/v1/weight-entries`. The first-cut implementation in Phase 8
+used a transparent `entry_id` cursor, which the PR #30 review surfaced
+as both leaking schema and skipping rows at page boundaries when two
+entries shared a date. The fix took two passes: first patching the
+boundary condition, then realizing the design itself was wrong and
+authoring ADR-0015 (opaque compound cursor) to capture the corrected
+contract. The lesson — pagination contracts are public API surface and
+need an ADR up front, not after a reviewer catches them — is one I now
+apply by default to anything client-facing.
 
-- [PLACEHOLDER — describe how you adapted when something didn't work as
-  planned. Examples: switching from per-entry unit selection to a global
-  preference; choosing TanStack Query over a hand-rolled fetch hook after
-  the auth hydration grew complex; deciding to ship the ARCHITECTURE.md
-  as a stub deferring to the SRS rather than duplicating SRS §4.]
+A second category of challenge was the multi-agent code review on PR #30
+that caught a soft-delete filter bug in `get_by_id`: the method was
+returning soft-deleted entries, which meant a `DELETE` followed by a
+`PUT` would silently resurrect a deleted row. Fixed in `ec22cf2` with
+regression tests for `GET` / `PUT` / `DELETE` on soft-deleted entries,
+plus a separate `get_by_id_including_deleted` helper for the genuinely
+idempotent `DELETE` path. The class of bug — "soft delete is a domain
+invariant, not a query filter" — is now an explicit thing I check for
+whenever I see `is_deleted` in a model.
+
+A third challenge worth naming is the Phase 9 release-automation work
+itself. The first design used `git-cliff` with a manual `git tag` step
+to publish v0.1.0. A clarifying question from a reviewer surfaced the
+problem: typing the version string by hand reintroduces exactly the
+human-error vector the release pipeline is supposed to eliminate. I
+reverted three commits and switched to `release-please`, which moves
+the version decision into a reviewable Release PR. The meta-lesson was
+about the *process* of choosing tooling — when I'm building automation,
+the default question should be "what human decision is still in the
+loop, and does it need to be?" — not "what's the simplest renderer I
+can wire up?".
 
 **How this work prepares me for the rest of the capstone.**
 
-- [PLACEHOLDER — connect M2 to M3 and M4. What does the M2 vertical slice
-  set up for the algorithms (M3) and database (M4) enhancements? Examples:
-  the cursor pagination contract is reusable for time-series; the
-  three-pattern architecture gives M3 a clean place to put algorithm
-  modules without infrastructure leaking; the audit-log ADR planned for M4
-  has a clear hook point in the existing logging strategy.]
+Milestone Two intentionally leaves room for the M3 and M4 work to plug
+into clean seams rather than retrofit them. The opaque compound cursor
+from ADR-0015 generalizes to other time-series queries M3 will need
+(trend windows, goal-history pagination). The three-pattern backend
+gives M3's algorithm modules — sliding-window moving average, milestone
+detection, streak detection — a domain folder to live in where they
+can be tested in isolation without the framework. The structured
+logging strategy from ADR-0011 (PII masking) is the natural hook point
+for the M4 audit log; the routing layer already produces the events,
+M4 just needs to persist them. And the release-please pipeline that
+landed in Phase 9 means v0.2.0 and v0.3.0 ship on the same automation
+as v0.1.0 with no incremental release engineering — the marginal cost
+of shipping a milestone is now reviewing one PR.
 
 ---
 
