@@ -7,6 +7,23 @@ issues were resolved.
 
 ---
 
+## [2026-05-23 Phase 8 Subtasks 27–30] feat(frontend): add weight and dashboard UI components
+
+**Change Type:** Feature
+**Scope:** Frontend — weight and dashboard components
+
+**Summary:**
+Created `ConfirmDeleteDialog` (MUI Dialog with focus trap), `WeightEntryTable` (accessible table with Edit links and Delete buttons), `WeightEntryForm` (React Hook Form + zodResolver, MUI v6 slotProps, notes counter), and three dashboard cards (`LatestEntryCard`, `TotalEntriesCard`, `GoalProgressPlaceholderCard`). 203 frontend tests passing.
+
+**Rationale:**
+Using `slotProps.htmlInput` instead of deprecated `inputProps` for MUI v6 compatibility. The zodResolver type mismatch from `z.coerce.number()` is suppressed with `as any` — this is a known TypeScript/zod/RHF interaction limitation and does not affect runtime behavior.
+
+**References:**
+- SRS §10.3, §NFR-A-1..5
+- Phase 8 Implementation Plan subtasks 27–30
+
+---
+
 ## [2026-05-23 Phase 8 Subtasks 23–26] feat(frontend): add weight schemas, API clients, format helpers, and hooks
 
 **Change Type:** Feature
