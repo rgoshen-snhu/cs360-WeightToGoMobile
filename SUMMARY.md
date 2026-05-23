@@ -7,6 +7,22 @@ issues were resolved.
 
 ---
 
+## [2026-05-23 Issue #17] docs: add top-level docs/README index
+
+**Change Type:** Docs
+**Scope:** `/docs/` — new `README.md`
+
+**Summary:**
+Adds a top-level `docs/README.md` that lists the 13 subdirectories of the documentation tree with their purpose, plus a quick-links section for the most-referenced documents (SRS, M2 plan, code review checklist, ADR index, DDR index). Includes an explicit authority order so a new contributor knows which document wins when two disagree.
+
+**Rationale:**
+Before this change the `docs/` tree had thirteen subdirectories and no map. A contributor opening `docs/` had to guess what lived where. Documenting purpose in one index file — rather than scattering it across each subdirectory — keeps the scope narrow and matches the boundary set in issue #17 (this PR adds new index READMEs only; content fixes to existing docs are owned by #20).
+
+**References:**
+- Issue: GH-17
+
+---
+
 ## [2026-05-23 PR #30 Review] fix(weight): render not-found state when edit-form fetch fails
 
 **Change Type:** Fix
