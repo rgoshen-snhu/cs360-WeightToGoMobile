@@ -13,7 +13,7 @@ export default defineConfig({
   webServer: [
     {
       command: `cd ../backend && uv run uvicorn weighttogo.main:app --port ${API_PORT}`,
-      url: `http://localhost:${API_PORT}/api/v1/auth/me`,
+      url: `http://localhost:${API_PORT}/health`,
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,
     },
