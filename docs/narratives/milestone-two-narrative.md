@@ -147,8 +147,8 @@ place from the first commit, documented in ADRs, and verified by tests.
 The SRS, the ADRs, the API documentation auto-generated from the OpenAPI
 schema, the README, the CONTRIBUTING guide, the ARCHITECTURE summary, the
 documentation index, and this narrative collectively demonstrate the
-ability to communicate engineering decisions in writing to multiple
-audiences (engineers, reviewers, stakeholders).
+ability to communicate engineering decisions in writing for multiple
+audiences (course instructors, future maintainers, portfolio readers).
 
 **Outcome 3 (algorithmic principles and trade-offs) — Partial.** Milestone
 Two intentionally defers most of the algorithm and data-structure work to
@@ -185,18 +185,18 @@ the items planned to land in M3.
 **What I learned during the rebuild.**
 
 The biggest technical surprise was how much architectural drift becomes
-visible — and unavoidable — when you write the test before the code and
-enforce the dependency rule in CI. The three-pattern backend (Screaming +
-Clean + Hexagonal, ADR-0012) sounds like ceremony on paper, but with
-`import-linter` enforcing the rule that domain code may not import
+visible — and unavoidable — when I wrote the test before the code and
+enforced the dependency rule in CI. The three-pattern backend (Screaming +
+Clean + Hexagonal, ADR-0012) sounded like ceremony on paper, but once I
+had `import-linter` enforcing the rule that domain code may not import
 FastAPI or SQLAlchemy, the architecture stopped being aspirational and
-became something the build refuses to tolerate. The first time I tried to
+became something the build refused to tolerate. The first time I tried to
 shortcut by reaching into the ORM from a use case, the CI run failed in
-under a minute. After a few of those, the pattern stuck. The same is true
-of `mypy --strict`: it forces you to make explicit the contract every
-public function carries, and the cost up front pays back every time a
-caller refactors and the compiler rather than a runtime exception tells
-you what broke.
+under a minute. After a few of those, the pattern stuck. The same proved
+true of `mypy --strict`: it forced me to make explicit the contract every
+public function carries, and the cost up front paid back every time I
+refactored a caller and the compiler rather than a runtime exception
+told me what broke.
 
 The non-technical lesson was the value of writing the Architecture
 Decision Record *before* the code that depends on it. ADR-0012 (the
@@ -223,8 +223,8 @@ entries shared a date. The fix took two passes: first patching the
 boundary condition, then realizing the design itself was wrong and
 authoring ADR-0015 (opaque compound cursor) to capture the corrected
 contract. The lesson — pagination contracts are public API surface and
-need an ADR up front, not after a reviewer catches them — is one I now
-apply by default to anything client-facing.
+need an ADR up front, not after a code review catches them — is one I
+now apply by default to anything client-facing.
 
 A second category of challenge was the multi-agent code review on PR #30
 that caught a soft-delete filter bug in `get_by_id`: the method was
@@ -238,15 +238,15 @@ whenever I see `is_deleted` in a model.
 
 A third challenge worth naming is the Phase 9 release-automation work
 itself. The first design used `git-cliff` with a manual `git tag` step
-to publish v0.1.0. A clarifying question from a reviewer surfaced the
+to publish v0.1.0. A closeout review of the design surfaced the
 problem: typing the version string by hand reintroduces exactly the
 human-error vector the release pipeline is supposed to eliminate. I
 reverted three commits and switched to `release-please`, which moves
 the version decision into a reviewable Release PR. The meta-lesson was
-about the *process* of choosing tooling — when I'm building automation,
-the default question should be "what human decision is still in the
-loop, and does it need to be?" — not "what's the simplest renderer I
-can wire up?".
+about the *process* of choosing tooling — when I am building
+automation, the default question should be "what human decision is still
+in the loop, and does it need to be?" — not "what is the simplest
+renderer I can wire up?".
 
 **How this work prepares me for the rest of the capstone.**
 

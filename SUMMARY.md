@@ -7,6 +7,32 @@ issues were resolved.
 
 ---
 
+## [2026-05-23 Phase 9] docs(narrative): fix first-person voice; remove implied second-person references
+
+**Change Type:** Docs (voice correction)
+**Scope:** `docs/narratives/milestone-two-narrative.md`
+
+**Summary:**
+Audited the narrative for any phrasing that implied a second person on a solo project. Five fixes across sections 2 and 4:
+
+1. **§2 Outcome 2 audience list** — "audiences (engineers, reviewers, stakeholders)" → "audiences (course instructors, future maintainers, portfolio readers)". Concrete roles instead of the ambiguous "reviewers" which read as implied peer reviewers.
+2. **§4 "What I learned" first paragraph** — three generic "you" instances replaced with first-person "I" ("when you write the test" → "when I wrote the test"; "it forces you to make explicit" → "it forced me to make explicit"; "tells you what broke" → "told me what broke"). Past tense throughout for consistency with the reflective frame.
+3. **§4 cursor pagination challenge** — "not after a reviewer catches them" → "not after a code review catches them". Keeps the activity (code review) and removes the implied other person.
+4. **§4 release-automation challenge** — "A clarifying question from a reviewer surfaced the problem" → "A closeout review of the design surfaced the problem". Same principle: the review activity is real, the "reviewer" framing as a separate person is not.
+5. Minor: "when I'm building" → "when I am building" and "what's the simplest" → "what is the simplest" inside the same paragraph for consistent formal voice.
+
+Rubric-question headings ("Justify the inclusion of the artifact in **your** ePortfolio", "Did **you** meet the course outcomes **you** planned to meet") are kept as-is because they are literal quotes from the rubric prompts — the answers below are first-person.
+
+**Rationale:**
+The capstone is a solo project; the narrative is a personal reflection. Phrases like "a reviewer caught X" or "you write the test before the code" either falsely imply a second person on the project or drift out of first-person voice. Either way, they undermine the document's credibility as a personal account. The fix is mechanical (replace second-person and ambiguous role nouns with first-person and specific roles) but the principle generalizes — code reviews on this repo are activities I drove (self-review against the CS 499 checklist; multi-agent reviews at my direction), not findings from external reviewers.
+
+**Memory saved:** the pattern is now captured for M3, M4, and Final narratives as `feedback-narrative-voice-first-person-singular`.
+
+**References:**
+- Issue: GH-15
+
+---
+
 ## [2026-05-23 Phase 9] docs(srs): create v2 baseline; restore v1 to pre-M2 state
 
 **Change Type:** Docs (process correction + new version)
