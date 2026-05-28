@@ -70,4 +70,23 @@ describe('WeightEntryTable', () => {
     renderTable({ entries: [] });
     expect(screen.getByText(/no entries/i)).toBeInTheDocument();
   });
+
+  // F5 / SRS NFR-A-5: interactive targets must be at least 44 by 44 CSS pixels.
+  // The action controls must be rendered as full Buttons with a visible text
+  // label (not an icon-only IconButton size="small"), with sx={{ minHeight: 44 }}.
+  it('renders Edit action as a Button with min-height 44px', () => {
+    renderTable();
+    const editLink = screen.getAllByRole('link', { name: /edit entry from/i })[0];
+    expect(editLink).toBeDefined();
+    // MUI Button compiles minHeight into inline styles via the sx prop, so
+    // toHaveStyle reads it directly from the rendered element.
+    expect(editLink).toHaveStyle({ minHeight: '44px' });
+  });
+
+  it('renders Delete action as a Button with min-height 44px', () => {
+    renderTable();
+    const deleteButton = screen.getAllByRole('button', { name: /delete entry from/i })[0];
+    expect(deleteButton).toBeDefined();
+    expect(deleteButton).toHaveStyle({ minHeight: '44px' });
+  });
 });
