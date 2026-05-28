@@ -7,6 +7,28 @@ issues were resolved.
 
 ---
 
+## [2026-05-28 09:00] F5: weight table action controls meet 44 px target size
+
+**Change Type:** Fix (accessibility)
+**Scope:** `web/frontend` — `src/features/weight/components/WeightEntryTable.tsx`, its component test, new Playwright spec `e2e/weight-target-size.spec.ts`, DDR-0004
+
+**Summary:**
+Converted the Edit/Delete row controls in `WeightEntryTable` from `IconButton size="small"` (with a span-label hack inside a Tooltip) to MUI `Button` with `startIcon` and `sx={{ minHeight: 44 }}`. Followed the Red→Green cycle: extended `WeightEntryTable.test.tsx` with two `toHaveStyle({ minHeight: '44px' })` assertions (one per control) and added a new Playwright spec asserting `boundingBox().width/height >= 44` after a real render. Both failed before the implementation change (component test: missing `minHeight`; Playwright: actual height ≈ 35.7 px on the IconButton). After replacing the IconButton/Tooltip pairs with outlined Buttons, both gates went green. Dropped the now-redundant Tooltip wrappers and inline `<span style={{ marginLeft: 4 }}>` label hack. Existing E2E selectors (`weight-edit.spec.ts`, `weight-delete.spec.ts`) keep working because the `aria-label` strings are unchanged.
+
+**Rationale:**
+SRS NFR-A-5 requires all interactive targets to be at least 44 by 44 CSS pixels, and the M2 Web App Quality Review (`docs/standards/M2_WEB_APP_QUALITY.md` §5) flagged these specific controls as a likely violation that no automated check was catching (axe scans cover critical WCAG only, not target sizing). Choosing `Button` + `startIcon` over the alternative ("keep IconButton with `sx={{ minWidth: 44, minHeight: 44 }}`") is documented in DDR-0004: the labeled Button removes the discoverability problem that motivated the original span-label hack, collapses three indirections (icon, span, tooltip) into one idiomatic component, and is the pattern published by MUI for labeled icon controls.
+
+**Bug Fix Context:**
+Root cause was MUI's `IconButton size="small"` preset rendering at ~30 px (measured 35.7 px in the affected layout), below the 44 px floor. The fix replaces the component entirely rather than adding `sx` overrides to the small IconButton, because the previous design was already trying to show a visible label and the Tooltip-plus-span workaround indicates the original component choice was wrong.
+
+**References:**
+- SRS NFR-A-5: `docs/specs/WeighToGo_Web_SRS_v2.md`
+- M2 Web App Quality Review §5: `docs/standards/M2_WEB_APP_QUALITY.md`
+- DDR-0004: `docs/ddr/0004-weight-table-action-button-conversion.md`
+- Issue: GH-34
+
+---
+
 ## [2026-05-23 Phase 9] docs: documentation hardening pass across active project docs
 
 **Change Type:** Docs (consistency + completeness)
