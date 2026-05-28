@@ -26,6 +26,31 @@ The plan was authored alongside the quality-review doc on the abandoned branch b
 
 ---
 
+## [2026-05-28 19:00 UTC] docs(F6): address PR #41 review — fix React/MUI version drift + FR-A mapping (GH-34)
+
+**Change Type:** Docs (precision fixes on the F6 drift cleanup itself)
+**Scope:** `docs/specs/WeighToGo_Web_SRS_v2.md`, `web/frontend/src/features/auth/pages/LoginPage.tsx`, `web/frontend/src/features/auth/pages/RegisterPage.tsx`, `SUMMARY.md`
+
+**Summary:**
+Three accepted fixes from the PR #41 review:
+
+1. **`WeighToGo_Web_SRS_v2.md` architecture diagram (Findings 1 + 2).** The block at lines 183–184 read `React 18 + TypeScript` and `Material UI v6`; both stale against `web/frontend/package.json` (`react@^19.2.6`, `@mui/material@^9.0.1`). The F6 audit grep was scoped to `FR-0[0-9]|react-router-dom v6|React Router v6` and caught the `React Router v6` line on 185 but missed the sibling version strings in the same diagram. Updated to `React 19 + TypeScript` and `Material UI v9` so the architecture overview matches the manifest a reader would cross-check.
+2. **`LoginPage.tsx` FR identifier (Finding 3).** Comment cited `SRS §6.1 FR-A-2, FR-A-3`. Mechanical translation error from the `FR-02 → FR-A-3` mapping during F6 — SRS v2 §6.1 FR-A-3 is *User Logout*, which `LoginPage` does not implement. The page implements login (FR-A-2) plus a redirect-when-already-authenticated guard (lines 21–24), which maps to FR-A-5 *Authenticated Session State*. Corrected to `FR-A-2, FR-A-5`.
+3. **`RegisterPage.tsx` FR identifier (consistency).** Same mechanical-translation class of bug, not flagged in the review: `RegisterPage` implements the same redirect-when-already-authenticated pattern (lines 21, 25) but cited only `FR-A-1`. Added `FR-A-5` so the page-comment traceability matches its actual implementation.
+
+**Pushback on Finding 4 (handled at right altitude via separate PR).**
+Reviewer flagged that `docs/plans/2026-05-27-issue-34-m2-web-quality-remediation-plan.md` does not resolve in the repo (only on the abandoned `feature/issue-34-m2-web-quality-remediation` branch, commit `32fca2f`). The same dead reference already exists on `main` in the F1 and F4 SUMMARY entries — F6 is not introducing the issue, it's repeating an existing pattern. Same systemic class of problem the M2 quality doc had, which PR #43 fixed by landing the file as a separate small docs PR. Opening a parallel PR ("PR 0b") that lands the remediation plan from commit `32fca2f` to `main` resolves F6's reference and the existing F1/F4 references simultaneously — keeps F6's reference as the accurate cite rather than papering over the citation with a less-relevant pointer.
+
+**Rationale:**
+Findings 1 and 2 are exactly the drift class F6 was created to clean up; missing them inside the very diagram block F6 edited would have left an obvious internal inconsistency in the same hunk. Finding 3 caught a semantic mismapping — the F-A-* identifiers in SRS v2 are name-tied to specific behaviors (`FR-A-3` = Logout), so the mechanical `FR-02 → FR-A-3` translation produced a reference that pointed at the wrong responsibility. Both are fast surgical fixes that should land with F6 rather than as follow-ups.
+
+**References:**
+- Issue: GH-34
+- PR: #41 review findings (1, 2, 3 addressed in this commit; 4 addressed via separate PR landing the remediation plan)
+- SRS v2 §6.1 FR-A-2 (Login), FR-A-5 (Authenticated Session State)
+
+---
+
 ## [2026-05-28 18:05 UTC] docs(quality): add M2 Web App Quality Review documentation (GH-34)
 
 **Change Type:** Docs (baseline; closes a known dead-reference gap)
@@ -2677,3 +2702,19 @@ Addressed 9 of 13 PR review comments (pushed back on 4). Changes: add inflightRe
 **References:**
 - Issue: GH-34
 - PR #38 review comments
+
+## [2026-05-28 16:46] Commit Summary
+
+**Change Type:** Docs
+**Scope:** Code comments + SRS prose — version drift cleanup (F6 / GH-34)
+
+**Summary:**
+Realigned eight documentation references to current identifiers. Code-comment FR-NN identifiers (Android-era naming, predating SRS v2's domain-prefixed scheme) were updated to FR-A-*, FR-G-*, FR-Ach-*, and FR-P-* in seven frontend files: `RegisterForm.tsx` (FR-03 → FR-A-1), `LoginForm.tsx` (FR-01 → FR-A-2), `LoginPage.tsx` (FR-01, FR-02 → FR-A-2, FR-A-3), `RegisterPage.tsx` (FR-03 → FR-A-1), `GoalsPlaceholderPage.tsx` (FR-07–FR-10 → FR-G-1–FR-G-5), `AchievementsPlaceholderPage.tsx` (FR-11–FR-12 → FR-Ach-1–FR-Ach-4), and `SettingsPlaceholderPage.tsx` (FR-13–FR-15 → FR-P-1–FR-P-3). In `docs/specs/WeighToGo_Web_SRS_v2.md`, three prose references to "React Router v6" updated to "React Router v7" (lines 185, 328, 1281) — the codebase has been on `react-router-dom@^7.15.1` since the M2 frontend bootstrap. Audit grep returned zero in-scope residual hits; three residuals in the frozen `WeighToGo_Web_SRS_v1.md` baseline were intentionally left untouched.
+
+**Rationale:**
+M2 quality review flagged code/spec drift as the sixth blocking finding (promoted from "follow-up" to formal F6 in the remediation plan). The drift erodes traceability: a reader following an `FR-NN` reference from a JSDoc block to the SRS finds no matching identifier, breaking the round-trip review path used during self-audit. The fix is mechanical (verified each FR-A-*/G-*/Ach-*/P-* mapping against SRS v2 §6.1–6.6 actual headings before applying) and surgical (eight files, ten line edits, zero behavioral changes).
+
+**References:**
+- Issue: GH-34
+- Plan: `docs/plans/2026-05-27-issue-34-m2-web-quality-remediation-plan.md` §4.6
+- SRS v2 §6.1–6.6 (current FR identifier scheme)

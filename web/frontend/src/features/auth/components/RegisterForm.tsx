@@ -20,7 +20,7 @@ export interface RegisterFormProps {
  * `onSubmit`. The parent supplies status and any server-level error to render
  * as a form-level alert.
  *
- * Requirements: SRS §3.1 FR-03.
+ * Requirements: SRS §6.1 FR-A-1.
  */
 export function RegisterForm({ onSubmit, status, formError }: RegisterFormProps) {
   const {

@@ -180,9 +180,9 @@ The system is a three-tier web application with a single-page application fronte
 +----------------------------+         +----------------------------+         +----------------------+
 |    Browser (Frontend)      |  HTTPS  |    FastAPI Application     |   TCP   |  PostgreSQL 16+      |
 |                            | <-----> |                            | <-----> |                      |
-|  React 18 + TypeScript     |  JSON   |  Python 3.12 + FastAPI     |   SSL   |  Strict schema       |
-|  Material UI v6            |         |  Pydantic v2 + SQLAlchemy  |         |  CHECK constraints   |
-|  React Router v6           |         |  Alembic for migrations    |         |  Foreign keys        |
+|  React 19 + TypeScript     |  JSON   |  Python 3.12 + FastAPI     |   SSL   |  Strict schema       |
+|  Material UI v9            |         |  Pydantic v2 + SQLAlchemy  |         |  CHECK constraints   |
+|  React Router v7           |         |  Alembic for migrations    |         |  Foreign keys        |
 |  Vite build tooling        |         |  bcrypt + JWT auth         |         |                      |
 +----------------------------+         +----------------------------+         +----------------------+
 ```
@@ -325,7 +325,7 @@ This blend is documented in `[ADR-0012]` (planned). The decision builds on the e
 
 ```
 +-----------------------------+
-|        AppRouter            |   React Router v6 with code-split routes
+|        AppRouter            |   React Router v7 with code-split routes
 +-------------+---------------+
               |
    +----------+----------+
@@ -1278,7 +1278,7 @@ A snapshot of the OpenAPI document is committed to `/docs/api/openapi-snapshot.j
 
 ### 10.1 Routing
 
-The frontend uses React Router v6 with declarative route definitions and code-split routes. This design directly replaces the hardcoded if-elseif navigation chain in the Android predecessor (lines 311-333 of `MainActivity.java`), where adding a new screen required modifying the central dispatcher.
+The frontend uses React Router v7 with declarative route definitions and code-split routes. This design directly replaces the hardcoded if-elseif navigation chain in the Android predecessor (lines 311-333 of `MainActivity.java`), where adding a new screen required modifying the central dispatcher.
 
 #### 10.1.1 Public Routes
 
