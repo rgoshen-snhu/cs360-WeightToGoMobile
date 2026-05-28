@@ -24,7 +24,7 @@ export interface LoginFormProps {
  * The parent supplies status and any server-level error to render as a
  * form-level alert.
  *
- * Requirements: SRS §3.1 FR-01.
+ * Requirements: SRS §6.1 FR-A-2.
  */
 export function LoginForm({ onSubmit, status, formError }: LoginFormProps) {
   const {

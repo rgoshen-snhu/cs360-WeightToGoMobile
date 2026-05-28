@@ -2,7 +2,7 @@
  * Achievements placeholder page — displayed while the Achievements feature is
  * pending implementation in Milestone 3.
  *
- * Requirements: SRS §3.1 FR-11 through FR-12 (achievements and badges).
+ * Requirements: SRS §6.4 FR-Ach-1 through FR-Ach-4 (achievements and badges).
  */
 
 import { Box, Paper, Typography } from '@mui/material';

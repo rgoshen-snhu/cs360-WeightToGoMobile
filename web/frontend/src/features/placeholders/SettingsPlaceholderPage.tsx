@@ -2,7 +2,7 @@
  * Settings placeholder page — displayed while the Settings feature is pending
  * implementation in Milestone 3.
  *
- * Requirements: SRS §3.1 FR-13 through FR-15 (user preferences).
+ * Requirements: SRS §6.6 FR-P-1 through FR-P-3 (user preferences).
  */
 
 import { Box, Paper, Typography } from '@mui/material';

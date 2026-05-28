@@ -2,7 +2,7 @@
  * Goals placeholder page — displayed while the Goals feature is pending
  * implementation in Milestone 3.
  *
- * Requirements: SRS §3.1 FR-07 through FR-10 (goal management).
+ * Requirements: SRS §6.3 FR-G-1 through FR-G-5 (goal management).
  */
 
 import { Box, Paper, Typography } from '@mui/material';
