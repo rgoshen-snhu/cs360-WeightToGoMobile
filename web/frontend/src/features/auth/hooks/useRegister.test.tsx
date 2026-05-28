@@ -68,23 +68,19 @@ describe('useRegister', () => {
     );
   });
 
-  it('sets generic formError on 409 to avoid email-existence disclosure', async () => {
-    vi.spyOn(authClient, 'register').mockRejectedValueOnce(new ApiError(409, 'Conflict'));
-    const { result } = renderHook(() => useRegister(), { wrapper });
-    result.current.submit(validValues, vi.fn());
-    await waitFor(() =>
-      expect(result.current.formError).toBe('The account could not be created with those details.'),
-    );
-  });
-
-  it('sets generic creation-failure formError when ApiError status is not 409', async () => {
-    vi.spyOn(authClient, 'register').mockRejectedValueOnce(new ApiError(500, 'Server error'));
-    const { result } = renderHook(() => useRegister(), { wrapper });
-    result.current.submit(validValues, vi.fn());
-    await waitFor(() =>
-      expect(result.current.formError).toBe('The account could not be created with those details.'),
-    );
-  });
+  it.each([409, 401, 423, 429, 500, 503])(
+    'collapses ApiError %i into the non-disclosive form-level message (ADR-0010)',
+    async (status) => {
+      vi.spyOn(authClient, 'register').mockRejectedValueOnce(new ApiError(status, 'x'));
+      const { result } = renderHook(() => useRegister(), { wrapper });
+      result.current.submit(validValues, vi.fn());
+      await waitFor(() =>
+        expect(result.current.formError).toBe(
+          'The account could not be created. Please try again.',
+        ),
+      );
+    },
+  );
 
   it('sets generic formError on unexpected network error', async () => {
     vi.spyOn(authClient, 'register').mockRejectedValueOnce(new Error('Network error'));

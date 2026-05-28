@@ -35,7 +35,7 @@ export function useRegister() {
         return;
       }
       if (error instanceof ApiError) {
-        setFormError('The account could not be created with those details.');
+        setFormError('The account could not be created. Please try again.');
       } else {
         setFormError('Something went wrong. Please try again.');
       }
