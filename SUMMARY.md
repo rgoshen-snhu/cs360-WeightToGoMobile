@@ -7,6 +7,35 @@ issues were resolved.
 
 ---
 
+## [2026-05-28 12:42 UTC] fix(F4): remove email-existence disclosure on registration (GH-34)
+
+**Change Type:** Fix (security — information disclosure)
+**Scope:** `web/frontend/src/features/auth/hooks/useRegister.ts`, `web/frontend/src/features/auth/hooks/useRegister.test.tsx`
+
+**Summary:**
+Collapsed the HTTP 409 branch in the `useRegister` hook's `onError` handler into the generic `ApiError` branch. Previously a 409 response from `POST /api/auth/register` set `formError` to `"An account with this email already exists."`, which confirmed account existence to any client willing to probe the endpoint with arbitrary emails. The hook now sets a uniform message — `"The account could not be created with those details."` — for any `ApiError`, regardless of HTTP status, so the UI no longer distinguishes between "email is already registered" and any other server-side rejection of the registration request. Unexpected non-`ApiError` (e.g. network) failures keep the existing `"Something went wrong. Please try again."` fallback.
+
+Three commits, TDD discipline:
+
+1. **`test(F4)`** — updated the two `useRegister.test.tsx` cases that asserted the old disclosure wording. The 409-conflict test now expects the generic `"The account could not be created with those details."` string, and the previously-named "ApiError status is not 409" test was renamed and tightened to assert the same string (replacing the prior loose `/something went wrong/i` regex match). Verified both updated assertions failed against the old implementation before writing the fix.
+2. **`fix(F4)`** — replaced the `if (error.status === 409) … else …` two-branch block inside `if (error instanceof ApiError)` with a single `setFormError('The account could not be created with those details.')` call. All 6 `useRegister` tests pass; full frontend suite remains green at 222/222.
+
+**Rationale:**
+ADR-0010 (Generic Authentication Error Policy) requires that every authentication failure — including `POST /auth/register` returning 409 for duplicate email — surface a generic, non-disclosive response that does not confirm whether a specific email address exists in the system. SRS FR-A-1 (registration) and FR-A-9 (auth security posture) extend that requirement to the rendered UI. The backend already complies (returns 409 with a generic body), but the registration form's client-side handler was inspecting the 409 status and substituting the human-readable disclosure "An account with this email already exists." — re-introducing the enumeration vector at the UI layer that the backend policy had just closed at the protocol layer. The fix collapses the special-case branch so the rendered form gives the same feedback for "email already in use", a transient 5xx, and any other API-level rejection. The non-`ApiError` branch is left alone because the user-visible distinction between "the API rejected the request" and "we never reached the API" is genuinely useful and does not leak account existence.
+
+This is an ADR-0010 compliance fix, not a new architectural decision, so no new ADR was authored.
+
+**Bug Fix Context:**
+Root cause — the client treated a 409 from `POST /api/auth/register` as a specific user-facing condition ("email already in use") and rendered a message that confirmed that condition. The HTTP status is the disclosure vector at the protocol layer; the UI message is the disclosure vector at the user layer. Closing the UI vector restores the property that an attacker cannot enumerate registered emails by submitting candidate addresses to the registration form and watching the error wording change.
+
+**References:**
+- Issue: GH-34 (M2 web quality remediation)
+- Plan: `docs/plans/2026-05-27-issue-34-m2-web-quality-remediation-plan.md` §4.4
+- ADR: ADR-0010 (Generic Authentication Error Policy)
+- SRS: §FR-A-1 (Registration), §FR-A-9 (Auth security posture)
+
+---
+
 ## [2026-05-23 Phase 9] docs: documentation hardening pass across active project docs
 
 **Change Type:** Docs (consistency + completeness)
