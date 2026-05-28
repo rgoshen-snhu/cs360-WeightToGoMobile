@@ -25,7 +25,9 @@ Create a new `CsrfOriginRefererMiddleware` at `web/backend/src/weighttogo/interf
 | `GET`, `HEAD`, `OPTIONS` (safe) | Pass through unconditionally — no CSRF risk |
 | `POST`, `PUT`, `DELETE`, `PATCH` (unsafe) | Validate `Origin` header; if absent, fall back to extracting the origin from `Referer`; if neither is present or the value does not match an allowed origin, return `403` |
 
-**Allowed-origin list:** Parsed directly from `Settings.cors_allowed_origins` (the same comma-separated string consumed by `CORSMiddleware`). Single source of truth — CORS and CSRF cannot drift out of sync.
+**Allowed-origin list:** The union of two sets:
+1. Origins parsed from `Settings.cors_allowed_origins` (the same comma-separated string consumed by `CORSMiddleware`) — single source of truth for configured allowed frontends.
+2. The API's own origin, derived from the request's scheme and netloc (`request.url.scheme + "://" + request.url.netloc`) — permits same-origin flows such as Swagger UI at `/api/docs` posting back to the same host.
 
 **Error response format:** RFC 7807 `application/problem+json`:
 ```json
@@ -43,6 +45,9 @@ Create a new `CsrfOriginRefererMiddleware` at `web/backend/src/weighttogo/interf
 
 **Why check Origin before Referer?**
 `Origin` is the canonical header for cross-origin checks — it is always present on cross-origin requests and contains only the scheme + host + port without path. `Referer` is a fallback for environments where `Origin` may be stripped (some proxies, certain browser privacy settings), but it requires extracting the origin portion from a full URL. Checking `Origin` first and falling back to `Referer` maximises coverage.
+
+**Why include the API's own origin in the allowed set?**
+Same-origin requests are never CSRF attacks by definition — CSRF exploits cross-site trust, not same-site requests. When Swagger UI (served at `/api/docs` on the same host as the API) submits a form or AJAX call, the browser sends `Origin` or `Referer` pointing to the API host itself. Blocking those requests would break the interactive API documentation flow without providing any security benefit. The API's own origin is derived from each `Request` object (`scheme://netloc`) rather than from a static config so that the middleware is host-agnostic across development, staging, and production without additional configuration.
 
 **Why reuse `cors_allowed_origins` instead of a separate CSRF allowlist?**
 A separate allowlist would create a second place to configure allowed origins, which would inevitably drift out of sync with the CORS list. Reusing the same setting guarantees that any origin permitted by CORS is also permitted by CSRF validation, and vice versa.

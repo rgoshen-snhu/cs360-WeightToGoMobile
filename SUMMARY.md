@@ -2439,3 +2439,18 @@ SRS NFR-S-9 requires server-side CSRF protection as defense-in-depth beyond `Sam
 - Issue: GH-34
 - SRS: NFR-S-9
 - ADR-0017
+
+## [2026-05-27 02:01] Commit Summary
+
+**Change Type:** Fix
+**Scope:** CSRF middleware — same-origin allowance (F2 / GH-34)
+
+**Summary:**
+Allow same-origin requests (Origin or Referer matching the API's own host) through the CSRF middleware. Previously, Swagger UI at /api/docs posting back to the same host was blocked because the API host is not in cors_allowed_origins. Added _request_own_origin() helper and unioned it with the CORS allowlist. Added two tests for the same-origin scenarios. Updated ADR-0017 to document the decision.
+
+**Rationale:**
+Same-origin requests are not CSRF attacks by definition. Blocking them breaks the documented interactive Swagger UI flow with no security benefit.
+
+**References:**
+- Issue: GH-34
+- PR #37 Codex review comment (P2 — same-origin requests blocked)

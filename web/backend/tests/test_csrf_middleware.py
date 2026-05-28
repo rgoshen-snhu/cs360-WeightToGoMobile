@@ -82,3 +82,30 @@ def test_options_preflight_bypasses_csrf_check(client: TestClient) -> None:
     response = client.options("/api/v1/weight-entries")
 
     assert response.status_code in (200, 204, 400, 405)
+
+
+def test_post_from_api_own_origin_passes(permissive_client: TestClient) -> None:
+    """Same-origin requests (e.g. Swagger UI at /api/docs) must not be blocked.
+
+    Swagger UI posts back to the API's own host, sending Origin or Referer
+    pointing to the API server itself.  Those are not CSRF attacks.
+    """
+    # TestClient uses http://testserver as the API host
+    response = permissive_client.post(
+        "/api/v1/auth/login",
+        json={"email": "x@example.com", "password": "irrelevant"},
+        headers={"Origin": "http://testserver"},
+    )
+
+    assert response.status_code != 403
+
+
+def test_post_from_api_own_origin_via_referer_passes(permissive_client: TestClient) -> None:
+    """Same-origin Referer (no Origin header) must also be permitted."""
+    response = permissive_client.post(
+        "/api/v1/auth/login",
+        json={"email": "x@example.com", "password": "irrelevant"},
+        headers={"Referer": "http://testserver/api/docs"},
+    )
+
+    assert response.status_code != 403

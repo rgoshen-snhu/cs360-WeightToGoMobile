@@ -1,7 +1,8 @@
 """CSRF Origin/Referer validation middleware (SRS §NFR-S-9, ADR-0017).
 
 Rejects state-changing requests whose Origin or Referer header does not match
-an allowed CORS origin.  Safe methods (GET, HEAD, OPTIONS) are always permitted.
+an allowed CORS origin or the API's own origin.  Safe methods (GET, HEAD,
+OPTIONS) are always permitted.
 """
 
 from urllib.parse import urlparse
@@ -32,6 +33,15 @@ def _origin_from_referer(referer: str) -> str:
     return f"{parsed.scheme}://{parsed.netloc}"
 
 
+def _request_own_origin(request: Request) -> str:
+    """Return the origin of the API server itself (scheme + host + port).
+
+    Same-origin requests (e.g. Swagger UI at /api/docs posting back to the
+    same host) are never CSRF attacks and must always be permitted.
+    """
+    return f"{request.url.scheme}://{request.url.netloc}"
+
+
 class CsrfOriginRefererMiddleware(BaseHTTPMiddleware):
     """Validate Origin/Referer on state-changing requests (ADR-0017)."""
 
@@ -44,7 +54,9 @@ class CsrfOriginRefererMiddleware(BaseHTTPMiddleware):
         if request.method in _SAFE_METHODS:
             return await next_fn(request)
 
-        allowed = _allowed_origins()
+        # Allow the API's own origin so same-origin flows (e.g. Swagger UI)
+        # are never blocked, in addition to configured CORS origins.
+        allowed = _allowed_origins() | {_request_own_origin(request)}
         origin = request.headers.get("origin")
         referer = request.headers.get("referer")
 
