@@ -68,20 +68,22 @@ describe('useRegister', () => {
     );
   });
 
-  it('sets formError on 409 email conflict', async () => {
+  it('sets generic formError on 409 to avoid email-existence disclosure', async () => {
     vi.spyOn(authClient, 'register').mockRejectedValueOnce(new ApiError(409, 'Conflict'));
     const { result } = renderHook(() => useRegister(), { wrapper });
     result.current.submit(validValues, vi.fn());
     await waitFor(() =>
-      expect(result.current.formError).toBe('An account with this email already exists.'),
+      expect(result.current.formError).toBe('The account could not be created with those details.'),
     );
   });
 
-  it('sets generic formError when ApiError status is not 409', async () => {
+  it('sets generic creation-failure formError when ApiError status is not 409', async () => {
     vi.spyOn(authClient, 'register').mockRejectedValueOnce(new ApiError(500, 'Server error'));
     const { result } = renderHook(() => useRegister(), { wrapper });
     result.current.submit(validValues, vi.fn());
-    await waitFor(() => expect(result.current.formError).toMatch(/something went wrong/i));
+    await waitFor(() =>
+      expect(result.current.formError).toBe('The account could not be created with those details.'),
+    );
   });
 
   it('sets generic formError on unexpected network error', async () => {
