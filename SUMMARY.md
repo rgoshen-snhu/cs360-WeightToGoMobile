@@ -2493,3 +2493,18 @@ ADR-first workflow established in F2. ADR-0013's family-revocation policy makes 
 **References:**
 - Issue: GH-34
 - ADR-0013
+
+## [2026-05-27 03:01] Commit Summary
+
+**Change Type:** Feature
+**Scope:** Frontend API client — concurrent refresh coalescing (F3 / GH-34)
+
+**Summary:**
+Add module-level inflightRefresh promise to api-client.ts. When two concurrent 401s occur, the first caller creates the refresh promise with onLogout wired in a .catch() (fires exactly once on failure, not once per concurrent caller). Subsequent callers await the same promise. .finally() clears inflightRefresh so the next 401 starts a fresh refresh. Added 2 tests: success-path coalescing (refresh called once, both retries succeed) and failure-path (refresh called once, onLogout called exactly once).
+
+**Rationale:**
+ADR-0013's family-revocation policy makes the second concurrent refresh call a logout trigger (stale token → revoke entire family). The coalescing fix restores ADR-0013 compliance. onLogout fires in the promise chain rather than per-caller to avoid double-redirect on failure.
+
+**References:**
+- Issue: GH-34
+- ADR-0013, ADR-0018

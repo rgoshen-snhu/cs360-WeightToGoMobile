@@ -72,6 +72,12 @@ interface AuthInterceptor {
 
 let interceptor: AuthInterceptor | null = null;
 
+// Coalesces concurrent 401 responses into a single refresh call (ADR-0018).
+// When two requests both receive 401 simultaneously, only the first starts a
+// refresh; subsequent callers await the same promise so ADR-0013's single-use
+// token policy is never violated by a double-refresh.
+let inflightRefresh: Promise<void> | null = null;
+
 /**
  * Install an interceptor that will attempt a token refresh when any request
  * returns 401.  Only one interceptor is active at a time.
@@ -93,10 +99,22 @@ async function handle401AndRetry<T>(url: string, init: RequestInit): Promise<T> 
     interceptor?.onLogout();
     throw new ApiError(401, mapApiError(401));
   }
+  if (inflightRefresh === null) {
+    // Call onLogout inside the promise chain so it fires exactly once even when
+    // multiple callers are awaiting the same refresh (ADR-0018).
+    inflightRefresh = interceptor
+      .refresh()
+      .catch((err: unknown) => {
+        interceptor?.onLogout();
+        throw err;
+      })
+      .finally(() => {
+        inflightRefresh = null;
+      });
+  }
   try {
-    await interceptor.refresh();
+    await inflightRefresh;
   } catch {
-    interceptor.onLogout();
     throw new ApiError(401, mapApiError(401));
   }
   const retry = await fetch(url, init);
