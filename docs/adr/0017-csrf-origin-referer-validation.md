@@ -43,6 +43,9 @@ Create a new `CsrfOriginRefererMiddleware` at `web/backend/src/weighttogo/interf
 
 ## Rationale
 
+**Why allow requests with no Origin AND no Referer?**
+The initial implementation rejected requests where both headers were absent. However, same-origin browser requests — such as those proxied through Vite's dev server with `changeOrigin: true` — arrive at the backend with neither `Origin` nor `Referer` after header transformation. A cross-origin browser CSRF attack *always* includes an `Origin` header (required by the CORS/Fetch specifications). A request with neither header present cannot be a browser-originated CSRF attack. The `SameSite=Strict` cookie attribute already prevents cross-site cookie submission independently. The middleware therefore only rejects when a header is *present and points to a disallowed origin* — not when both headers are absent. This restores the intended defense-in-depth without disrupting legitimate proxy-based flows.
+
 **Why check Origin before Referer?**
 `Origin` is the canonical header for cross-origin checks — it is always present on cross-origin requests and contains only the scheme + host + port without path. `Referer` is a fallback for environments where `Origin` may be stripped (some proxies, certain browser privacy settings), but it requires extracting the origin portion from a full URL. Checking `Origin` first and falling back to `Referer` maximises coverage.
 

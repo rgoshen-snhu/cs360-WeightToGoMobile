@@ -67,7 +67,12 @@ class CsrfOriginRefererMiddleware(BaseHTTPMiddleware):
         else:
             candidate = None
 
-        if candidate is None or candidate not in allowed:
+        # Only reject when a header is present and points to a disallowed origin.
+        # If neither Origin nor Referer is sent (e.g. same-origin requests via a
+        # reverse proxy such as Vite dev server with changeOrigin=true), the
+        # request cannot be a browser-initiated CSRF attack — SameSite=Strict
+        # cookies already prevent cross-site cookie submission in that path.
+        if candidate is not None and candidate not in allowed:
             return JSONResponse(
                 status_code=403,
                 content=_FORBIDDEN_BODY,

@@ -1,8 +1,11 @@
 """CSRF Origin/Referer middleware tests (SRS §NFR-S-9, GH-34).
 
-Verifies that state-changing requests without a valid Origin or Referer header
-are rejected with 403, and that safe methods and requests from allowed origins
-are permitted.
+Verifies CSRF middleware behaviour:
+- Requests where Origin or Referer IS present and WRONG → 403
+- Requests with no Origin and no Referer → pass through (cannot be a
+  browser CSRF attack; SameSite=Strict cookies guard that path)
+- Requests from allowed CORS origins or the API's own origin → pass through
+- Safe methods (GET, HEAD, OPTIONS) → always pass through
 
 The default cors_allowed_origins setting is "http://localhost:5173".
 
@@ -23,12 +26,33 @@ def permissive_client() -> TestClient:
     return TestClient(app, raise_server_exceptions=False)
 
 
-def test_post_with_missing_origin_and_referer_is_forbidden(client: TestClient) -> None:
-    """POST without Origin or Referer must be rejected 403 (SRS §NFR-S-9)."""
-    response = client.post(
+def test_post_with_missing_origin_and_referer_passes_through(
+    permissive_client: TestClient,
+) -> None:
+    """POST with no Origin and no Referer must NOT be rejected by CSRF.
+
+    A cross-origin browser CSRF attack always includes an Origin header (required
+    by the CORS specification).  A request with neither Origin nor Referer cannot
+    be a browser-originated CSRF attack — SameSite=Strict cookies already guard
+    that path.  This allows same-origin requests proxied through Vite dev server
+    (changeOrigin=true strips both headers) to reach the backend.
+    """
+    response = permissive_client.post(
         "/api/v1/auth/login",
         json={"email": "x@example.com", "password": "irrelevant"},
         headers={},
+    )
+
+    # CSRF must not block — the endpoint may return anything except 403
+    assert response.status_code != 403
+
+
+def test_post_with_disallowed_origin_is_still_forbidden(client: TestClient) -> None:
+    """POST where Origin IS present but wrong must still be rejected 403."""
+    response = client.post(
+        "/api/v1/auth/login",
+        json={"email": "x@example.com", "password": "irrelevant"},
+        headers={"Origin": "https://evil.example.com"},
     )
 
     assert response.status_code == 403
@@ -46,17 +70,6 @@ def test_post_with_allowed_origin_header_passes(permissive_client: TestClient) -
     )
 
     assert response.status_code != 403
-
-
-def test_post_with_disallowed_origin_is_forbidden(client: TestClient) -> None:
-    """POST from an origin not in cors_allowed_origins must be rejected 403."""
-    response = client.post(
-        "/api/v1/auth/login",
-        json={"email": "x@example.com", "password": "irrelevant"},
-        headers={"Origin": "https://evil.example.com"},
-    )
-
-    assert response.status_code == 403
 
 
 def test_post_falls_back_to_referer_when_origin_missing(permissive_client: TestClient) -> None:

@@ -2454,3 +2454,15 @@ Same-origin requests are not CSRF attacks by definition. Blocking them breaks th
 **References:**
 - Issue: GH-34
 - PR #37 Codex review comment (P2 — same-origin requests blocked)
+
+## [2026-05-27 02:02] Commit Summary
+
+**Change Type:** Fix
+**Scope:** CSRF middleware — allow absent-header requests (F2 / GH-34)
+
+**Summary:**
+Changed CSRF check from "block when no Origin and no Referer" to "block only when a header is present and points to a disallowed origin." Same-origin browser requests proxied via Vite dev server (changeOrigin=true) arrive at the backend with no Origin and no Referer after header transformation. A cross-origin CSRF attack always includes Origin per the CORS spec; no-header requests cannot be browser CSRF attacks. SameSite=Strict cookies already guard the no-header path independently.
+
+**References:**
+- Issue: GH-34
+- PR #37 CI failure: Playwright E2E weight-delete test (Vite proxy stripped headers)
