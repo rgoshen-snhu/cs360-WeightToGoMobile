@@ -6,6 +6,12 @@ import { authClient, type AuthUser } from '../api/auth-client';
 import { ApiError, ValidationError } from '../../../lib/api-client';
 import type { LoginFormHelpers } from '../components/LoginForm';
 import type { LoginFormValues } from '../schemas/auth-schemas';
+import {
+  AUTH_INVALID_CREDENTIALS,
+  AUTH_ACCOUNT_LOCKED,
+  AUTH_RATE_LIMITED,
+  AUTH_GENERIC_FAILURE,
+} from '../messages';
 
 export function useLogin() {
   const { setUser } = useAuth();
@@ -33,20 +39,20 @@ export function useLogin() {
       }
       if (error instanceof ApiError) {
         if (error.status === 401) {
-          setFormError('Invalid credentials.');
+          setFormError(AUTH_INVALID_CREDENTIALS);
           // Clear the password field after a failed attempt so the browser
           // does not auto-fill the wrong credential on the next try.
           vars.helpers.resetField('password');
         } else if (error.status === 423) {
-          setFormError('Account is temporarily locked. Please try again later.');
+          setFormError(AUTH_ACCOUNT_LOCKED);
           vars.helpers.resetField('password');
         } else if (error.status === 429) {
-          setFormError('Too many attempts. Please wait a moment and try again.');
+          setFormError(AUTH_RATE_LIMITED);
         } else {
-          setFormError('Something went wrong. Please try again.');
+          setFormError(AUTH_GENERIC_FAILURE);
         }
       } else {
-        setFormError('Something went wrong. Please try again.');
+        setFormError(AUTH_GENERIC_FAILURE);
       }
     },
   });

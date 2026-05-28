@@ -2754,3 +2754,19 @@ Flat named exports are the correct shape — not a status-keyed Record — becau
 - Issue: GH-42
 - ADR-0010: `docs/adr/0010-generic-auth-error-policy.md`
 - Design spec: `docs/specs/2026-05-28-adr-0010-message-consolidation-design.md`
+
+## [2026-05-28 20:25] Commit Summary
+
+**Change Type:** Refactor
+**Scope:** Frontend auth hooks and tests — ADR-0010 message consolidation (GH-42)
+
+**Summary:**
+REFACTOR: migrated `useLogin.ts` and `useRegister.ts` to import ADR-0010 string constants from `messages.ts` — zero inline message literals remain in either hook's `onError` branches. Migrated `useLogin.test.tsx` to import all four relevant constants (AUTH_INVALID_CREDENTIALS, AUTH_ACCOUNT_LOCKED, AUTH_RATE_LIMITED, AUTH_GENERIC_FAILURE) and tightened three previously-regex assertions (`.toMatch(/locked/i)`, `/too many/i`, `/something went wrong/i`) to exact `.toBe(CONST)`. Migrated `useRegister.test.tsx` to import AUTH_REGISTER_FAILED and AUTH_GENERIC_FAILURE and replace inline string literals in the `it.each` and network-error tests with exact constant equality. All 228 tests green. Grep AC verified: `grep -rn "Invalid credentials\." src` returns one definition site (messages.ts) plus unrelated layer tests.
+
+**Rationale:**
+Tightening loose regex matchers to exact `.toBe(CONST)` eliminates the risk that future wording changes partially match the pattern and silently pass. The refactor also decouples wording from test files: a single `messages.ts` edit propagates automatically to all consumers and assertions.
+
+**References:**
+- Issue: GH-42
+- Design spec: `docs/specs/2026-05-28-adr-0010-message-consolidation-design.md`
+- ADR-0010: `docs/adr/0010-generic-auth-error-policy.md`

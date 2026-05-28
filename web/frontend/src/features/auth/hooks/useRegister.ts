@@ -6,6 +6,7 @@ import { useAuth } from '../../../contexts/AuthContext';
 import { authClient, type AuthUser } from '../api/auth-client';
 import { ApiError, ValidationError } from '../../../lib/api-client';
 import type { RegisterFormValues } from '../schemas/auth-schemas';
+import { AUTH_REGISTER_FAILED, AUTH_GENERIC_FAILURE } from '../messages';
 
 export function useRegister() {
   const { setUser } = useAuth();
@@ -35,9 +36,9 @@ export function useRegister() {
         return;
       }
       if (error instanceof ApiError) {
-        setFormError('The account could not be created. Please try again.');
+        setFormError(AUTH_REGISTER_FAILED);
       } else {
-        setFormError('Something went wrong. Please try again.');
+        setFormError(AUTH_GENERIC_FAILURE);
       }
     },
   });

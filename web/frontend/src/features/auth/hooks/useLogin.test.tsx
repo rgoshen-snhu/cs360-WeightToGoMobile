@@ -6,7 +6,12 @@ import { authClient, type AuthUser } from '../api/auth-client';
 import { ApiError, ValidationError } from '../../../lib/api-client';
 import { AuthProvider } from '../../../contexts/AuthContext';
 import { useLogin } from './useLogin';
-import { AUTH_INVALID_CREDENTIALS } from '../messages';
+import {
+  AUTH_INVALID_CREDENTIALS,
+  AUTH_ACCOUNT_LOCKED,
+  AUTH_RATE_LIMITED,
+  AUTH_GENERIC_FAILURE,
+} from '../messages';
 
 const user: AuthUser = {
   user_id: 1,
@@ -51,18 +56,18 @@ describe('useLogin', () => {
     await waitFor(() => expect(result.current.formError).toBe(AUTH_INVALID_CREDENTIALS));
   });
 
-  it('sets formError on 423 account lockout', async () => {
+  it('sets formError to AUTH_ACCOUNT_LOCKED on 423', async () => {
     vi.spyOn(authClient, 'login').mockRejectedValueOnce(new ApiError(423, 'Locked'));
     const { result } = renderHook(() => useLogin(), { wrapper });
     result.current.submit({ email: 'a@b.co', password: 'wrong' }, makeHelpers());
-    await waitFor(() => expect(result.current.formError).toMatch(/locked/i));
+    await waitFor(() => expect(result.current.formError).toBe(AUTH_ACCOUNT_LOCKED));
   });
 
-  it('sets formError on 429 rate limit', async () => {
+  it('sets formError to AUTH_RATE_LIMITED on 429', async () => {
     vi.spyOn(authClient, 'login').mockRejectedValueOnce(new ApiError(429, 'Too many'));
     const { result } = renderHook(() => useLogin(), { wrapper });
     result.current.submit({ email: 'a@b.co', password: 'wrong' }, makeHelpers());
-    await waitFor(() => expect(result.current.formError).toMatch(/too many/i));
+    await waitFor(() => expect(result.current.formError).toBe(AUTH_RATE_LIMITED));
   });
 
   it('calls setError for ValidationError field errors', async () => {
@@ -80,18 +85,18 @@ describe('useLogin', () => {
     );
   });
 
-  it('sets generic formError when ApiError status is not 401, 423, or 429', async () => {
+  it('sets formError to AUTH_GENERIC_FAILURE when ApiError status is not 401, 423, or 429', async () => {
     vi.spyOn(authClient, 'login').mockRejectedValueOnce(new ApiError(500, 'Server error'));
     const { result } = renderHook(() => useLogin(), { wrapper });
     result.current.submit({ email: 'a@b.co', password: 'pass' }, makeHelpers());
-    await waitFor(() => expect(result.current.formError).toMatch(/something went wrong/i));
+    await waitFor(() => expect(result.current.formError).toBe(AUTH_GENERIC_FAILURE));
   });
 
-  it('sets generic formError when error is not an ApiError or ValidationError', async () => {
+  it('sets formError to AUTH_GENERIC_FAILURE when error is not an ApiError or ValidationError', async () => {
     vi.spyOn(authClient, 'login').mockRejectedValueOnce(new Error('Network failure'));
     const { result } = renderHook(() => useLogin(), { wrapper });
     result.current.submit({ email: 'a@b.co', password: 'pass' }, makeHelpers());
-    await waitFor(() => expect(result.current.formError).toMatch(/something went wrong/i));
+    await waitFor(() => expect(result.current.formError).toBe(AUTH_GENERIC_FAILURE));
   });
 
   it('isPending flips status to submitting while in flight', async () => {

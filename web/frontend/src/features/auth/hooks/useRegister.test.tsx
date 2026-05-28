@@ -6,6 +6,7 @@ import { authClient, type AuthUser } from '../api/auth-client';
 import { ApiError, ValidationError } from '../../../lib/api-client';
 import { AuthProvider } from '../../../contexts/AuthContext';
 import { useRegister } from './useRegister';
+import { AUTH_REGISTER_FAILED, AUTH_GENERIC_FAILURE } from '../messages';
 
 const user: AuthUser = {
   user_id: 2,
@@ -69,24 +70,20 @@ describe('useRegister', () => {
   });
 
   it.each([409, 401, 423, 429, 500, 503])(
-    'collapses ApiError %i into the non-disclosive form-level message (ADR-0010)',
+    'sets formError to AUTH_REGISTER_FAILED for ApiError %i (ADR-0010)',
     async (status) => {
       vi.spyOn(authClient, 'register').mockRejectedValueOnce(new ApiError(status, 'x'));
       const { result } = renderHook(() => useRegister(), { wrapper });
       result.current.submit(validValues, vi.fn());
-      await waitFor(() =>
-        expect(result.current.formError).toBe(
-          'The account could not be created. Please try again.',
-        ),
-      );
+      await waitFor(() => expect(result.current.formError).toBe(AUTH_REGISTER_FAILED));
     },
   );
 
-  it('sets generic formError on unexpected network error', async () => {
+  it('sets formError to AUTH_GENERIC_FAILURE on unexpected network error', async () => {
     vi.spyOn(authClient, 'register').mockRejectedValueOnce(new Error('Network error'));
     const { result } = renderHook(() => useRegister(), { wrapper });
     result.current.submit(validValues, vi.fn());
-    await waitFor(() => expect(result.current.formError).toMatch(/something went wrong/i));
+    await waitFor(() => expect(result.current.formError).toBe(AUTH_GENERIC_FAILURE));
   });
 
   it('flips status to submitting while in flight', async () => {
