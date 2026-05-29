@@ -3500,3 +3500,10 @@ intermittently breaking the goal-create and achievement-notification E2E specs.
 **References:**
 - Issue: GH-55
 - PR: #67
+
+## [2026-05-29 21:10] Commit Summary
+**Change Type:** Fix
+**Scope:** test_index_usage_postgres
+**Summary:** Introduce module-scoped seeded_uid fixture so _seed is called once per module; fixes UniqueViolation when second EXPLAIN test tried to re-insert perf@example.com after scope="module" kept the DB alive
+**Rationale:** scope="module" was correct (halves migration churn) but the two EXPLAIN tests each called _seed independently, violating the unique email constraint on the second call. One shared seeded_uid fixture seeds once and both tests receive the same uid.
+**References:** Issue: GH-56

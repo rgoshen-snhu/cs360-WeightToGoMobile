@@ -94,7 +94,18 @@ def _seed(engine: Engine, n: int) -> int:
     return int(target)
 
 
-def test_list_query_uses_index_not_seqscan(pg_engine: Engine) -> None:
+@pytest.fixture(scope="module")
+def seeded_uid(pg_engine: Engine) -> int:
+    """Seed the database once per module; return the target user_id.
+
+    Both EXPLAIN tests share this fixture so ``_seed`` is called exactly once
+    per CI run — the module-scoped ``pg_engine`` keeps the schema alive between
+    tests, so a second ``_seed`` call would violate the unique email constraint.
+    """
+    return _seed(pg_engine, n=_NFR_P3_THRESHOLD_ROWS)
+
+
+def test_list_query_uses_index_not_seqscan(pg_engine: Engine, seeded_uid: int) -> None:
     """The (user_id, observation_date DESC, entry_id DESC) index from migration
     0002 is used for observation_date-ordered list queries.
 
@@ -102,7 +113,6 @@ def test_list_query_uses_index_not_seqscan(pg_engine: Engine) -> None:
     ``test_created_at_index_used_for_created_at_ordered_query`` for the 0007
     index added by this PR.
     """
-    uid = _seed(pg_engine, n=_NFR_P3_THRESHOLD_ROWS)
     sql = (
         "EXPLAIN SELECT * FROM weight_entries "
         "WHERE user_id = :u AND is_deleted = FALSE "
@@ -110,18 +120,19 @@ def test_list_query_uses_index_not_seqscan(pg_engine: Engine) -> None:
     )
     with pg_engine.connect() as conn:
         conn.execute(text("SET enable_seqscan = off"))
-        plan = "\n".join(row[0] for row in conn.execute(text(sql), {"u": uid}))
+        plan = "\n".join(row[0] for row in conn.execute(text(sql), {"u": seeded_uid}))
     assert "Index Scan using" in plan, plan
     assert "Seq Scan on weight_entries" not in plan, plan
 
 
-def test_created_at_index_used_for_created_at_ordered_query(pg_engine: Engine) -> None:
+def test_created_at_index_used_for_created_at_ordered_query(
+    pg_engine: Engine, seeded_uid: int
+) -> None:
     """The (user_id, created_at) index from migration 0007 is used for created_at reads.
 
     This directly tests the index added by this PR.  The observation_date EXPLAIN
     test above validates the pre-existing 0002 indexes; this test validates 0007.
     """
-    uid = _seed(pg_engine, n=_NFR_P3_THRESHOLD_ROWS)
     sql = (
         "EXPLAIN SELECT * FROM weight_entries "
         "WHERE user_id = :u AND is_deleted = FALSE "
@@ -129,7 +140,7 @@ def test_created_at_index_used_for_created_at_ordered_query(pg_engine: Engine) -
     )
     with pg_engine.connect() as conn:
         conn.execute(text("SET enable_seqscan = off"))
-        plan = "\n".join(row[0] for row in conn.execute(text(sql), {"u": uid}))
+        plan = "\n".join(row[0] for row in conn.execute(text(sql), {"u": seeded_uid}))
     assert "Index Scan using idx_weight_entries_user_created_at" in plan, plan
 
 
