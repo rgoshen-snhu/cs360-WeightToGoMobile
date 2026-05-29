@@ -7,6 +7,25 @@ issues were resolved.
 
 ---
 
+## [2026-05-29 14:30] Commit Summary
+
+**Change Type:** Fix
+**Scope:** test_index_usage_postgres
+
+**Summary:**
+Six PR review fixes: outer try/finally around upgrade so env restore always runs; module-scoped fixture halves migration churn; drop _seed default to enforce constant usage; executemany for batch inserts; SET enable_seqscan=off for deterministic EXPLAIN; add EXPLAIN test for the new created_at index (0007) to close the NFR-P-3 proof gap.
+
+**Rationale:**
+The original EXPLAIN test proved the pre-existing observation_date index (0002), not the new created_at index (0007) this PR adds. The new EXPLAIN test targets the 0007 index directly. The outer try/finally fix ensures DATABASE_URL and get_settings cache are always restored even if alembic upgrade raises. Module scope eliminates redundant migration round-trips. executemany reduces N individual INSERT calls to one batched call per user.
+
+**Bug Fix Context (if applicable):**
+If command.upgrade raised before the inner try block was reached, DATABASE_URL would leak into subsequent tests and get_settings cache would remain polluted. The restructured outer try/finally closes that gap.
+
+**References:**
+- Issue: GH-56
+
+---
+
 ## [2026-05-29 13:10] Commit Summary
 
 **Change Type:** Fix
