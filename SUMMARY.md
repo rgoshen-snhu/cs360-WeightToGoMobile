@@ -3084,3 +3084,25 @@ communicate the coming Step 5 feature without re-layout.
 - Issue: GH-55
 - DDR-0008: Settings page layout
 - FR-P-1, FR-P-3
+
+## [2026-05-29] Commit Summary
+
+**Change Type:** Feature
+**Scope:** Database / Alembic
+
+**Summary:**
+Added migration `0006_user_preferences` creating the EAV `user_preferences` table
+(per ADR-0020 Option A). Includes a `pref_key` domain CHECK, a conditional
+`pref_value` CHECK (weight_unit vs notify_* logic), UNIQUE(user_id, pref_key)
+conflict target for upsert, user_id index, and upgrade + downgrade paths.
+Added `test_migration_0006.py` (5 tests, TDD red→green).
+
+**Rationale:**
+EAV schema matches SRS §8.2.6 and ADR-0020 Option A decision. Conditional CHECK
+enforces value-domain rules at DB level as defense-in-depth. UNIQUE constraint
+serves as ON CONFLICT conflict target for the atomic upsert in the repository.
+
+**References:**
+- Issue: GH-55
+- ADR-0020: Preferences storage data structure (EAV key-value)
+- SRS §8.2.6
