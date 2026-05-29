@@ -7,6 +7,22 @@ issues were resolved.
 
 ---
 
+## [2026-05-29 13:10] Commit Summary
+
+**Change Type:** Fix
+**Scope:** dashboard frontend
+
+**Summary:**
+Tighten isEmpty condition to also require active_goal === null; users with a goal but no entries now see the goal card instead of the pure empty state.
+
+**Rationale:**
+GoalProgressBar has explicit support for progress_percent=null ("No entries yet"), but this state was unreachable because isEmpty fired on total_entries===0 alone, before active_goal was checked. One new TDD test was added (RED then GREEN) to cover the previously missing branch.
+
+**References:**
+- Issue: GH-56
+
+---
+
 ## [2026-05-29 24:00] Commit Summary
 
 **Change Type:** Fix

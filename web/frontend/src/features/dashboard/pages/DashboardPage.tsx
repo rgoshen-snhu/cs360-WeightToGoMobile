@@ -20,7 +20,7 @@ import { useDashboardSummary } from '../hooks/useDashboardSummary';
 export function DashboardPage() {
   const { data, isLoading, isError } = useDashboardSummary();
 
-  const isEmpty = !isLoading && data !== undefined && data.total_entries === 0;
+  const isEmpty = !isLoading && data !== undefined && data.total_entries === 0 && !data.active_goal;
 
   return (
     <Box component="main">
