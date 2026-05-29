@@ -19,7 +19,7 @@ import { DashboardPage } from './features/dashboard/pages/DashboardPage';
 import { LoginPage } from './features/auth/pages/LoginPage';
 import { RegisterPage } from './features/auth/pages/RegisterPage';
 import { AchievementsPage } from './features/achievements/pages/AchievementsPage';
-import { SettingsPlaceholderPage } from './features/placeholders/SettingsPlaceholderPage';
+import { SettingsPage } from './features/settings/pages/SettingsPage';
 import { GoalsPage } from './features/goals/pages/GoalsPage';
 import { WeightHistoryPage } from './features/weight/pages/WeightHistoryPage';
 import { WeightEntryFormPage } from './features/weight/pages/WeightEntryFormPage';
@@ -70,7 +70,7 @@ export function App() {
         <Route path="/weight/:entryId/edit" element={<WeightEntryFormPage />} />
         <Route path="/goals" element={<GoalsPage />} />
         <Route path="/achievements" element={<AchievementsPage />} />
-        <Route path="/settings" element={<SettingsPlaceholderPage />} />
+        <Route path="/settings" element={<SettingsPage />} />
       </Route>
 
       {/* ── Fallback ─────────────────────────────────────────────── */}

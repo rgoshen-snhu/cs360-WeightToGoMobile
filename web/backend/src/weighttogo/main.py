@@ -21,6 +21,7 @@ from weighttogo.config import get_settings
 from weighttogo.dashboard.interface.router import router as dashboard_router
 from weighttogo.goals.interface.router import router as goals_router
 from weighttogo.interface.middleware.csrf import CsrfOriginRefererMiddleware
+from weighttogo.preferences.interface.router import router as preferences_router
 from weighttogo.shared.error_handlers import validation_exception_handler
 from weighttogo.shared.logging import configure_logging
 from weighttogo.weight_tracking.interface.router import router as weight_router
@@ -107,6 +108,7 @@ app.include_router(auth_router, prefix="/api/v1")
 app.include_router(weight_router, prefix="/api/v1")
 app.include_router(goals_router, prefix="/api/v1")
 app.include_router(achievements_router, prefix="/api/v1")
+app.include_router(preferences_router, prefix="/api/v1")
 app.include_router(dashboard_router, prefix="/api/v1")
 
 

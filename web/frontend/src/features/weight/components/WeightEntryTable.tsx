@@ -20,7 +20,7 @@ import {
 } from '@mui/material';
 import { Link } from 'react-router-dom';
 import type { WeightEntryRecord } from '../api/weight-client';
-import { formatObservationDate } from '../../../lib/format';
+import { formatObservationDate, formatWeight } from '../../../lib/format';
 
 interface WeightEntryTableProps {
   entries: WeightEntryRecord[];
@@ -59,7 +59,7 @@ export function WeightEntryTable({ entries, onDelete }: WeightEntryTableProps) {
             <TableRow key={entry.entry_id} hover>
               <TableCell>{formatObservationDate(entry.observation_date)}</TableCell>
               <TableCell align="right">
-                {entry.weight_value} {entry.weight_unit}
+                {formatWeight(entry.weight_value, entry.weight_unit as 'lbs' | 'kg')}
               </TableCell>
               <TableCell>{entry.notes ?? '—'}</TableCell>
               <TableCell align="center">

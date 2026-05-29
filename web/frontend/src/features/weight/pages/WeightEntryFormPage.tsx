@@ -10,6 +10,7 @@ import { Alert, Box, CircularProgress, Typography } from '@mui/material';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { AchievementNotification } from '../../achievements/components/AchievementNotification';
+import { useVisibleAchievements } from '../../achievements/hooks/useVisibleAchievements';
 import type { AchievementRecord } from '../../achievements/schemas/achievement';
 import { ApiError, ValidationError } from '../../../lib/api-client';
 import { WeightEntryForm } from '../components/WeightEntryForm';
@@ -45,19 +46,28 @@ export function WeightEntryFormPage() {
   const isSubmitting = createMutation.isPending || updateMutation.isPending;
 
   const [newAchievements, setNewAchievements] = useState<AchievementRecord[]>([]);
+  const visibleAchievements = useVisibleAchievements(newAchievements);
   const pendingNavRef = useRef(false);
 
+  // Remove the displayed achievement (first visible) from the raw queue.
+  // Slicing prev[0] would be wrong when hidden items precede the visible one:
+  // closing the toast would remove a hidden item, leaving the same visible
+  // achievement re-displayed on the next render.
   const handleDismissOne = useCallback(() => {
-    setNewAchievements((prev) => prev.slice(1));
-  }, []);
+    const displayed = visibleAchievements[0];
+    if (!displayed) return;
+    setNewAchievements((prev) => prev.filter((a) => a.achievement_id !== displayed.achievement_id));
+  }, [visibleAchievements]);
 
-  // Navigate to /weight once the achievement queue drains (FR-N-1 DDR-0007)
+  // Navigate to /weight once the visible achievement queue drains (FR-N-1 DDR-0007).
+  // visibleAchievements filters out suppressed types so navigation is not blocked
+  // when the user has turned off a notification toggle.
   useEffect(() => {
-    if (newAchievements.length === 0 && pendingNavRef.current) {
+    if (visibleAchievements.length === 0 && pendingNavRef.current) {
       pendingNavRef.current = false;
       void navigate('/weight');
     }
-  }, [newAchievements.length, navigate]);
+  }, [visibleAchievements.length, navigate]);
 
   const handleSubmit = (values: WeightEntryFormValues) => {
     setConflictError(null);
@@ -135,7 +145,7 @@ export function WeightEntryFormPage() {
         conflictError={conflictError}
         isSubmitting={isSubmitting}
       />
-      <AchievementNotification achievements={newAchievements} onDismissOne={handleDismissOne} />
+      <AchievementNotification achievements={visibleAchievements} onDismissOne={handleDismissOne} />
     </Box>
   );
 }

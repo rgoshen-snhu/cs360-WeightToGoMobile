@@ -4,6 +4,19 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { GoalForm } from './GoalForm';
 
+vi.mock('../../../contexts/PreferencesContext', () => ({
+  usePreferences: () => ({
+    preferences: {
+      weightUnit: 'lbs',
+      notifyAchievement: true,
+      notifyMilestone: true,
+      notifyStreak: true,
+    },
+    isLoading: false,
+    setPreference: vi.fn(),
+  }),
+}));
+
 describe('GoalForm', () => {
   it('renders all create-mode fields', () => {
     render(<GoalForm onSubmit={vi.fn()} />);

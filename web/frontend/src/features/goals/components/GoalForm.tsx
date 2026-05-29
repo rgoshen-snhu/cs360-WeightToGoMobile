@@ -18,7 +18,9 @@ import {
   TextField,
 } from '@mui/material';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useEffect } from 'react';
 import { Controller, useForm } from 'react-hook-form';
+import { usePreferences } from '../../../contexts/PreferencesContext';
 import { type GoalFormValues, goalFormSchema } from '../schemas/goal-schemas';
 
 interface GoalFormProps {
@@ -44,10 +46,13 @@ export function GoalForm({
   conflictError,
   isSubmitting = false,
 }: GoalFormProps) {
+  const { preferences, isLoading: prefsLoading } = usePreferences();
+
   const {
     register,
     handleSubmit,
     control,
+    setValue,
     formState: { errors },
   } = useForm<GoalFormValues>({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -55,11 +60,18 @@ export function GoalForm({
     defaultValues: defaultValues ?? {
       goal_type: 'lose',
       target_value: undefined,
-      target_unit: 'lbs',
+      target_unit: preferences.weightUnit,
       start_value: undefined,
       target_date: null,
     },
   });
+
+  // Sync target_unit when the preferences query resolves after mount.
+  useEffect(() => {
+    if (!prefsLoading && !defaultValues) {
+      setValue('target_unit', preferences.weightUnit, { shouldDirty: false });
+    }
+  }, [prefsLoading, preferences.weightUnit, defaultValues, setValue]);
 
   return (
     <Box

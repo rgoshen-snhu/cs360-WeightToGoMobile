@@ -3042,3 +3042,218 @@ N/A
 - ADR-0019: Milestone detection algorithm
 - DDR-0007: Achievement notification UI
 - FR-Ach-1, FR-Ach-2, FR-G-4, FR-N-1
+
+## [2026-05-29] Commit Summary
+
+**Change Type:** Docs
+**Scope:** Architecture Decision Records
+
+**Summary:**
+Added ADR-0020 documenting the EAV key-value storage shape selected for the
+`user_preferences` table (Issue #55). Records the EAV-vs-columnar trade-off,
+the `ON CONFLICT DO UPDATE` upsert algorithm choice, and the rationale for
+aligning with SRS §8.2.6 and Android ADR-0004.
+
+**Rationale:**
+EAV selected over columnar to match SRS §8.2.6 verbatim and maintain continuity
+with Android ADR-0004; open-ended extension path requires no future migrations
+for new preference keys. Upsert chosen over catch-IntegrityError for atomicity
+and idempotency. Committed before the migration per §9 "docs first" gate.
+
+**References:**
+- Issue: GH-55
+- ADR-0020: Preferences storage data structure (EAV key-value)
+
+## [2026-05-29] Commit Summary
+
+**Change Type:** Docs
+**Scope:** Design Decision Records
+
+**Summary:**
+Added DDR-0008 documenting the settings page layout: two-card design (Units +
+Notifications), segmented radio for weight-unit preference, MUI Switch toggles for
+notification preferences, immediate persistence with aria-live save feedback.
+
+**Rationale:**
+Segmented radio exposes both unit options without a dropdown; MUI Switch communicates
+on/off settings semantics; immediate persistence removes the "forgot to save" failure
+mode and matches Android behavior. Streak toggle rendered disabled (not hidden) to
+communicate the coming Step 5 feature without re-layout.
+
+**References:**
+- Issue: GH-55
+- DDR-0008: Settings page layout
+- FR-P-1, FR-P-3
+
+## [2026-05-29] Commit Summary
+
+**Change Type:** Feature
+**Scope:** Database / Alembic
+
+**Summary:**
+Added migration `0006_user_preferences` creating the EAV `user_preferences` table
+(per ADR-0020 Option A). Includes a `pref_key` domain CHECK, a conditional
+`pref_value` CHECK (weight_unit vs notify_* logic), UNIQUE(user_id, pref_key)
+conflict target for upsert, user_id index, and upgrade + downgrade paths.
+Added `test_migration_0006.py` (5 tests, TDD red→green).
+
+**Rationale:**
+EAV schema matches SRS §8.2.6 and ADR-0020 Option A decision. Conditional CHECK
+enforces value-domain rules at DB level as defense-in-depth. UNIQUE constraint
+serves as ON CONFLICT conflict target for the atomic upsert in the repository.
+
+**References:**
+- Issue: GH-55
+- ADR-0020: Preferences storage data structure (EAV key-value)
+- SRS §8.2.6
+
+## [2026-05-29] Commit Summary
+
+**Change Type:** Refactor
+**Scope:** Shared / RFC-7807
+
+**Summary:**
+Extracted `build_problem_detail()` into `shared/problem_detail.py`. Provides a
+consistent RFC-7807 Problem Details dict builder (type, title, status, detail,
+instance, errors, request_id) so the preferences router and future routers avoid
+hand-building the body. Added 9 unit tests (TDD red→green).
+
+**Rationale:**
+Goals router hand-builds the RFC-7807 dict per handler; preferences uses the shared
+helper from the start. DRY: one function, one source of the `about:blank` type and
+key ordering. Goals/achievements migration to the helper is a tracked follow-up issue.
+
+**References:**
+- Issue: GH-55
+- SRS §9.2
+
+## [2026-05-29] Commit Summary
+
+**Change Type:** Feature
+**Scope:** Preferences backend (domain / application / infrastructure / interface)
+
+**Summary:**
+Implemented the full preferences bounded context (4-layer Clean Architecture):
+domain entities (PreferenceKey StrEnum, Preference dataclass, DEFAULT_PREFERENCES),
+validate_preference_value (O(1), strict coercion policy), GetPreferences and
+SetPreference use cases, SqlAlchemyPreferenceRepository with atomic
+ON CONFLICT DO UPDATE upsert, PreferencesResponse / UpdatePreferenceRequest schemas,
+and the /api/v1/preferences router (GET + PUT with PreferenceKey path-param). Added
+import-linter contracts (3 new rules) and registered in main.py. 500 tests pass.
+
+**Rationale:**
+Each layer is independently testable with zero framework imports in domain/app
+(enforced by import-linter). Atomic upsert (ADR-0020) is race-free and idempotent.
+Lazy defaults (GetPreferences merges DEFAULT_PREFERENCES over stored rows) means
+no mandatory preferences setup at registration.
+
+**References:**
+- Issue: GH-55
+- ADR-0020: Preferences storage data structure
+- SRS §9.x, FR-P-1, FR-P-3
+
+## [2026-05-29] Commit Summary
+
+**Change Type:** Feature
+**Scope:** Frontend settings feature + context wiring
+
+**Summary:**
+Implemented the full frontend preferences slice: `features/settings/` (Zod schemas,
+api client, usePreferencesQuery, useUpdatePreference, UnitPreferenceControl,
+NotificationTogglesControl, SettingsPage). Reshaped PreferencesContext (removed
+colorScheme, backed by TanStack Query). Wired weightUnit default into WeightEntryForm
++ GoalForm. Wired formatWeight into WeightEntryTable. Added useVisibleAchievements
+for toggle enforcement. Swapped /settings route from placeholder to SettingsPage.
+62 frontend test files pass; lint + typecheck clean.
+
+**Rationale:**
+Context backed by TanStack Query (ADR-0014) so the preferences are server state,
+not local state. Optimistic updates provide instant feedback. Toggle enforcement
+at one place (useVisibleAchievements selector, decision #8) satisfies SRP.
+
+**References:**
+- Issue: GH-55
+- ADR-0020, DDR-0008
+- FR-P-1, FR-P-3
+
+## [2026-05-29] Commit Summary
+
+**Change Type:** Test
+**Scope:** E2E / Playwright
+
+**Summary:**
+Added `e2e/preferences.spec.ts` with 3 tests in serial: seed user + goal, verify
+unit preference changes the weight form default to kg, verify milestone notification
+toggle off suppresses the achievement toast.
+
+**Rationale:**
+E2E tests exercise the full vertical slice from the settings UI through the API and
+back. Serial execution and unique email per run avoid data collisions in CI.
+
+**References:**
+- Issue: GH-55
+- FR-P-1, FR-P-3, DDR-0008
+
+## [2026-05-29] Commit Summary
+
+**Change Type:** Fix
+**Scope:** E2E / WeightEntryForm / GoalForm
+
+**Summary:**
+Fixed two E2E failures in preferences.spec.ts:
+1. `toHaveValue()` on a MUI Select's combobox div — replaced with
+   `locator('input[name="weight_unit"]')` (MUI's hidden native input) and
+   `combobox.click()` + `option.click()` for selection.
+2. RHF `defaultValues` set once at mount: added a `useEffect` in WeightEntryForm
+   and GoalForm that calls `setValue('weight_unit/target_unit', preferences.weightUnit)`
+   when the preferences query resolves after a full-page navigation (which resets the
+   QueryClient cache in the browser).
+
+**Rationale:**
+`page.goto()` in Playwright is a full HTTP navigation — it destroys the QueryClient
+cache. On fresh page load, `usePreferences()` returns the loading fallback ('lbs')
+before the server response arrives. RHF captures this at mount; the `useEffect` sync
+corrects the value once the query resolves.
+
+**References:**
+- Issue: GH-55
+- PR: #67
+
+## [2026-05-29] Commit Summary
+
+**Change Type:** Fix
+**Scope:** Code review — 6 findings (P2-1 through P2-5, P3-1)
+
+**Summary:**
+- P2-1: Scoped preferences query key to userId; disabled query when unauthenticated;
+  cleared preferences cache in clearAuth to prevent cross-user cache leakage.
+- P2-2: handleDismissOne now removes the specific displayed achievement by achievement_id
+  rather than slicing raw queue position 0 (fixes duplicate toast when milestone is hidden
+  but goal_reached is visible).
+- P2-3: Added UniqueConstraint(user_id, pref_key) to UserPreferenceModel __table_args__
+  to mirror migration 0006's UNIQUE constraint in ORM metadata.
+- P2-4: SettingsPage now calls useUpdatePreference directly and passes showSaved as
+  onSuccess; "Preferences saved" only fires after the API call succeeds.
+- P2-5: GoalFormWithPrefill initial target_unit now seeds from preferences.weightUnit
+  instead of hardcoded 'lbs' for first-goal create flow.
+- P3-1: UpdatePreferenceRequest.value uses StrictBool | StrictStr to prevent JSON integer
+  1/0 from coercing to True/False.
+
+**References:**
+- Issue: GH-55
+- PR: #67
+
+## [2026-05-29] Commit Summary
+
+**Change Type:** Fix
+**Scope:** GoalsPage / GoalFormWithPrefill
+
+**Summary:**
+Moved usePreferences() call from GoalFormWithPrefill to GoalsPage and passed
+defaultUnit as a prop. GoalFormWithPrefill's nested context subscription
+caused extra async re-renders during form interaction on slow CI machines,
+intermittently breaking the goal-create and achievement-notification E2E specs.
+
+**References:**
+- Issue: GH-55
+- PR: #67

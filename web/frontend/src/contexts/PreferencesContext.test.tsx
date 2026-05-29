@@ -1,7 +1,34 @@
-import { act, renderHook, screen, render } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { render, renderHook, screen } from '@testing-library/react';
+import type { ReactNode } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 import { PreferencesProvider, usePreferences } from './PreferencesContext';
+
+vi.mock('./AuthContext', () => ({
+  useAuth: () => ({ user: { user_id: 1 }, isAuthenticated: true, isLoading: false }),
+}));
+
+vi.mock('../features/settings/api/preferences-client', () => ({
+  preferencesClient: {
+    fetch: vi.fn().mockResolvedValue({
+      weight_unit: 'lbs',
+      notify_achievement: true,
+      notify_milestone: true,
+      notify_streak: true,
+    }),
+    update: vi.fn(),
+  },
+}));
+
+function wrapper({ children }: { children: ReactNode }) {
+  const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  return (
+    <QueryClientProvider client={qc}>
+      <PreferencesProvider>{children}</PreferencesProvider>
+    </QueryClientProvider>
+  );
+}
 
 describe('usePreferences', () => {
   it('throws when used outside PreferencesProvider', () => {
@@ -10,65 +37,51 @@ describe('usePreferences', () => {
     spy.mockRestore();
   });
 
-  it('defaults weightUnit to lbs', () => {
-    const { result } = renderHook(() => usePreferences(), {
-      wrapper: PreferencesProvider,
-    });
+  it('defaults weightUnit to lbs while loading', () => {
+    const { result } = renderHook(() => usePreferences(), { wrapper });
     expect(result.current.preferences.weightUnit).toBe('lbs');
   });
 
-  it('defaults colorScheme to light', () => {
-    const { result } = renderHook(() => usePreferences(), {
-      wrapper: PreferencesProvider,
-    });
-    expect(result.current.preferences.colorScheme).toBe('light');
+  it('exposes notifyAchievement default true', () => {
+    const { result } = renderHook(() => usePreferences(), { wrapper });
+    expect(result.current.preferences.notifyAchievement).toBe(true);
   });
 
-  it('exposes a setPreferences function', () => {
-    const { result } = renderHook(() => usePreferences(), {
-      wrapper: PreferencesProvider,
-    });
-    expect(typeof result.current.setPreferences).toBe('function');
+  it('exposes notifyMilestone default true', () => {
+    const { result } = renderHook(() => usePreferences(), { wrapper });
+    expect(result.current.preferences.notifyMilestone).toBe(true);
   });
 
-  it('setPreferences updates weightUnit', () => {
-    const { result } = renderHook(() => usePreferences(), {
-      wrapper: PreferencesProvider,
-    });
-    act(() => {
-      result.current.setPreferences({ weightUnit: 'kg' });
-    });
-    expect(result.current.preferences.weightUnit).toBe('kg');
+  it('exposes notifyStreak default true', () => {
+    const { result } = renderHook(() => usePreferences(), { wrapper });
+    expect(result.current.preferences.notifyStreak).toBe(true);
   });
 
-  it('setPreferences updates colorScheme', () => {
-    const { result } = renderHook(() => usePreferences(), {
-      wrapper: PreferencesProvider,
-    });
-    act(() => {
-      result.current.setPreferences({ colorScheme: 'dark' });
-    });
-    expect(result.current.preferences.colorScheme).toBe('dark');
+  it('exposes isLoading boolean', () => {
+    const { result } = renderHook(() => usePreferences(), { wrapper });
+    expect(typeof result.current.isLoading).toBe('boolean');
   });
 
-  it('partial setPreferences preserves unchanged fields', () => {
-    const { result } = renderHook(() => usePreferences(), {
-      wrapper: PreferencesProvider,
-    });
-    act(() => {
-      result.current.setPreferences({ colorScheme: 'dark' });
-    });
-    // weightUnit should remain at its default.
-    expect(result.current.preferences.weightUnit).toBe('lbs');
+  it('exposes a setPreference function', () => {
+    const { result } = renderHook(() => usePreferences(), { wrapper });
+    expect(typeof result.current.setPreference).toBe('function');
+  });
+
+  it('does not have colorScheme on the preferences object', () => {
+    const { result } = renderHook(() => usePreferences(), { wrapper });
+    // colorScheme is FR-P-2, deferred. Asserting it is not present.
+    expect('colorScheme' in result.current.preferences).toBe(false);
   });
 });
 
 describe('PreferencesProvider', () => {
   it('renders children', () => {
     render(
-      <PreferencesProvider>
-        <span>child node</span>
-      </PreferencesProvider>,
+      <QueryClientProvider client={new QueryClient()}>
+        <PreferencesProvider>
+          <span>child node</span>
+        </PreferencesProvider>
+      </QueryClientProvider>,
     );
     expect(screen.getByText('child node')).toBeInTheDocument();
   });

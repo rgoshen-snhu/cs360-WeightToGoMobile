@@ -8,6 +8,19 @@ import { ApiError } from '../../../lib/api-client';
 import { weightClient } from '../api/weight-client';
 import { WeightEntryFormPage } from './WeightEntryFormPage';
 
+vi.mock('../../../contexts/PreferencesContext', () => ({
+  usePreferences: () => ({
+    preferences: {
+      weightUnit: 'lbs',
+      notifyAchievement: true,
+      notifyMilestone: true,
+      notifyStreak: true,
+    },
+    isLoading: false,
+    setPreference: vi.fn(),
+  }),
+}));
+
 function wrapper(initialPath = '/weight/new') {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return function Wrap({ children }: { children: React.ReactNode }) {

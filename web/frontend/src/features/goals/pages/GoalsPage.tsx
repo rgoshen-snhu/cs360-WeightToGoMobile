@@ -30,6 +30,7 @@ import { useAbandonGoal } from '../hooks/useAbandonGoal';
 import { useSetGoal } from '../hooks/useSetGoal';
 import { useUpdateGoal } from '../hooks/useUpdateGoal';
 import type { GoalFormValues } from '../schemas/goal-schemas';
+import { usePreferences } from '../../../contexts/PreferencesContext';
 
 function mapError(err: unknown): string {
   if (err instanceof ApiError) {
@@ -45,6 +46,7 @@ export function GoalsPage() {
   const setGoal = useSetGoal();
   const updateGoal = useUpdateGoal();
   const abandonGoal = useAbandonGoal();
+  const { preferences } = usePreferences();
 
   const [isEditing, setIsEditing] = useState(false);
   const [conflictError, setConflictError] = useState<string | null>(null);
@@ -131,6 +133,7 @@ export function GoalsPage() {
           onSubmit={handleCreate}
           conflictError={conflictError}
           isSubmitting={setGoal.isPending}
+          defaultUnit={preferences.weightUnit}
         />
       </Box>
     );
@@ -230,15 +233,18 @@ function GoalFormWithPrefill({
   onSubmit,
   conflictError,
   isSubmitting,
+  defaultUnit,
 }: {
   onSubmit: (values: GoalFormValues) => void;
   conflictError: string | null;
   isSubmitting: boolean;
+  defaultUnit: 'lbs' | 'kg';
 }) {
   const [isPrefetching, setIsPrefetching] = useState(true);
   const [prefillValues, setPrefillValues] = useState<Partial<GoalFormValues>>({
     goal_type: 'lose',
-    target_unit: 'lbs',
+    // Use the user's preferred unit when there is no latest entry to infer from.
+    target_unit: defaultUnit,
   });
 
   useEffect(() => {

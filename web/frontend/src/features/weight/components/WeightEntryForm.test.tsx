@@ -5,6 +5,19 @@ import { describe, expect, it, vi } from 'vitest';
 import { WeightEntryForm } from './WeightEntryForm';
 import type { WeightEntryFormValues } from '../schemas/weight-schemas';
 
+vi.mock('../../../contexts/PreferencesContext', () => ({
+  usePreferences: () => ({
+    preferences: {
+      weightUnit: 'lbs',
+      notifyAchievement: true,
+      notifyMilestone: true,
+      notifyStreak: true,
+    },
+    isLoading: false,
+    setPreference: vi.fn(),
+  }),
+}));
+
 const TODAY = new Date().toISOString().split('T')[0]!;
 
 describe('WeightEntryForm', () => {

@@ -8,6 +8,19 @@ import * as goalClientModule from '../api/goal-client';
 import * as weightClientModule from '../../weight/api/weight-client';
 import { GoalsPage } from './GoalsPage';
 
+vi.mock('../../../contexts/PreferencesContext', () => ({
+  usePreferences: () => ({
+    preferences: {
+      weightUnit: 'lbs',
+      notifyAchievement: true,
+      notifyMilestone: true,
+      notifyStreak: true,
+    },
+    isLoading: false,
+    setPreference: vi.fn(),
+  }),
+}));
+
 // Re-used mock to suppress abandon/update mutations
 function mockMutations() {
   vi.spyOn(goalClientModule.goalClient, 'abandon').mockResolvedValue(undefined);

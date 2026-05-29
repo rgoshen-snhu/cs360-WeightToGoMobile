@@ -1,56 +1,66 @@
 /**
  * User preferences context for the Weigh to Go! web application.
  *
- * Tracks display preferences (weight unit and colour scheme). Phase 6 will
- * persist these to localStorage and sync them with the user's API profile.
+ * Backed by TanStack Query (ADR-0014: Query = server state).
+ * Falls back to DEFAULT_PREFERENCES while the initial fetch is in flight.
+ * Query is scoped to the authenticated user — prevents /login from firing
+ * an unauthenticated fetch and prevents stale data after user switching.
+ * colorScheme (FR-P-2 / theme) is deferred to the Final enhancement.
  *
  * SRS §10.4 governs the preferences management strategy.
  */
 
-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useContext, useMemo, type ReactNode } from 'react';
 
-export interface Preferences {
-  /**
-   * Unit used for weight display and entry throughout the application.
-   * Defaults to 'lbs' per the SRS default locale assumption.
-   */
-  weightUnit: 'lbs' | 'kg';
-  /**
-   * UI colour scheme preference.
-   * Defaults to 'light'; dark mode is implemented in Phase 7.
-   */
-  colorScheme: 'light' | 'dark';
-}
+import { useAuth } from './AuthContext';
+import { usePreferencesQuery } from '../features/settings/hooks/usePreferencesQuery';
+import { useUpdatePreference } from '../features/settings/hooks/useUpdatePreference';
+import {
+  DEFAULT_PREFERENCES,
+  type Preferences,
+} from '../features/settings/schemas/preferences-schemas';
+
+export type { Preferences };
 
 export interface PreferencesContextValue {
   preferences: Preferences;
+  /** Whether the initial preferences fetch is in flight. */
+  isLoading: boolean;
   /**
-   * Merge a partial preferences object into the current state.
-   * Fields not included in the update are preserved unchanged.
+   * Update a single preference key.
+   * Optimistic — immediately reflects the new value; rolls back on error.
+   *
+   * @param key   - The snake_case API key (e.g. 'weight_unit').
+   * @param value - The new value (boolean or string).
    */
-  setPreferences: (partial: Partial<Preferences>) => void;
+  setPreference: (key: string, value: boolean | string) => void;
 }
-
-const DEFAULT_PREFERENCES: Preferences = {
-  weightUnit: 'lbs',
-  colorScheme: 'light',
-};
 
 const PreferencesContext = createContext<PreferencesContextValue | undefined>(undefined);
 
 /**
  * Wrap the component tree that needs access to user preferences.
+ * Requires QueryClientProvider and AuthProvider ancestors.
  */
 export function PreferencesProvider({ children }: { children: ReactNode }) {
-  const [preferences, setPreferencesState] = useState<Preferences>(DEFAULT_PREFERENCES);
+  const { user } = useAuth();
+  const query = usePreferencesQuery(user?.user_id ?? null);
+  const mutation = useUpdatePreference();
 
-  const setPreferences = useCallback((partial: Partial<Preferences>) => {
-    setPreferencesState((prev) => ({ ...prev, ...partial }));
-  }, []);
+  const setPreference = useMemo(
+    () => (key: string, value: boolean | string) => {
+      mutation.mutate({ key: key as Parameters<typeof mutation.mutate>[0]['key'], value });
+    },
+    [mutation],
+  );
 
   const value = useMemo<PreferencesContextValue>(
-    () => ({ preferences, setPreferences }),
-    [preferences, setPreferences],
+    () => ({
+      preferences: query.data ?? DEFAULT_PREFERENCES,
+      isLoading: query.isLoading,
+      setPreference,
+    }),
+    [query.data, query.isLoading, setPreference],
   );
 
   return <PreferencesContext.Provider value={value}>{children}</PreferencesContext.Provider>;
