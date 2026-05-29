@@ -7,6 +7,22 @@ issues were resolved.
 
 ---
 
+## [2026-05-29 23:00] Commit Summary
+
+**Change Type:** Fix
+**Scope:** test_index_usage_postgres
+
+**Summary:**
+Nest env-restore in inner finally so DATABASE_URL is restored even if downgrade raises; tighten EXPLAIN assertion to "Index Scan using"; extract _NFR_P3_THRESHOLD_ROWS constant.
+
+**Rationale:**
+Prevents DATABASE_URL leaking into subsequent SQLite tests on downgrade failure. Precision: "Index Scan using" does not match Bitmap Index Scan.
+
+**References:**
+- Issue: GH-56
+
+---
+
 ## [2026-05-29 22:00] Commit Summary
 
 **Change Type:** Feature

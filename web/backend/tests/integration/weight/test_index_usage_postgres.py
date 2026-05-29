@@ -18,6 +18,7 @@ from sqlalchemy import Engine, create_engine, text
 pytestmark = pytest.mark.postgres
 
 _DSN = os.environ.get("WEIGHTTOGO_TEST_POSTGRES_DSN")
+_NFR_P3_THRESHOLD_ROWS = 150  # must exceed the 100-row SRS §7.2 threshold
 
 
 @pytest.fixture()
@@ -46,12 +47,14 @@ def pg_engine() -> Iterator[Engine]:
         yield engine
     finally:
         engine.dispose()
-        command.downgrade(cfg, "base")  # [G1] DSN MUST be a throwaway test DB
-        if prior_db_url is None:
-            os.environ.pop("DATABASE_URL", None)
-        else:
-            os.environ["DATABASE_URL"] = prior_db_url
-        get_settings.cache_clear()
+        try:
+            command.downgrade(cfg, "base")  # [G1] DSN MUST be a throwaway test DB
+        finally:
+            if prior_db_url is None:
+                os.environ.pop("DATABASE_URL", None)
+            else:
+                os.environ["DATABASE_URL"] = prior_db_url
+            get_settings.cache_clear()
 
 
 def _seed(engine: Engine, n: int = 150) -> int:
@@ -85,7 +88,7 @@ def _seed(engine: Engine, n: int = 150) -> int:
 
 
 def test_list_query_uses_index_not_seqscan(pg_engine: Engine) -> None:
-    uid = _seed(pg_engine, n=150)
+    uid = _seed(pg_engine, n=_NFR_P3_THRESHOLD_ROWS)
     sql = (
         "EXPLAIN SELECT * FROM weight_entries "
         "WHERE user_id = :u AND is_deleted = FALSE "
@@ -93,7 +96,7 @@ def test_list_query_uses_index_not_seqscan(pg_engine: Engine) -> None:
     )
     with pg_engine.connect() as conn:
         plan = "\n".join(row[0] for row in conn.execute(text(sql), {"u": uid}))
-    assert "Index Scan" in plan, plan
+    assert "Index Scan using" in plan, plan
     assert "Seq Scan on weight_entries" not in plan, plan
 
 
