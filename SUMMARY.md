@@ -3063,3 +3063,24 @@ and idempotency. Committed before the migration per §9 "docs first" gate.
 **References:**
 - Issue: GH-55
 - ADR-0020: Preferences storage data structure (EAV key-value)
+
+## [2026-05-29] Commit Summary
+
+**Change Type:** Docs
+**Scope:** Design Decision Records
+
+**Summary:**
+Added DDR-0008 documenting the settings page layout: two-card design (Units +
+Notifications), segmented radio for weight-unit preference, MUI Switch toggles for
+notification preferences, immediate persistence with aria-live save feedback.
+
+**Rationale:**
+Segmented radio exposes both unit options without a dropdown; MUI Switch communicates
+on/off settings semantics; immediate persistence removes the "forgot to save" failure
+mode and matches Android behavior. Streak toggle rendered disabled (not hidden) to
+communicate the coming Step 5 feature without re-layout.
+
+**References:**
+- Issue: GH-55
+- DDR-0008: Settings page layout
+- FR-P-1, FR-P-3
