@@ -68,6 +68,7 @@ class BuildDashboardSummary:
                 user_id=user_id,
                 latest_weight_value=latest_entry.weight_value if latest_entry else None,
                 latest_weight_unit=latest_entry.weight_unit if latest_entry else None,
+                readonly=True,
             )
         )
         active_goal = goal_with_progress if goal_with_progress.goal is not None else None

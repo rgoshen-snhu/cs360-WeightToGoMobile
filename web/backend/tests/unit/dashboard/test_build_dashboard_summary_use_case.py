@@ -134,3 +134,18 @@ def test_goal_exists_with_no_entries_sets_active_goal_with_null_progress() -> No
     result = _run(repo, gag=gag)
     assert result.active_goal is not None  # type: ignore[attr-defined]
     assert result.active_goal.progress is None  # type: ignore[attr-defined]
+
+
+def test_dashboard_does_not_write_when_goal_at_100_percent() -> None:
+    """Dashboard summary must not trigger mark_achieved (readonly GET path)."""
+    repo = MagicMock()
+    repo.get_latest_for_user.return_value = _make_entry()
+    repo.count_for_user.return_value = 1
+    gag = MagicMock()
+    gag.execute.return_value = GoalWithProgress(
+        goal=MagicMock(), progress=MagicMock(), current_value=Decimal("150")
+    )
+    _run(repo, gag=gag)
+    # The dashboard must pass readonly=True — verify via the command argument
+    cmd = gag.execute.call_args.args[0]
+    assert cmd.readonly is True

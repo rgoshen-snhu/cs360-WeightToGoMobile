@@ -22,11 +22,14 @@ class GetActiveGoalWithProgressCommand:
         latest_weight_unit: The unit of the most recent weight entry, or
             ``None`` when no entries exist.  Must accompany
             ``latest_weight_value``.
+        readonly: When ``True``, skip the mark-achieved write so callers on
+            safe HTTP methods (GET) do not mutate goal state.
     """
 
     user_id: int
     latest_weight_value: Decimal | None
     latest_weight_unit: str | None
+    readonly: bool = False
 
 
 @dataclass(frozen=True)
@@ -91,7 +94,7 @@ class GetActiveGoalWithProgress:
             target=goal.target_value,
         )
 
-        if progress.percent >= 100 and not goal.is_achieved:
+        if progress.percent >= 100 and not goal.is_achieved and not command.readonly:
             goal.mark_achieved()
             self._repo.save(goal)
 

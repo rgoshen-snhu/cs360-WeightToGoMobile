@@ -7,6 +7,22 @@ issues were resolved.
 
 ---
 
+## [2026-05-29 24:00] Commit Summary
+
+**Change Type:** Fix
+**Scope:** dashboard / goals application
+
+**Summary:**
+Add `readonly: bool = False` field to `GetActiveGoalWithProgressCommand`; guard the `mark_achieved` write with `not command.readonly`; pass `readonly=True` from `BuildDashboardSummary.execute()` so the GET `/dashboard/summary` endpoint never mutates goal state.
+
+**Rationale:**
+GET /dashboard/summary was committing a `mark_achieved` write as a side-effect of reading. Read endpoints must not write. The write-on-completion is preserved on the goals router (default `readonly=False`). Two new TDD tests were added: one in the dashboard unit tests (verifying `readonly=True` is passed in the command), one in the goals use case unit tests (verifying `readonly=True` skips the save).
+
+**References:**
+- Issue: GH-56
+
+---
+
 ## [2026-05-29 23:00] Commit Summary
 
 **Change Type:** Fix

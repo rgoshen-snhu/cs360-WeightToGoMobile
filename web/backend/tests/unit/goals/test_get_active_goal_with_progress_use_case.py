@@ -52,6 +52,7 @@ def _run(
     user_id: int = 1,
     latest_weight_value: Decimal | None = None,
     latest_weight_unit: str | None = None,
+    readonly: bool = False,
 ) -> GoalWithProgress:
     uc = GetActiveGoalWithProgress(goal_repo=repo)
     return uc.execute(
@@ -59,6 +60,7 @@ def _run(
             user_id=user_id,
             latest_weight_value=latest_weight_value,
             latest_weight_unit=latest_weight_unit,
+            readonly=readonly,
         )
     )
 
@@ -148,6 +150,17 @@ def test_active_goal_progress_with_kg_entry_and_lbs_goal() -> None:
 
 
 # ── gain goal ─────────────────────────────────────────────────────────────────
+
+
+def test_readonly_skips_mark_achieved() -> None:
+    """readonly=True must not trigger the mark_achieved write."""
+    goal = _make_goal(start_value="200", target_value="150")
+    repo = _make_repo(active_goal=goal)
+
+    _run(repo, latest_weight_value=Decimal("150"), latest_weight_unit="lbs", readonly=True)
+
+    assert goal.is_achieved is False
+    repo.save.assert_not_called()
 
 
 def test_gain_goal_progress_halfway() -> None:
