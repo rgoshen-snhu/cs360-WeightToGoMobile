@@ -9,6 +9,21 @@ issues were resolved.
 
 ## [2026-05-28] Commit Summary
 
+**Change Type:** Fix
+**Scope:** CI/CD — Playwright E2E pipeline on PR #63 (stayed red after the code fix was already committed)
+
+**Summary:**
+PR #63's E2E job kept failing on two goal tests — `goal-create.spec.ts:24` ("navigate to /goals and fill the goal form") and `goal-a11y.spec.ts:43` ("/goals with active goal") — both timing out on `getByRole('progressbar')`. The root cause was operational, not code: the two fix commits `de90b94` (UpdateGoal invariants) and `be558fe` (the actual progressbar fix: empty-string `target_date` → `|| null`) were committed locally but never pushed to `snhu` (the branch had no upstream). CI was still testing `53ff8e4`, whose `GoalsPage.tsx` used `?? null`, so a blank date input sent `target_date: ""`, the backend returned 422, and `handleCreate` (which only surfaces 409s) silently swallowed it — leaving the form on screen with no progress bar. Verified the already-committed fix locally (backend 397 pytest + mypy clean; frontend 274 vitest + tsc clean; the two previously-failing goal specs now 6/6 green), then pushed `53ff8e4..be558fe` to `snhu`. The re-triggered pipeline is green on `be558fe`: E2E, Frontend CI, Backend CI, and Security Audit all pass.
+
+**Bug Fix Context:**
+Diagnosed from the failed run's Playwright trace (run 26612722219, headSha 53ff8e4): the `POST /api/v1/goals` network entry showed request body `{"target_date":""}` and a 422 response (`date_from_datetime_parsing — input is too short`); the failure snapshot showed the filled form with no error alert, confirming the swallowed 422. `git show 53ff8e4:.../GoalsPage.tsx` confirmed line 65 used `?? null` (passes `""` through) versus `|| null` at local `HEAD`. The underlying code fix is documented in the `be558fe` entry below; this entry records why the pipeline remained red afterward (unpushed commits) and the local-verify-then-push remediation. Lesson: a feature branch with no upstream silently leaves fixes out of CI — confirm the failing run's `headSha` matches local `HEAD` before assuming the code is wrong.
+
+**References:**
+- PR #63 / GH-53 (Phase 1 goals feature branch)
+- Failed E2E run 26612722219 (53ff8e4) → green E2E run 26614711972 (be558fe)
+
+## [2026-05-28] Commit Summary
+
 **Change Type:** Chore
 **Scope:** Closeout — Phase 1 PR opened (GH-63), issue #53 acceptance criteria confirmed
 
