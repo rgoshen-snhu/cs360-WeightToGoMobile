@@ -160,6 +160,23 @@ type = "forbidden"
 source_modules = ["weighttogo.dashboard.application"]
 forbidden_modules = ["fastapi", "sqlalchemy", "pydantic", "alembic", "starlette"]
 
+# ── Achievements bounded context ───────────────────────────────────────────
+
+[[tool.importlinter.contracts]]
+name = "achievements: Clean Architecture layer ordering"
+type = "layers"
+containers = ["weighttogo.achievements"]
+layers = ["interface", "infrastructure", "application", "domain"]
+
+[[tool.importlinter.contracts]]
+name = "achievements: domain and application must not import frameworks"
+type = "forbidden"
+source_modules = [
+    "weighttogo.achievements.domain",
+    "weighttogo.achievements.application",
+]
+forbidden_modules = ["fastapi", "sqlalchemy", "pydantic", "alembic", "starlette"]
+
 # ── Shared cross-cutting isolation ─────────────────────────────────────────
 
 [[tool.importlinter.contracts]]
@@ -170,4 +187,5 @@ forbidden_modules = [
     "weighttogo.auth",
     "weighttogo.goals",
     "weighttogo.weight_tracking",
+    "weighttogo.achievements",
 ]

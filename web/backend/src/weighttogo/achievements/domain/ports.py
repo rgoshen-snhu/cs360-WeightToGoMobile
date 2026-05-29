@@ -58,6 +58,21 @@ class IAchievementRepository(Protocol):
         """
         ...
 
+    def has_goal_reached_been_recorded(self, goal_id: int) -> bool:
+        """Return ``True`` when a goal_reached achievement exists for *goal_id*.
+
+        Used by ``DetectAchievements`` as the in-memory idempotency guard for
+        the ``goal_reached`` achievement type, complementing the DB partial
+        unique index backstop (ADR-0019).
+
+        Args:
+            goal_id: The goal's primary key.
+
+        Returns:
+            ``True`` if a ``goal_reached`` achievement row exists for this goal.
+        """
+        ...
+
     def list_for_user(self, user_id: int, *, limit: int) -> list[Achievement]:
         """Return the most recent achievements for *user_id*, newest first.
 

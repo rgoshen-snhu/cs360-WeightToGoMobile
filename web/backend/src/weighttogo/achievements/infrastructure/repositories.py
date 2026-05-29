@@ -99,6 +99,21 @@ class SqlAlchemyAchievementRepository:
         )
         return _to_domain(row) if row else None
 
+    def has_goal_reached_been_recorded(self, goal_id: int) -> bool:
+        """Return ``True`` when a goal_reached achievement exists for *goal_id*.
+
+        Args:
+            goal_id: The goal's primary key.
+
+        Returns:
+            ``True`` if a ``goal_reached`` row exists for this goal.
+        """
+        return (
+            self._session.query(AchievementModel)
+            .filter_by(goal_id=goal_id, achievement_type=AchievementType.GOAL_REACHED)
+            .first()
+        ) is not None
+
     def list_for_user(self, user_id: int, *, limit: int) -> list[Achievement]:
         """Return the most recent achievements for *user_id*, newest first.
 
