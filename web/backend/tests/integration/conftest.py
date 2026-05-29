@@ -22,6 +22,7 @@ from sqlalchemy.pool import StaticPool
 
 from weighttogo.auth.infrastructure.models import Base
 from weighttogo.auth.interface.router import limiter
+from weighttogo.goals.infrastructure.models import GoalModel  # noqa: F401
 from weighttogo.main import app
 from weighttogo.shared.db import get_db_session
 from weighttogo.weight_tracking.infrastructure.models import WeightEntryModel  # noqa: F401

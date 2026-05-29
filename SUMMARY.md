@@ -10,6 +10,21 @@ issues were resolved.
 ## [2026-05-28] Commit Summary
 
 **Change Type:** Feature
+**Scope:** Backend — goals migration 0003, ORM model, and repository (issue Tasks 3 & 6)
+
+**Summary:**
+Alembic migration `0003_goals` creates the `goals` table per SRS §8.2.4 with 7 CHECK constraints (goal_type, target/start value bounds, target_unit, achieved-consistency) and the partial unique index `idx_goals_one_active_per_user`. Critically, the index uses BOTH `postgresql_where` AND `sqlite_where` — without `sqlite_where`, SQLite would enforce a full UNIQUE ON goals(user_id), permanently preventing abandon-then-recreate. `GoalModel` defines the same index in `__table_args__` (so `create_all` builds it in unit tests). `SqlAlchemyGoalRepository.save()` catches `IntegrityError` and re-raises `ActiveGoalAlreadyExistsError` (race backstop). `GoalModel` also registered in `tests/integration/conftest.py` for `create_all`. 18 infra tests (5 migration up/down, 2 model, 11 repo including partial-index constraint and abandon-recreate).
+
+**Rationale:**
+The dual `postgresql_where`/`sqlite_where` is the key correctness insight: migration 0002 only used `postgresql_where` (fine for weight_entries since a user legitimately only ever has one active entry-per-date), but for goals the constraint must allow multiple rows (past + active), so the SQLite fallback to a full unique index is semantically wrong.
+
+**References:**
+- Issue: GH-53
+- SRS v2 §8.2.4 (goals schema)
+
+## [2026-05-28] Commit Summary
+
+**Change Type:** Feature
 **Scope:** Backend — goals application use cases (FR-G-1..3)
 
 **Summary:**
