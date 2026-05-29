@@ -7,10 +7,16 @@ import { dashboardClient } from '../api/dashboard-client';
 import type { DashboardSummaryResponse } from '../api/dashboard-client';
 import { DashboardPage } from './DashboardPage';
 
+const noTrend = {
+  rate_of_change: { weekly_rate: null, unit: null, reason: 'insufficient_data' },
+  trend: [],
+} satisfies Pick<DashboardSummaryResponse, 'rate_of_change' | 'trend'>;
+
 const emptySummary: DashboardSummaryResponse = {
   latest_entry: null,
   total_entries: 0,
   active_goal: null,
+  ...noTrend,
 };
 
 const populatedSummary: DashboardSummaryResponse = {
@@ -25,6 +31,8 @@ const populatedSummary: DashboardSummaryResponse = {
   },
   total_entries: 1,
   active_goal: null,
+  rate_of_change: { weekly_rate: -0.8, unit: 'lbs', reason: null },
+  trend: [{ observation_date: '2026-05-20', weight_value: 175.5, weight_unit: 'lbs' }],
 };
 
 function wrapper({ children }: { children: React.ReactNode }) {
@@ -82,6 +90,7 @@ describe('DashboardPage', () => {
         progress_percent: null,
         current_value: null,
       },
+      ...noTrend,
     };
     vi.spyOn(dashboardClient, 'summary').mockResolvedValue(summaryWithGoalNoEntries);
     render(<DashboardPage />, { wrapper });
