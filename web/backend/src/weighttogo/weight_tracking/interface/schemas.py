@@ -13,6 +13,8 @@ from typing import Literal
 
 from pydantic import BaseModel, Field, field_validator
 
+from weighttogo.achievements.interface.schemas import AchievementResponse
+
 
 class WeightEntryRequest(BaseModel):
     """Request body for POST and PUT /api/v1/weight-entries (SRS §9.4).
@@ -58,6 +60,7 @@ class WeightEntryResponse(BaseModel):
     notes: str | None
     created_at: datetime
     updated_at: datetime
+    newly_earned_achievements: list[AchievementResponse] = []
 
     model_config = {"from_attributes": True}
 

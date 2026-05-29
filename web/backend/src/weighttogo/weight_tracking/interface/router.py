@@ -18,10 +18,22 @@ from datetime import date
 
 import structlog
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, status
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from weighttogo.achievements.application.detect_achievements import (
+    DetectAchievements,
+    DetectAchievementsCommand,
+)
+from weighttogo.achievements.domain.entities import Achievement, AchievementType
+from weighttogo.achievements.infrastructure.repositories import SqlAlchemyAchievementRepository
+from weighttogo.achievements.interface.schemas import (
+    AchievementResponse as AchievementResponseSchema,
+)
 from weighttogo.auth.interface.router import get_current_user_id, limiter
+from weighttogo.goals.infrastructure.repositories import SqlAlchemyGoalRepository
 from weighttogo.shared.db import get_db_session
+from weighttogo.shared.units import convert_weight
 from weighttogo.weight_tracking.application.create_weight_entry import (
     CreateWeightEntry,
     CreateWeightEntryCommand,
@@ -130,7 +142,62 @@ def create_weight_entry(
         ) from exc
 
     logger.info("weight_entry_created", entry_id=entry.entry_id, user_id=current_user_id)
-    return WeightEntryResponse.model_validate(entry)
+
+    # ── Detect achievements at the composition root (interface layer) ─────────
+    # weight_tracking domain never imports achievements — wiring happens here
+    # at the interface layer, keeping both domains isolated (ADR-0019).
+    newly_earned: list[AchievementResponseSchema] = []
+    goal_repo = SqlAlchemyGoalRepository(session)
+    goal = goal_repo.get_active_for_user(current_user_id)
+    if goal is not None and goal.goal_id is not None:
+        # Fix 2 (unit safety): normalise start, target, and current weight to
+        # lbs — the FR-Ach-2 threshold basis — before detection.  Without this,
+        # a kg goal paired with a lbs entry (or vice-versa) compares
+        # incompatible numbers and produces wrong or permanently-stuck milestones.
+        start_lbs = convert_weight(goal.start_value, goal.target_unit, "lbs")
+        target_lbs = convert_weight(goal.target_value, goal.target_unit, "lbs")
+        current_lbs = convert_weight(entry.weight_value, entry.weight_unit, "lbs")
+
+        ach_list: list[Achievement] = []
+        try:
+            # Fix 1 (data integrity): run achievement writes inside a SAVEPOINT
+            # so that a duplicate-constraint IntegrityError rolls back only the
+            # achievement inserts, leaving the already-flushed weight entry
+            # intact in the outer transaction.  A plain session.rollback() would
+            # cancel the weight entry too while still returning a 201 to the
+            # client (Codex adversarial review finding).
+            with session.begin_nested():
+                ach_list = DetectAchievements(
+                    achievement_repo=SqlAlchemyAchievementRepository(session)
+                ).execute(
+                    DetectAchievementsCommand(
+                        user_id=current_user_id,
+                        goal_id=goal.goal_id,
+                        goal_type=str(goal.goal_type),
+                        start_value=start_lbs,
+                        target_value=target_lbs,
+                        current_weight=current_lbs,
+                    )
+                )
+        except IntegrityError:
+            logger.warning(
+                "achievement_duplicate_ignored",
+                goal_id=goal.goal_id,
+                user_id=current_user_id,
+            )
+
+        newly_earned = [AchievementResponseSchema.model_validate(a) for a in ach_list]
+
+        # Fix 3 (goal state): when this entry reaches the target, mark the goal
+        # achieved in the same transaction.  FR-G-4 requires it; without this the
+        # goal stays active, blocking a new goal and misleading progress reads.
+        if any(a.achievement_type == AchievementType.GOAL_REACHED for a in ach_list):
+            goal.mark_achieved()
+            goal_repo.save(goal)
+
+    response = WeightEntryResponse.model_validate(entry)
+    response.newly_earned_achievements = newly_earned
+    return response
 
 
 # ── GET /weight-entries ───────────────────────────────────────────────────────

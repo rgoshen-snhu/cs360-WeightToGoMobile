@@ -3022,3 +3022,23 @@ The timezone bug was always latent but only manifested at night in US timezones 
 
 **References:**
 - PR #63 / GH-53 (Phase 1 goals feature branch)
+
+## [2026-05-29] Commit Summary
+
+**Change Type:** Feature
+**Scope:** achievements (new bounded context), weight_tracking/interface, frontend/achievements
+
+**Summary:**
+Implemented FR-Ach-1, FR-Ach-2, FR-G-4, and FR-N-1 — the primary "algorithms and data structures" showcase for Milestone Three. New `achievements` bounded context with full four-layer Clean Architecture structure (domain / application / infrastructure / interface). `detect_milestones()` is a pure O(k) function (k=4 thresholds) with an in-memory frozenset idempotency guard. The `DetectAchievements` use case orchestrates detection synchronously at the weight-entry POST composition root, returning `newly_earned_achievements` in the same HTTP response so the frontend can react immediately with a toast. `AchievementsPage` replaces the M2 placeholder. `AchievementNotification` (MUI Snackbar, role="status", ARIA live region) queues and shows toasts for each earned achievement, delaying navigation until the queue drains.
+
+**Rationale:**
+Synchronous detection was chosen over event-driven so achievements appear in the same API response (no polling required). Two partial unique indexes replace the single UNIQUE constraint because PostgreSQL and SQLite both treat NULL != NULL in unique indexes, which would allow duplicate goal_reached rows. The frozenset guard is the fast idempotency check; the DB indexes are the race-condition backstop (ADR-0019). Toast over modal because milestones are routine — a modal would over-interrupt; contextual copy differentiates goal_reached from milestone achievements.
+
+**Bug Fix Context (if applicable):**
+N/A
+
+**References:**
+- Issue: GH-54
+- ADR-0019: Milestone detection algorithm
+- DDR-0007: Achievement notification UI
+- FR-Ach-1, FR-Ach-2, FR-G-4, FR-N-1

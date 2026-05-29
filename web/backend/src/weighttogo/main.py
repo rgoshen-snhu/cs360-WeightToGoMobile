@@ -14,6 +14,7 @@ from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 
+from weighttogo.achievements.interface.router import router as achievements_router
 from weighttogo.auth.interface.router import limiter
 from weighttogo.auth.interface.router import router as auth_router
 from weighttogo.config import get_settings
@@ -105,6 +106,7 @@ async def add_security_headers(request: Request, call_next: object) -> object:
 app.include_router(auth_router, prefix="/api/v1")
 app.include_router(weight_router, prefix="/api/v1")
 app.include_router(goals_router, prefix="/api/v1")
+app.include_router(achievements_router, prefix="/api/v1")
 app.include_router(dashboard_router, prefix="/api/v1")
 
 
