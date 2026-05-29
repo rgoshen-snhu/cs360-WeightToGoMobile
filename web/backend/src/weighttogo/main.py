@@ -18,6 +18,7 @@ from weighttogo.auth.interface.router import limiter
 from weighttogo.auth.interface.router import router as auth_router
 from weighttogo.config import get_settings
 from weighttogo.dashboard.interface.router import router as dashboard_router
+from weighttogo.goals.interface.router import router as goals_router
 from weighttogo.interface.middleware.csrf import CsrfOriginRefererMiddleware
 from weighttogo.shared.error_handlers import validation_exception_handler
 from weighttogo.shared.logging import configure_logging
@@ -103,6 +104,7 @@ async def add_security_headers(request: Request, call_next: object) -> object:
 
 app.include_router(auth_router, prefix="/api/v1")
 app.include_router(weight_router, prefix="/api/v1")
+app.include_router(goals_router, prefix="/api/v1")
 app.include_router(dashboard_router, prefix="/api/v1")
 
 

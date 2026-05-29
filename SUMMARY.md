@@ -10,6 +10,21 @@ issues were resolved.
 ## [2026-05-28] Commit Summary
 
 **Change Type:** Feature
+**Scope:** Backend — goals interface (schemas, router, main.py registration) + IDOR tests (issue Tasks 7 & 10)
+
+**Summary:**
+5-endpoint goals router per SRS §9.6: `POST /goals` (201/409), `GET /goals/active` (200 nullable — goal=None when none, never 404), `GET /goals` (list), `PUT /goals/{id}` (200/404), `DELETE /goals/{id}` (204/404). `GoalCreateRequest.model_validator` enforces direction (lose⇒target<start, gain⇒target>start, target≠start). `GET /active` fetches latest weight at the composition root and passes it to `GetActiveGoalWithProgress` — cross-domain without polluting the `goals.domain` layer. Registered in `main.py`. 30 integration tests including auth guards, 409 conflict, progress computation, IDOR 404s, abandon-recreate. Architecture import-linter: 9/9 contracts pass. 387 total tests, mypy strict clean.
+
+**Rationale:**
+`GET /goals/active` returns 200+null (not 404) on no-goal to keep the frontend api-client error-free on the normal "no goal set yet" path. 404 stays reserved for IDOR on /{goal_id}, closing the information-disclosure side-channel (SRS §9.2). The cross-domain fetch at the router (composition root) keeps `goals.domain` pure and lets the import-linter continue to pass.
+
+**References:**
+- Issue: GH-53
+- SRS v2 §9.6, §6.3 FR-G-3, §7.1 (IDOR as 404)
+
+## [2026-05-28] Commit Summary
+
+**Change Type:** Feature
 **Scope:** Backend — goals migration 0003, ORM model, and repository (issue Tasks 3 & 6)
 
 **Summary:**
