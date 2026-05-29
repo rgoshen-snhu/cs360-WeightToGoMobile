@@ -7,6 +7,22 @@ issues were resolved.
 
 ---
 
+## [2026-05-29 15:00] Commit Summary
+
+**Change Type:** Test
+**Scope:** test_build_dashboard_summary_use_case
+
+**Summary:**
+Add test for goal-exists/no-entries branch (progress=None, active_goal non-None)
+
+**Rationale:**
+Covers the path where GetActiveGoalWithProgress returns a goal but progress is None because no weight entries exist yet.
+
+**References:**
+- Issue: GH-56
+
+---
+
 ## [2026-05-29 14:30] Commit Summary
 
 **Change Type:** Feature

@@ -122,3 +122,15 @@ def test_no_entry_passes_none_to_goal_use_case() -> None:
     cmd = gag.execute.call_args.args[0]
     assert cmd.latest_weight_value is None
     assert cmd.latest_weight_unit is None
+
+
+def test_goal_exists_with_no_entries_sets_active_goal_with_null_progress() -> None:
+    """active_goal is non-None when a goal exists even if progress is None (no entries)."""
+    repo = MagicMock()
+    repo.get_latest_for_user.return_value = None
+    repo.count_for_user.return_value = 0
+    gag = MagicMock()
+    gag.execute.return_value = GoalWithProgress(goal=MagicMock(), progress=None, current_value=None)
+    result = _run(repo, gag=gag)
+    assert result.active_goal is not None  # type: ignore[attr-defined]
+    assert result.active_goal.progress is None  # type: ignore[attr-defined]
