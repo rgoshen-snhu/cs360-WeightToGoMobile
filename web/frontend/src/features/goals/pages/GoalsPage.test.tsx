@@ -190,4 +190,56 @@ describe('GoalsPage', () => {
     await userEvent.click(abandonBtn);
     expect(goalClientModule.goalClient.abandon).toHaveBeenCalledWith(1);
   });
+
+  it('shows action error when handleCreate fails with non-409', async () => {
+    vi.spyOn(goalClientModule.goalClient, 'getActive').mockResolvedValue({
+      goal: null,
+      progress_percent: null,
+      current_value: null,
+    });
+    vi.spyOn(goalClientModule.goalClient, 'create').mockRejectedValue(
+      Object.assign(new Error('Server error'), { status: 500 }),
+    );
+    render(<GoalsPage />, { wrapper: Wrapper });
+    const submitBtn = await screen.findByRole('button', { name: /set goal/i });
+    // Fill required fields so the form passes Zod validation
+    await userEvent.type(screen.getByLabelText(/starting weight/i), '200');
+    await userEvent.type(screen.getByLabelText(/target weight/i), '150');
+    await userEvent.click(submitBtn);
+    await screen.findByText(/server error|unexpected error/i);
+  });
+
+  it('shows action error when handleUpdate fails', async () => {
+    vi.spyOn(goalClientModule.goalClient, 'getActive').mockResolvedValue({
+      goal: MOCK_ACTIVE_GOAL,
+      progress_percent: null,
+      current_value: null,
+    });
+    vi.spyOn(goalClientModule.goalClient, 'update').mockRejectedValue(
+      Object.assign(new Error('Update failed'), { status: 500 }),
+    );
+    render(<GoalsPage />, { wrapper: Wrapper });
+    const editBtn = await screen.findByRole('button', { name: /edit goal/i });
+    await userEvent.click(editBtn);
+    const targetInput = screen.getByLabelText(/target weight/i);
+    await userEvent.clear(targetInput);
+    await userEvent.type(targetInput, '145');
+    await userEvent.click(screen.getByRole('button', { name: /update goal/i }));
+    await screen.findByText(/server error|unexpected error/i);
+  });
+
+  it('shows action error when handleAbandon fails', async () => {
+    vi.spyOn(goalClientModule.goalClient, 'getActive').mockResolvedValue({
+      goal: MOCK_ACTIVE_GOAL,
+      progress_percent: null,
+      current_value: null,
+    });
+    vi.spyOn(goalClientModule.goalClient, 'abandon').mockRejectedValue(
+      Object.assign(new Error('Abandon failed'), { status: 500 }),
+    );
+    render(<GoalsPage />, { wrapper: Wrapper });
+    const abandonBtn = await screen.findByRole('button', { name: /abandon goal/i });
+    await userEvent.click(abandonBtn);
+    await screen.findByText(/server error|unexpected error/i);
+  });
 });

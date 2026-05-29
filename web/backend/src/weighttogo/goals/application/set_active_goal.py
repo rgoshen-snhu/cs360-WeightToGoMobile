@@ -9,6 +9,7 @@ from decimal import Decimal
 from weighttogo.goals.domain.entities import Goal, GoalType
 from weighttogo.goals.domain.exceptions import ActiveGoalAlreadyExistsError
 from weighttogo.goals.domain.ports import IGoalRepository
+from weighttogo.goals.domain.validation import validate_target_direction
 
 
 @dataclass(frozen=True)
@@ -49,6 +50,9 @@ class SetActiveGoal:
         if self._repo.get_active_for_user(command.user_id) is not None:
             raise ActiveGoalAlreadyExistsError()
 
+        goal_type = GoalType(command.goal_type)
+        validate_target_direction(goal_type, command.start_value, command.target_value)
+
         now = datetime.now(UTC)
         goal = Goal(
             goal_id=None,
@@ -56,7 +60,7 @@ class SetActiveGoal:
             target_value=command.target_value,
             target_unit=command.target_unit,
             start_value=command.start_value,
-            goal_type=GoalType(command.goal_type),
+            goal_type=goal_type,
             target_date=command.target_date,
             is_active=True,
             is_achieved=False,

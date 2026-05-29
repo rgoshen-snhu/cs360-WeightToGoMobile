@@ -23,6 +23,7 @@ import {
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, useForm } from 'react-hook-form';
 import { type WeightEntryFormValues, weightEntrySchema } from '../schemas/weight-schemas';
+import { toLocalISODate } from '../../../lib/date';
 
 interface WeightEntryFormProps {
   /** Called with the validated form values when the user submits. */
@@ -35,8 +36,7 @@ interface WeightEntryFormProps {
   isSubmitting?: boolean;
 }
 
-const d = new Date();
-const TODAY = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+const TODAY = toLocalISODate();
 
 /**
  * Weight entry form with full validation and accessibility.

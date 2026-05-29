@@ -10,7 +10,7 @@ import pytest
 
 from weighttogo.goals.application.set_active_goal import SetActiveGoal, SetActiveGoalCommand
 from weighttogo.goals.domain.entities import Goal, GoalType
-from weighttogo.goals.domain.exceptions import ActiveGoalAlreadyExistsError
+from weighttogo.goals.domain.exceptions import ActiveGoalAlreadyExistsError, InvalidGoalTargetError
 
 
 def _make_repo(active_goal: Goal | None = None) -> MagicMock:
@@ -90,3 +90,24 @@ def test_set_active_goal_does_not_call_save_on_conflict() -> None:
     with pytest.raises(ActiveGoalAlreadyExistsError):
         _run(repo)
     repo.save.assert_not_called()
+
+
+# ── direction invariant (enforced at use-case layer) ─────────────────────────
+
+
+def test_set_active_goal_rejects_lose_goal_with_target_above_start() -> None:
+    repo = _make_repo()
+    with pytest.raises(InvalidGoalTargetError):
+        _run(repo, goal_type="lose", start_value=Decimal("150"), target_value=Decimal("200"))
+
+
+def test_set_active_goal_rejects_lose_goal_with_equal_target_and_start() -> None:
+    repo = _make_repo()
+    with pytest.raises(InvalidGoalTargetError):
+        _run(repo, goal_type="lose", start_value=Decimal("200"), target_value=Decimal("200"))
+
+
+def test_set_active_goal_rejects_gain_goal_with_target_below_start() -> None:
+    repo = _make_repo()
+    with pytest.raises(InvalidGoalTargetError):
+        _run(repo, goal_type="gain", start_value=Decimal("200"), target_value=Decimal("150"))

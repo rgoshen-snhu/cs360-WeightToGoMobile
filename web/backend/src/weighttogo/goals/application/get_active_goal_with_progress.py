@@ -37,10 +37,13 @@ class GoalWithProgress:
         goal: The user's active goal, or ``None`` when no active goal exists.
         progress: The progress toward the goal, or ``None`` when the goal is
             absent or the user has no weight entries yet.
+        current_value: The latest weight entry converted to the goal's unit,
+            or ``None`` when no entries exist or no goal is active.
     """
 
     goal: Goal | None
     progress: GoalProgress | None
+    current_value: Decimal | None
 
 
 class GetActiveGoalWithProgress:
@@ -71,10 +74,10 @@ class GetActiveGoalWithProgress:
         """
         goal = self._repo.get_active_for_user(command.user_id)
         if goal is None:
-            return GoalWithProgress(goal=None, progress=None)
+            return GoalWithProgress(goal=None, progress=None, current_value=None)
 
         if command.latest_weight_value is None or command.latest_weight_unit is None:
-            return GoalWithProgress(goal=goal, progress=None)
+            return GoalWithProgress(goal=goal, progress=None, current_value=None)
 
         current_in_goal_unit = convert_weight(
             command.latest_weight_value,
@@ -87,4 +90,9 @@ class GetActiveGoalWithProgress:
             current=current_in_goal_unit,
             target=goal.target_value,
         )
-        return GoalWithProgress(goal=goal, progress=progress)
+
+        if progress.percent >= 100 and not goal.is_achieved:
+            goal.mark_achieved()
+            self._repo.save(goal)
+
+        return GoalWithProgress(goal=goal, progress=progress, current_value=current_in_goal_unit)

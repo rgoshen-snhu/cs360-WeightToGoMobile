@@ -7,6 +7,46 @@ issues were resolved.
 
 ---
 
+## [2026-05-28 20:43] Commit Summary
+
+**Change Type:** Fix
+**Scope:** PR #63 code-review remediation — 15 issues across goals backend and frontend
+
+**Summary:**
+Addressed all 15 review comments on PR #63 (Goals Vertical Slice). Changes span the full stack: domain, application, infrastructure, interface, and frontend.
+
+**Backend changes:**
+- `goals/domain/exceptions.py` — re-parented all four exceptions to the `DomainError` hierarchy (`GoalNotFoundError(NotFoundError)`, `ActiveGoalAlreadyExistsError/GoalNotActiveError(ConflictError)`, `InvalidGoalTargetError(ValidationError)`)
+- `goals/domain/validation.py` (new) — extracted `validate_target_direction` as a shared domain rule, removing it from `update_goal.py` and adding it to `set_active_goal.py` so both use cases enforce the invariant regardless of caller
+- `goals/application/get_active_goal_with_progress.py` — wired `mark_achieved()`: when progress ≥ 100% and the goal is not yet achieved, calls `goal.mark_achieved()` and saves; returns `current_value` (converted to goal's unit) in `GoalWithProgress`
+- `goals/application/update_goal.py` — uses shared `validate_target_direction` from domain
+- `goals/application/set_active_goal.py` — calls `validate_target_direction` before creating the goal entity
+- `goals/infrastructure/repositories.py` — `save()` update branch now only writes mutable fields (`target_value`, `target_date`, `is_active`, `is_achieved`, `achieved_at`, `updated_at`); `start_value`, `goal_type`, `target_unit` (immutable per FR-G-3) are explicitly excluded with a comment
+- `goals/interface/router.py` — `current_value` in the active-goal response now uses `result.current_value` (already converted to goal's unit); `InvalidGoalTargetError` 422 now emits RFC 7807 `JSONResponse` with `errors: [{field: "target_value", ...}]` so the frontend field-highlights the error
+
+**Frontend changes:**
+- `lib/date.ts` (new) — extracted `toLocalISODate()` shared utility, eliminating ~5× duplication of the `getFullYear/getMonth/getDate` local-date pattern
+- `features/weight/schemas/weight-schemas.ts` — uses `toLocalISODate()` from lib
+- `features/weight/components/WeightEntryForm.tsx` — uses `toLocalISODate()` from lib
+- `features/goals/components/GoalProgressBar.tsx` — added `aria-valuetext={helperText}` so screen readers announce "No entries yet" instead of "0%" when `progressPercent === null`; removed redundant `aria-valuenow/min/max` (MUI emits these from `value`)
+- `features/dashboard/components/GoalProgressCard.tsx` — reads `isError` and renders an error state; passes `onSetGoal={() => navigate('/goals')}` to wire the "Set a goal" CTA button
+- `features/goals/pages/GoalsPage.tsx`:
+  - `GoalFormWithPrefill` defers rendering until the weight-entry prefetch resolves, fixing RHF `defaultValues`-at-mount semantics so the starting weight field is actually populated; also carries `weight_unit` to set `target_unit` consistently
+  - `handleCreate` catches all non-409 errors and renders them as an `actionError` alert
+  - `handleUpdate` wrapped in try/catch; `setIsEditing(false)` only called on success; errors shown as `actionError`
+  - `handleAbandon` wrapped in try/catch; errors shown as `actionError`
+  - `isSubmitting={setGoal.isPending}` threaded through to `GoalFormWithPrefill` → `GoalForm` to disable the submit button during the in-flight POST
+
+**New tests:** 5 backend tests (`mark_achieved` wiring, `current_value` contract, `already_achieved` guard, direction-invariant in `SetActiveGoal`), 4 frontend tests (error state in `GoalProgressCard`, `handleCreate/Update/Abandon` error paths), 1 new `GoalProgressCard` error test.
+
+**Rationale:**
+All 15 review findings were valid. The four high-severity frontend issues (prefill, swallowed errors, double-submit) were correctness bugs directly visible to users. The medium-severity items (DomainError hierarchy, RFC 7807 422 shape, direction invariant at use-case layer, `current_value` unit mismatch, `mark_achieved` wiring) were architecture/contract violations that would degrade as the codebase grew. The low-severity items (a11y, code duplication, `save()` field mapping) were quality improvements with low implementation risk.
+
+**References:**
+- PR #63 / GH-53 (Phase 1 goals feature branch)
+
+---
+
 ## [2026-05-28] Commit Summary
 
 **Change Type:** Fix

@@ -52,9 +52,7 @@ export function GoalProgressBar({ progressPercent, hasGoal, onSetGoal }: GoalPro
         variant="determinate"
         value={value}
         aria-label="Goal progress"
-        aria-valuenow={value}
-        aria-valuemin={0}
-        aria-valuemax={100}
+        aria-valuetext={helperText}
         sx={{ height: 8, borderRadius: 1 }}
       />
       <Typography

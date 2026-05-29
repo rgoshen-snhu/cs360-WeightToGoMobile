@@ -31,6 +31,15 @@ import { useSetGoal } from '../hooks/useSetGoal';
 import { useUpdateGoal } from '../hooks/useUpdateGoal';
 import type { GoalFormValues } from '../schemas/goal-schemas';
 
+function mapError(err: unknown): string {
+  if (err instanceof ApiError) {
+    if (err.status === 429) return 'Too many requests. Please wait a moment and try again.';
+    if (err.status >= 500) return 'A server error occurred. Please try again.';
+    return err.message || 'An unexpected error occurred.';
+  }
+  return 'An unexpected error occurred.';
+}
+
 export function GoalsPage() {
   const { data, isLoading, isError } = useActiveGoal();
   const setGoal = useSetGoal();
@@ -39,6 +48,7 @@ export function GoalsPage() {
 
   const [isEditing, setIsEditing] = useState(false);
   const [conflictError, setConflictError] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   if (isLoading) {
     return (
@@ -56,6 +66,7 @@ export function GoalsPage() {
 
   async function handleCreate(values: GoalFormValues) {
     setConflictError(null);
+    setActionError(null);
     try {
       await setGoal.mutateAsync({
         goal_type: values.goal_type,
@@ -67,25 +78,37 @@ export function GoalsPage() {
     } catch (err) {
       if (err instanceof ApiError && err.status === 409) {
         setConflictError('You already have an active goal. Abandon it before creating a new one.');
+      } else {
+        setActionError(mapError(err));
       }
     }
   }
 
   async function handleUpdate(values: GoalFormValues) {
     if (!activeGoal) return;
-    await updateGoal.mutateAsync({
-      goalId: activeGoal.goal_id,
-      payload: {
-        target_value: values.target_value,
-        target_date: values.target_date || null,
-      },
-    });
-    setIsEditing(false);
+    setActionError(null);
+    try {
+      await updateGoal.mutateAsync({
+        goalId: activeGoal.goal_id,
+        payload: {
+          target_value: values.target_value,
+          target_date: values.target_date || null,
+        },
+      });
+      setIsEditing(false);
+    } catch (err) {
+      setActionError(mapError(err));
+    }
   }
 
   async function handleAbandon() {
     if (!activeGoal) return;
-    await abandonGoal.mutateAsync(activeGoal.goal_id);
+    setActionError(null);
+    try {
+      await abandonGoal.mutateAsync(activeGoal.goal_id);
+    } catch (err) {
+      setActionError(mapError(err));
+    }
   }
 
   // ── No active goal — show creation form ───────────────────────────────────
@@ -99,7 +122,16 @@ export function GoalsPage() {
         <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
           Set a weight goal to track your progress over time.
         </Typography>
-        <GoalFormWithPrefill onSubmit={handleCreate} conflictError={conflictError} />
+        {actionError && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {actionError}
+          </Alert>
+        )}
+        <GoalFormWithPrefill
+          onSubmit={handleCreate}
+          conflictError={conflictError}
+          isSubmitting={setGoal.isPending}
+        />
       </Box>
     );
   }
@@ -112,6 +144,11 @@ export function GoalsPage() {
         <Typography variant="h4" component="h1" gutterBottom>
           Edit Goal
         </Typography>
+        {actionError && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {actionError}
+          </Alert>
+        )}
         <GoalForm
           onSubmit={handleUpdate}
           isEditMode
@@ -136,6 +173,12 @@ export function GoalsPage() {
       <Typography variant="h4" component="h1" gutterBottom>
         Goals
       </Typography>
+
+      {actionError && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {actionError}
+        </Alert>
+      )}
 
       <Card>
         <CardContent>
@@ -179,39 +222,60 @@ export function GoalsPage() {
 }
 
 /**
- * GoalForm wrapper that pre-populates start_value from the latest weight entry.
+ * GoalForm wrapper that pre-populates start_value and target_unit from the
+ * latest weight entry. Defers rendering the form until the prefetch resolves
+ * so that RHF's defaultValues captures the prefilled values at mount time.
  */
 function GoalFormWithPrefill({
   onSubmit,
   conflictError,
+  isSubmitting,
 }: {
   onSubmit: (values: GoalFormValues) => void;
   conflictError: string | null;
+  isSubmitting: boolean;
 }) {
-  const [defaultStartValue, setDefaultStartValue] = useState<number | undefined>(undefined);
+  const [isPrefetching, setIsPrefetching] = useState(true);
+  const [prefillValues, setPrefillValues] = useState<Partial<GoalFormValues>>({
+    goal_type: 'lose',
+    target_unit: 'lbs',
+  });
 
   useEffect(() => {
     weightClient
       .list({ limit: 1 })
       .then((page) => {
         if (page.items[0]) {
-          setDefaultStartValue(page.items[0].weight_value);
+          const entry = page.items[0];
+          setPrefillValues({
+            goal_type: 'lose',
+            target_unit: entry.weight_unit as 'lbs' | 'kg',
+            start_value: entry.weight_value,
+          });
         }
       })
       .catch(() => {
-        // No entries — start_value stays undefined for manual entry
+        // No entries — form renders with manual-entry defaults
+      })
+      .finally(() => {
+        setIsPrefetching(false);
       });
   }, []);
+
+  if (isPrefetching) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+        <CircularProgress size={24} aria-label="Loading your latest weight" />
+      </Box>
+    );
+  }
 
   return (
     <GoalForm
       onSubmit={onSubmit}
       conflictError={conflictError}
-      defaultValues={{
-        goal_type: 'lose',
-        target_unit: 'lbs',
-        start_value: defaultStartValue,
-      }}
+      defaultValues={prefillValues}
+      isSubmitting={isSubmitting}
     />
   );
 }

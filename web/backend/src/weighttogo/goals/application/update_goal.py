@@ -6,27 +6,13 @@ from dataclasses import dataclass
 from datetime import UTC, date, datetime
 from decimal import Decimal
 
-from weighttogo.goals.domain.entities import Goal, GoalType
+from weighttogo.goals.domain.entities import Goal
 from weighttogo.goals.domain.exceptions import (
     GoalNotActiveError,
     GoalNotFoundError,
-    InvalidGoalTargetError,
 )
 from weighttogo.goals.domain.ports import IGoalRepository
-
-
-def _validate_target_direction(
-    goal_type: GoalType, start_value: Decimal, target_value: Decimal
-) -> None:
-    """Raise InvalidGoalTargetError when target contradicts the goal direction.
-
-    LOSE goals require target < start; GAIN goals require target > start.
-    Equality is rejected because it would make progress permanently stuck at 0%.
-    """
-    if goal_type == GoalType.LOSE and target_value >= start_value:
-        raise InvalidGoalTargetError("Target must be below start value for a lose goal.")
-    if goal_type == GoalType.GAIN and target_value <= start_value:
-        raise InvalidGoalTargetError("Target must be above start value for a gain goal.")
+from weighttogo.goals.domain.validation import validate_target_direction
 
 
 @dataclass(frozen=True)
@@ -73,7 +59,7 @@ class UpdateGoal:
         if not goal.is_active:
             raise GoalNotActiveError()
 
-        _validate_target_direction(goal.goal_type, goal.start_value, command.target_value)
+        validate_target_direction(goal.goal_type, goal.start_value, command.target_value)
 
         goal.target_value = command.target_value
         goal.target_date = command.target_date

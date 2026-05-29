@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import * as goalClientModule from '../../goals/api/goal-client';
@@ -7,7 +8,11 @@ import { GoalProgressCard } from './GoalProgressCard';
 
 function Wrapper({ children }: { children: React.ReactNode }) {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  return <QueryClientProvider client={qc}>{children}</QueryClientProvider>;
+  return (
+    <MemoryRouter>
+      <QueryClientProvider client={qc}>{children}</QueryClientProvider>
+    </MemoryRouter>
+  );
 }
 
 describe('GoalProgressCard', () => {
@@ -38,6 +43,14 @@ describe('GoalProgressCard', () => {
     );
     render(<GoalProgressCard />, { wrapper: Wrapper });
     expect(screen.getByText(/loading/i)).toBeInTheDocument();
+  });
+
+  it('shows error message when query fails', async () => {
+    vi.spyOn(goalClientModule.goalClient, 'getActive').mockRejectedValue(
+      new Error('Network error'),
+    );
+    render(<GoalProgressCard />, { wrapper: Wrapper });
+    await screen.findByText(/failed to load goal progress/i);
   });
 
   it('shows progress bar when active goal with progress', async () => {

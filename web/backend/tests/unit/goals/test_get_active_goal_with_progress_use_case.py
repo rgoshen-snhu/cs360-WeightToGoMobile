@@ -71,6 +71,7 @@ def test_no_active_goal_returns_none_goal() -> None:
     result = _run(repo)
     assert result.goal is None
     assert result.progress is None
+    assert result.current_value is None
 
 
 # ── active goal, no weight entries ────────────────────────────────────────────
@@ -81,6 +82,7 @@ def test_active_goal_with_no_entries_returns_none_progress() -> None:
     result = _run(repo, latest_weight_value=None, latest_weight_unit=None)
     assert result.goal is not None
     assert result.progress is None
+    assert result.current_value is None
 
 
 # ── active goal, matching units ───────────────────────────────────────────────
@@ -92,6 +94,7 @@ def test_active_goal_halfway_progress_matching_unit() -> None:
     result = _run(repo, latest_weight_value=Decimal("175"), latest_weight_unit="lbs")
     assert result.progress is not None
     assert result.progress.percent == pytest.approx(50.0)
+    assert result.current_value == Decimal("175")
 
 
 def test_active_goal_at_target_is_100_percent() -> None:
@@ -101,12 +104,34 @@ def test_active_goal_at_target_is_100_percent() -> None:
     assert result.progress.percent == pytest.approx(100.0)
 
 
+def test_reaching_target_calls_mark_achieved_and_saves() -> None:
+    goal = _make_goal(start_value="200", target_value="150")
+    repo = _make_repo(active_goal=goal)
+    repo.save.return_value = goal
+
+    _run(repo, latest_weight_value=Decimal("150"), latest_weight_unit="lbs")
+
+    assert goal.is_achieved is True
+    repo.save.assert_called_once_with(goal)
+
+
+def test_already_achieved_goal_does_not_call_save_again() -> None:
+    goal = _make_goal(start_value="200", target_value="150")
+    goal.mark_achieved()  # pre-mark so is_achieved=True
+    repo = _make_repo(active_goal=goal)
+
+    _run(repo, latest_weight_value=Decimal("150"), latest_weight_unit="lbs")
+
+    repo.save.assert_not_called()
+
+
 # ── active goal, MISMATCHED units (Option B — must convert) ───────────────────
 
 
 def test_active_goal_progress_with_kg_entry_and_lbs_goal() -> None:
     # Goal: lose from 200 lbs to 150 lbs.
-    # Latest entry: 79.37866 kg ≈ 175 lbs → should compute ~50%
+    # Latest entry: 79.37866 kg ≈ 175 lbs → should compute ~50%.
+    # current_value must be returned in lbs (goal unit), not kg.
     repo = _make_repo(
         active_goal=_make_goal(start_value="200", target_value="150", target_unit="lbs")
     )
@@ -117,6 +142,9 @@ def test_active_goal_progress_with_kg_entry_and_lbs_goal() -> None:
     )
     assert result.progress is not None
     assert result.progress.percent == pytest.approx(50.0, abs=0.5)
+    # current_value must be in the goal's unit (lbs), not the entry unit (kg)
+    assert result.current_value is not None
+    assert float(result.current_value) == pytest.approx(175.0, abs=0.5)
 
 
 # ── gain goal ─────────────────────────────────────────────────────────────────
@@ -130,3 +158,4 @@ def test_gain_goal_progress_halfway() -> None:
     result = _run(repo, latest_weight_value=Decimal("175"), latest_weight_unit="lbs")
     assert result.progress is not None
     assert result.progress.percent == pytest.approx(50.0)
+    assert result.current_value == Decimal("175")

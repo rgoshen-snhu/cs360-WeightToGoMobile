@@ -90,8 +90,9 @@ class SqlAlchemyGoalRepository:
                 if row_or_none is None:
                     raise ValueError(f"Goal {goal.goal_id} not found in database.")
                 row = row_or_none
+                # Mutable fields only — start_value, goal_type, and target_unit
+                # are immutable once set (FR-G-3) and intentionally excluded.
                 row.target_value = goal.target_value
-                row.target_unit = goal.target_unit
                 row.target_date = goal.target_date
                 row.is_active = goal.is_active
                 row.is_achieved = goal.is_achieved

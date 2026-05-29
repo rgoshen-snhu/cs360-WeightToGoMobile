@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import structlog
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
 from weighttogo.auth.interface.router import get_current_user_id, limiter
@@ -154,7 +155,7 @@ def get_active_goal(
     return ActiveGoalResponse(
         goal=GoalResponse.model_validate(result.goal),
         progress_percent=result.progress.percent if result.progress else None,
-        current_value=float(latest.weight_value) if latest else None,
+        current_value=float(result.current_value) if result.current_value is not None else None,
     )
 
 
@@ -202,7 +203,7 @@ def update_goal(
     payload: GoalUpdateRequest,
     session: Session = Depends(get_db_session),
     current_user_id: int = Depends(get_current_user_id),
-) -> GoalResponse:
+) -> GoalResponse | Response:
     """Update an active goal owned by the authenticated user.
 
     Only ``target_value`` and ``target_date`` are mutable (FR-G-3).
@@ -240,10 +241,19 @@ def update_goal(
             detail="Goal is no longer active and cannot be modified.",
         ) from exc
     except InvalidGoalTargetError as exc:
-        raise HTTPException(
+        return JSONResponse(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail=str(exc),
-        ) from exc
+            content={
+                "type": "about:blank",
+                "title": "Validation failed",
+                "status": 422,
+                "detail": str(exc),
+                "instance": request.url.path,
+                "errors": [
+                    {"field": "target_value", "code": "direction_error", "message": str(exc)}
+                ],
+            },
+        )
 
     logger.info("goal_updated", goal_id=goal.goal_id, user_id=current_user_id)
     return GoalResponse.model_validate(goal)
