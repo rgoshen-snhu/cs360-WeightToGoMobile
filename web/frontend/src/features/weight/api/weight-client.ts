@@ -6,6 +6,7 @@
  */
 
 import { fetchJson } from '../../../lib/api-client';
+import type { AchievementRecord } from '../../achievements/schemas/achievement';
 
 const BASE = '/api/v1/weight-entries';
 
@@ -18,6 +19,8 @@ export interface WeightEntryRecord {
   notes: string | null;
   created_at: string;
   updated_at: string;
+  /** Achievements earned by this entry (empty array when none or no active goal). */
+  newly_earned_achievements?: AchievementRecord[];
 }
 
 /** Paginated list response envelope for weight entries.
