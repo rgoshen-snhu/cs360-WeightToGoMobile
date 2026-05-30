@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Weigh to Go! API",
-    "version": "0.1.0"
+    "version": "0.2.0"
   },
   "paths": {
     "/api/v1/auth/register": {
@@ -95,7 +95,7 @@
           "auth"
         ],
         "summary": "End the current session (FR-A-3)",
-        "description": "Revoke the refresh token family and clear session cookies.\n\nDoes not require a valid access token \u2014 clients must be able to log out\neven after the 15-minute access token has expired.  Auth cookies are always\ncleared regardless of token state.\n\nArgs:\n    request: The incoming HTTP request (required by slowapi rate limiting).\n    response: The outgoing HTTP response (used to clear cookies).\n    refresh_token: The refresh token from the cookie (optional).\n    session: The active database session.\n    jwt_adapter: JWT adapter used for token hashing.",
+        "description": "Revoke the refresh token family and clear session cookies.\n\nDoes not require a valid access token — clients must be able to log out\neven after the 15-minute access token has expired.  Auth cookies are always\ncleared regardless of token state.\n\nArgs:\n    request: The incoming HTTP request (required by slowapi rate limiting).\n    response: The outgoing HTTP response (used to clear cookies).\n    refresh_token: The refresh token from the cookie (optional).\n    session: The active database session.\n    jwt_adapter: JWT adapter used for token hashing.",
         "operationId": "logout_api_v1_auth_logout_post",
         "parameters": [
           {
@@ -480,7 +480,7 @@
           "goals"
         ],
         "summary": "List goals for the current user (capped at 100)",
-        "description": "Return recent goals for the authenticated user, newest first.\n\nBy default this returns active and historical goals. When *history* is true,\nonly past (achieved or abandoned) goals are returned \u2014 the FR-G-5 history\nview. Results are capped at *limit* (max 100) to prevent unbounded DB reads\nand serialization cost on accounts with large goal histories.\n\nArgs:\n    request: The incoming HTTP request (required by slowapi).\n    limit: Maximum number of goals to return (1 \u2013 100, default 50).\n    history: When true, exclude the active goal so only past goals are\n        returned (FR-G-5).\n    session: The active database session.\n    current_user_id: The authenticated user's ID.\n\nReturns:\n    A list of at most *limit* goals, newest first.",
+        "description": "Return recent goals for the authenticated user, newest first.\n\nBy default this returns active and historical goals. When *history* is true,\nonly past (achieved or abandoned) goals are returned — the FR-G-5 history\nview. Results are capped at *limit* (max 100) to prevent unbounded DB reads\nand serialization cost on accounts with large goal histories.\n\nArgs:\n    request: The incoming HTTP request (required by slowapi).\n    limit: Maximum number of goals to return (1 – 100, default 50).\n    history: When true, exclude the active goal so only past goals are\n        returned (FR-G-5).\n    session: The active database session.\n    current_user_id: The authenticated user's ID.\n\nReturns:\n    A list of at most *limit* goals, newest first.",
         "operationId": "list_goals_api_v1_goals_get",
         "parameters": [
           {
@@ -491,11 +491,11 @@
               "type": "integer",
               "maximum": 100,
               "minimum": 1,
-              "description": "Maximum goals to return (1\u2013100).",
+              "description": "Maximum goals to return (1–100).",
               "default": 50,
               "title": "Limit"
             },
-            "description": "Maximum goals to return (1\u2013100)."
+            "description": "Maximum goals to return (1–100)."
           },
           {
             "name": "history",
@@ -540,7 +540,7 @@
           "goals"
         ],
         "summary": "Get the active goal with progress (FR-G-2, FR-D-4)",
-        "description": "Return the authenticated user's active goal and progress.\n\n200 is returned even when no active goal exists \u2014 the ``goal`` field\nwill be ``None``.  404 is reserved for IDOR on /{goal_id}.\n\nArgs:\n    session: The active database session.\n    current_user_id: The authenticated user's ID.\n\nReturns:\n    The active goal with progress, or a null-goal envelope.",
+        "description": "Return the authenticated user's active goal and progress.\n\n200 is returned even when no active goal exists — the ``goal`` field\nwill be ``None``.  404 is reserved for IDOR on /{goal_id}.\n\nArgs:\n    session: The active database session.\n    current_user_id: The authenticated user's ID.\n\nReturns:\n    The active goal with progress, or a null-goal envelope.",
         "operationId": "get_active_goal_api_v1_goals_active_get",
         "responses": {
           "200": {
@@ -671,7 +671,7 @@
           "achievements"
         ],
         "summary": "Get a single achievement (IDOR-safe)",
-        "description": "Retrieve a single achievement scoped to the authenticated user.\n\nReturns 404 for achievements owned by other users (IDOR guard per SRS \u00a77).\n\nArgs:\n    achievement_id: The achievement primary key.\n    session: The active database session.\n    current_user_id: The authenticated user's ID.\n\nReturns:\n    The matching achievement.\n\nRaises:\n    HTTPException: 404 when not found or owned by another user.",
+        "description": "Retrieve a single achievement scoped to the authenticated user.\n\nReturns 404 for achievements owned by other users (IDOR guard per SRS §7).\n\nArgs:\n    achievement_id: The achievement primary key.\n    session: The active database session.\n    current_user_id: The authenticated user's ID.\n\nReturns:\n    The matching achievement.\n\nRaises:\n    HTTPException: 404 when not found or owned by another user.",
         "operationId": "get_achievement_api_v1_achievements__achievement_id__get",
         "parameters": [
           {
@@ -845,7 +845,7 @@
           "items"
         ],
         "title": "AchievementListResponse",
-        "description": "Response envelope for the list achievements endpoint (SRS \u00a79.7)."
+        "description": "Response envelope for the list achievements endpoint (SRS §9.7)."
       },
       "AchievementResponse": {
         "properties": {
@@ -932,7 +932,7 @@
           "current_value"
         ],
         "title": "ActiveGoalResponse",
-        "description": "Response body for GET /api/v1/goals/active (SRS \u00a79.6).\n\nThe ``goal`` field is ``None`` when no active goal exists (200 is still\nreturned \u2014 404 is reserved for IDOR on /{goal_id}).\n\nAttributes:\n    goal: The active goal, or ``None``.\n    progress_percent: Progress toward the goal in [0, 100], or ``None``\n        when there is no active goal or no weight entries yet.\n    current_value: The latest weight entry value in the goal's unit,\n        or ``None`` when no entries exist."
+        "description": "Response body for GET /api/v1/goals/active (SRS §9.6).\n\nThe ``goal`` field is ``None`` when no active goal exists (200 is still\nreturned — 404 is reserved for IDOR on /{goal_id}).\n\nAttributes:\n    goal: The active goal, or ``None``.\n    progress_percent: Progress toward the goal in [0, 100], or ``None``\n        when there is no active goal or no weight entries yet.\n    current_value: The latest weight entry value in the goal's unit,\n        or ``None`` when no entries exist."
       },
       "DashboardSummaryResponse": {
         "properties": {
@@ -979,7 +979,7 @@
           "rate_of_change"
         ],
         "title": "DashboardSummaryResponse",
-        "description": "Response body for GET /api/v1/dashboard/summary (SRS \u00a79.5).\n\nCovers FR-D-1 (summary), FR-D-4 (goal progress), FR-D-3 (rate of change),\nand FR-D-2 (trend series).\n\nAttributes:\n    latest_entry: The user's most recent active weight entry, or ``None``.\n    total_entries: Count of non-deleted weight entries.\n    active_goal: The active goal with progress, or ``None`` when no active\n        goal exists.\n    rate_of_change: The weekly rate of weight change.\n    trend: The full weight series, oldest first, for the trend chart."
+        "description": "Response body for GET /api/v1/dashboard/summary (SRS §9.5).\n\nCovers FR-D-1 (summary), FR-D-4 (goal progress), FR-D-3 (rate of change),\nand FR-D-2 (trend series).\n\nAttributes:\n    latest_entry: The user's most recent active weight entry, or ``None``.\n    total_entries: Count of non-deleted weight entries.\n    active_goal: The active goal with progress, or ``None`` when no active\n        goal exists.\n    rate_of_change: The weekly rate of weight change.\n    trend: The full weight series, oldest first, for the trend chart."
       },
       "GoalCreateRequest": {
         "properties": {
@@ -987,8 +987,8 @@
             "anyOf": [
               {
                 "type": "number",
-                "maximum": 1500.0,
-                "exclusiveMinimum": 0.0
+                "maximum": 1500,
+                "exclusiveMinimum": 0
               },
               {
                 "type": "string",
@@ -1009,8 +1009,8 @@
             "anyOf": [
               {
                 "type": "number",
-                "maximum": 1500.0,
-                "exclusiveMinimum": 0.0
+                "maximum": 1500,
+                "exclusiveMinimum": 0
               },
               {
                 "type": "string",
@@ -1048,7 +1048,7 @@
           "goal_type"
         ],
         "title": "GoalCreateRequest",
-        "description": "Request body for POST /api/v1/goals (SRS \u00a79.6).\n\nAttributes:\n    target_value: Target weight; positive, \u2264 1500.\n    target_unit: Weight unit \u2014 ``'lbs'`` or ``'kg'``.\n    start_value: Starting weight reference; positive, \u2264 1500.\n    goal_type: Either ``'lose'`` or ``'gain'``.\n    target_date: Optional date by which to reach the goal."
+        "description": "Request body for POST /api/v1/goals (SRS §9.6).\n\nAttributes:\n    target_value: Target weight; positive, ≤ 1500.\n    target_unit: Weight unit — ``'lbs'`` or ``'kg'``.\n    start_value: Starting weight reference; positive, ≤ 1500.\n    goal_type: Either ``'lose'`` or ``'gain'``.\n    target_date: Optional date by which to reach the goal."
       },
       "GoalListResponse": {
         "properties": {
@@ -1152,7 +1152,7 @@
           "updated_at"
         ],
         "title": "GoalResponse",
-        "description": "Response body for a single goal (SRS \u00a79.6).\n\nAttributes:\n    goal_id: Surrogate primary key.\n    user_id: The owning user's ID.\n    target_value: Target weight as a JSON number.\n    target_unit: Weight unit.\n    start_value: Starting weight.\n    goal_type: ``'lose'`` or ``'gain'``.\n    target_date: Optional target date.\n    is_active: Whether the goal is currently in progress.\n    is_achieved: Whether the goal has been reached.\n    achieved_at: UTC timestamp of achievement, or ``None``.\n    created_at: UTC timestamp of creation.\n    updated_at: UTC timestamp of last update."
+        "description": "Response body for a single goal (SRS §9.6).\n\nAttributes:\n    goal_id: Surrogate primary key.\n    user_id: The owning user's ID.\n    target_value: Target weight as a JSON number.\n    target_unit: Weight unit.\n    start_value: Starting weight.\n    goal_type: ``'lose'`` or ``'gain'``.\n    target_date: Optional target date.\n    is_active: Whether the goal is currently in progress.\n    is_achieved: Whether the goal has been reached.\n    achieved_at: UTC timestamp of achievement, or ``None``.\n    created_at: UTC timestamp of creation.\n    updated_at: UTC timestamp of last update."
       },
       "GoalUpdateRequest": {
         "properties": {
@@ -1160,8 +1160,8 @@
             "anyOf": [
               {
                 "type": "number",
-                "maximum": 1500.0,
-                "exclusiveMinimum": 0.0
+                "maximum": 1500,
+                "exclusiveMinimum": 0
               },
               {
                 "type": "string",
@@ -1188,7 +1188,7 @@
           "target_value"
         ],
         "title": "GoalUpdateRequest",
-        "description": "Request body for PUT /api/v1/goals/{goal_id} (FR-G-3).\n\nOnly ``target_value`` and ``target_date`` are mutable; goal_type and\nstart_value are immutable once set (SRS \u00a76.3 FR-G-3).\n\nAttributes:\n    target_value: New target weight; positive, \u2264 1500.\n    target_date: New target date, or ``None`` to clear it."
+        "description": "Request body for PUT /api/v1/goals/{goal_id} (FR-G-3).\n\nOnly ``target_value`` and ``target_date`` are mutable; goal_type and\nstart_value are immutable once set (SRS §6.3 FR-G-3).\n\nAttributes:\n    target_value: New target weight; positive, ≤ 1500.\n    target_date: New target date, or ``None`` to clear it."
       },
       "HTTPValidationError": {
         "properties": {
@@ -1223,7 +1223,7 @@
           "password"
         ],
         "title": "LoginRequest",
-        "description": "Request body for POST /api/v1/auth/login (SRS \u00a79.3.2, FR-A-2).\n\nAttributes:\n    email: The user's email address; normalised to lowercase at the boundary.\n    password: The plain-text password."
+        "description": "Request body for POST /api/v1/auth/login (SRS §9.3.2, FR-A-2).\n\nAttributes:\n    email: The user's email address; normalised to lowercase at the boundary.\n    password: The plain-text password."
       },
       "PreferenceKey": {
         "type": "string",
@@ -1267,7 +1267,7 @@
           "notify_streak"
         ],
         "title": "PreferencesResponse",
-        "description": "Response body for GET /api/v1/preferences and PUT /api/v1/preferences/{key}.\n\nAll four preferences are always present (lazy defaults merged in the\napplication layer before this schema is constructed).\n\nAttributes:\n    weight_unit: Global weight-unit preference \u2014 'lbs' or 'kg'.\n    notify_achievement: Whether to show achievement alerts.\n    notify_milestone: Whether to show milestone alerts.\n    notify_streak: Whether to show streak alerts."
+        "description": "Response body for GET /api/v1/preferences and PUT /api/v1/preferences/{key}.\n\nAll four preferences are always present (lazy defaults merged in the\napplication layer before this schema is constructed).\n\nAttributes:\n    weight_unit: Global weight-unit preference — 'lbs' or 'kg'.\n    notify_achievement: Whether to show achievement alerts.\n    notify_milestone: Whether to show milestone alerts.\n    notify_streak: Whether to show streak alerts."
       },
       "RateOfChangeResponse": {
         "properties": {
@@ -1312,7 +1312,7 @@
           "reason"
         ],
         "title": "RateOfChangeResponse",
-        "description": "Weekly rate of weight change (SRS \u00a76.7, FR-D-3).\n\nAttributes:\n    weekly_rate: Signed weight change per week as a JSON number (SRS \u00a73.2\n        micro-decision 1), or ``None`` when there is insufficient data.\n    unit: The weight unit of ``weekly_rate``, or ``None``.\n    reason: A short reason when ``weekly_rate`` is ``None`` (e.g.\n        ``'insufficient_data'``); ``None`` otherwise."
+        "description": "Weekly rate of weight change (SRS §6.7, FR-D-3).\n\nAttributes:\n    weekly_rate: Signed weight change per week as a JSON number (SRS §3.2\n        micro-decision 1), or ``None`` when there is insufficient data.\n    unit: The weight unit of ``weekly_rate``, or ``None``.\n    reason: A short reason when ``weekly_rate`` is ``None`` (e.g.\n        ``'insufficient_data'``); ``None`` otherwise."
       },
       "RegisterRequest": {
         "properties": {
@@ -1341,7 +1341,7 @@
           "display_name"
         ],
         "title": "RegisterRequest",
-        "description": "Request body for POST /api/v1/auth/register (SRS \u00a79.3.1, FR-A-1).\n\nAttributes:\n    email: RFC 5322 email address; normalised to lowercase at the boundary.\n    password: Plain-text password meeting complexity requirements.\n    display_name: Human-readable name (2\u201350 chars, trimmed)."
+        "description": "Request body for POST /api/v1/auth/register (SRS §9.3.1, FR-A-1).\n\nAttributes:\n    email: RFC 5322 email address; normalised to lowercase at the boundary.\n    password: Plain-text password meeting complexity requirements.\n    display_name: Human-readable name (2–50 chars, trimmed)."
       },
       "TrendPointResponse": {
         "properties": {
@@ -1366,7 +1366,7 @@
           "weight_unit"
         ],
         "title": "TrendPointResponse",
-        "description": "A single point in the weight trend series (SRS \u00a76.7, FR-D-2).\n\nAttributes:\n    observation_date: Calendar date of the measurement.\n    weight_value: Recorded weight as a JSON number (SRS \u00a73.2 micro-decision 1).\n    weight_unit: Either ``'lbs'`` or ``'kg'``."
+        "description": "A single point in the weight trend series (SRS §6.7, FR-D-2).\n\nAttributes:\n    observation_date: Calendar date of the measurement.\n    weight_value: Recorded weight as a JSON number (SRS §3.2 micro-decision 1).\n    weight_unit: Either ``'lbs'`` or ``'kg'``."
       },
       "UpdatePreferenceRequest": {
         "properties": {
@@ -1417,7 +1417,7 @@
           "created_at"
         ],
         "title": "UserResponse",
-        "description": "Response body for register, login, and /me endpoints (SRS \u00a79.3.3, FR-A-5).\n\nContains only the fields the user themselves provided plus metadata.\nNo PII is added beyond what the user submitted (SRS \u00a7NFR-Priv-2).\n\nAttributes:\n    user_id: The opaque numeric user identifier.\n    email: The user's email address.\n    display_name: The user's display name.\n    created_at: UTC timestamp of account creation."
+        "description": "Response body for register, login, and /me endpoints (SRS §9.3.3, FR-A-5).\n\nContains only the fields the user themselves provided plus metadata.\nNo PII is added beyond what the user submitted (SRS §NFR-Priv-2).\n\nAttributes:\n    user_id: The opaque numeric user identifier.\n    email: The user's email address.\n    display_name: The user's display name.\n    created_at: UTC timestamp of account creation."
       },
       "ValidationError": {
         "properties": {
@@ -1486,7 +1486,7 @@
           "next_cursor"
         ],
         "title": "WeightEntryListResponse",
-        "description": "Paginated list response envelope for weight entries (SRS \u00a79.4).\n\nAttributes:\n    items: The weight entries in the current page.\n    next_cursor: Opaque base64 pagination token (ADR-0015), or ``None``\n        when no further pages exist. Clients should treat this value as\n        opaque and round-trip it unchanged to the next request."
+        "description": "Paginated list response envelope for weight entries (SRS §9.4).\n\nAttributes:\n    items: The weight entries in the current page.\n    next_cursor: Opaque base64 pagination token (ADR-0015), or ``None``\n        when no further pages exist. Clients should treat this value as\n        opaque and round-trip it unchanged to the next request."
       },
       "WeightEntryRequest": {
         "properties": {
@@ -1494,8 +1494,8 @@
             "anyOf": [
               {
                 "type": "number",
-                "maximum": 1500.0,
-                "exclusiveMinimum": 0.0
+                "maximum": 1500,
+                "exclusiveMinimum": 0
               },
               {
                 "type": "string",
@@ -1537,7 +1537,7 @@
           "observation_date"
         ],
         "title": "WeightEntryRequest",
-        "description": "Request body for POST and PUT /api/v1/weight-entries (SRS \u00a79.4).\n\nAttributes:\n    weight_value: Positive decimal weight, \u2264 1500, two decimal places.\n    weight_unit: Either ``'lbs'`` or ``'kg'``.\n    observation_date: ISO-8601 date string; must not be in the future.\n    notes: Optional free-text note, max 500 characters."
+        "description": "Request body for POST and PUT /api/v1/weight-entries (SRS §9.4).\n\nAttributes:\n    weight_value: Positive decimal weight, ≤ 1500, two decimal places.\n    weight_unit: Either ``'lbs'`` or ``'kg'``.\n    observation_date: ISO-8601 date string; must not be in the future.\n    notes: Optional free-text note, max 500 characters."
       },
       "WeightEntryResponse": {
         "properties": {
@@ -1599,7 +1599,7 @@
           "updated_at"
         ],
         "title": "WeightEntryResponse",
-        "description": "Response body for a single weight entry (SRS \u00a79.4).\n\nAttributes:\n    entry_id: The surrogate primary key.\n    weight_value: The recorded weight as a JSON number (SRS \u00a73.2 micro-decision 1).\n    weight_unit: The unit of measurement.\n    observation_date: The date of the measurement.\n    notes: Optional note.\n    created_at: UTC timestamp of creation.\n    updated_at: UTC timestamp of the most recent update."
+        "description": "Response body for a single weight entry (SRS §9.4).\n\nAttributes:\n    entry_id: The surrogate primary key.\n    weight_value: The recorded weight as a JSON number (SRS §3.2 micro-decision 1).\n    weight_unit: The unit of measurement.\n    observation_date: The date of the measurement.\n    notes: Optional note.\n    created_at: UTC timestamp of creation.\n    updated_at: UTC timestamp of the most recent update."
       }
     }
   }
