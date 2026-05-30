@@ -64,6 +64,25 @@ def test_expired_entry_is_evicted_not_just_hidden() -> None:
     assert 1 not in cache._store  # noqa: SLF001 — white-box storage check
 
 
+def test_concurrent_eviction_of_same_expired_key_does_not_raise() -> None:
+    # ARRANGE — reproduce the TOCTOU window: between the expiry check and the
+    # eviction, a second thread (simulated here via the injected clock) removes
+    # the same expired key.  A non-atomic ``del`` would raise KeyError -> 500.
+    cache: TTLCache[int, str] = TTLCache(ttl_seconds=30.0, now=lambda: 1000.0)
+    cache.set(1, "summary")
+
+    def racing_now() -> float:
+        # Drop the key as if another thread already evicted it, then report a
+        # time past the deadline so this call also attempts to evict it.
+        cache._store.pop(1, None)  # noqa: SLF001 — simulate concurrent eviction
+        return 2000.0
+
+    cache._now = racing_now  # noqa: SLF001 — inject the racing clock
+
+    # ACT / ASSERT — the second eviction must be a no-op, not a KeyError
+    assert cache.get(1) is None
+
+
 def test_invalidate_removes_entry() -> None:
     # ARRANGE
     cache: TTLCache[int, str] = TTLCache()

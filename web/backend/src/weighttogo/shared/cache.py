@@ -74,7 +74,12 @@ class TTLCache[K, V]:
         if entry is None:
             return None
         if self._now() >= entry.expires_at:
-            del self._store[key]
+            # ``pop(key, None)`` (not ``del``) makes lazy eviction idempotent:
+            # under the AnyIO threadpool that runs sync endpoints, two threads
+            # can read the same expired entry and both attempt eviction; ``del``
+            # would raise ``KeyError`` on the loser (a 500), whereas ``pop`` is a
+            # no-op.  Mirrors ``invalidate``.
+            self._store.pop(key, None)
             return None
         return entry.value
 
