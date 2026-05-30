@@ -19,7 +19,7 @@ import {
   YAxis,
 } from 'recharts';
 import type { TrendPointResponse } from '../api/dashboard-client';
-import { formatObservationDate, formatWeightInPreferredUnit } from '../../../lib/format';
+import { formatObservationDate, formatWeight } from '../../../lib/format';
 import { usePreferences } from '../../../contexts/PreferencesContext';
 import { convertWeight, type WeightUnit } from '../../../lib/unit-conversion';
 
@@ -166,7 +166,7 @@ export function WeightTrendChart({
                 {visible.map((p) => (
                   <tr key={p.observation_date}>
                     <td>{formatObservationDate(p.observation_date)}</td>
-                    <td>{formatWeightInPreferredUnit(Number(p.weight_value), unit, unit)}</td>
+                    <td>{formatWeight(Number(p.weight_value), unit)}</td>
                   </tr>
                 ))}
               </tbody>
