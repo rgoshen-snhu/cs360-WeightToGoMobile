@@ -47,6 +47,13 @@ describe('RateOfChangeCard', () => {
     expect(screen.getByText(/no change/i)).toBeInTheDocument();
   });
 
+  it('renders no-change when a small rate rounds to 0.0 at one decimal', () => {
+    const negligible: RateOfChangeResponse = { weekly_rate: -0.04, unit: 'lbs', reason: null };
+    render(<RateOfChangeCard rateOfChange={negligible} isLoading={false} isError={false} />);
+    expect(screen.getByText(/no change/i)).toBeInTheDocument();
+    expect(screen.queryByText(/down/i)).not.toBeInTheDocument();
+  });
+
   it('renders a not-enough-data message when the rate is null', () => {
     render(<RateOfChangeCard rateOfChange={insufficient} isLoading={false} isError={false} />);
     expect(screen.getByText(/not enough data/i)).toBeInTheDocument();

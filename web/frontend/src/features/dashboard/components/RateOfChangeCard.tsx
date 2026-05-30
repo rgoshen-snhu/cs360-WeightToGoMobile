@@ -1,5 +1,7 @@
 import { Card, CardContent, Typography } from '@mui/material';
 import type { RateOfChangeResponse } from '../api/dashboard-client';
+import { formatWeight } from '../../../lib/format';
+import type { Preferences } from '../../../contexts/PreferencesContext';
 
 interface RateOfChangeCardProps {
   /** Rate-of-change figure from the dashboard summary, or undefined while pending. */
@@ -45,16 +47,18 @@ export function RateOfChangeCard({ rateOfChange, isLoading, isError }: RateOfCha
 }
 
 function RateValue({ rate, unit }: { rate: number; unit: string }) {
-  if (rate === 0) {
+  // A rate that rounds to 0.0 at the one-decimal display precision is shown as
+  // "no change" rather than a misleading "Down 0.0 …".
+  if (Math.abs(rate) < 0.05) {
     return <Typography variant="h5">No change this week</Typography>;
   }
 
-  const magnitude = Math.abs(rate).toFixed(1);
+  const magnitude = formatWeight(Math.abs(rate), unit as Preferences['weightUnit']);
   const direction = rate < 0 ? 'Down' : 'Up';
 
   return (
     <Typography variant="h5">
-      {direction} {magnitude} {unit} / week
+      {direction} {magnitude} / week
     </Typography>
   );
 }
