@@ -36,3 +36,4 @@ the next available number.
 | [0020](0020-preferences-storage-data-structure.md) | Preferences Storage Data Structure | Accepted | 2026-05-29 | Web |
 | [0021](0021-composite-index-strategy.md) | Composite Index Strategy for Weight-History Reads | Accepted | 2026-05-29 | Web |
 | [0022](0022-streak-detection-algorithm.md) | Streak Detection Algorithm | Accepted | 2026-05-29 | Web |
+| [0023](0023-ttl-caching-strategy.md) | TTL-Based Server-Side Caching Strategy | Accepted | 2026-05-29 | Web |
