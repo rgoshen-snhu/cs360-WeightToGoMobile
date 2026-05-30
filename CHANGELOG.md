@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/rgoshen-snhu/WeighToGo/compare/v0.2.0...v0.2.1) (2026-05-30)
+
+
+### Changed
+
+* **auth:** import AUTH_INVALID_CREDENTIALS in LoginForm test (GH-47) ([#81](https://github.com/rgoshen-snhu/WeighToGo/issues/81)) ([91595a9](https://github.com/rgoshen-snhu/WeighToGo/commit/91595a9ad79c26fb496bccd325ced41ac54ec2c1))
+
 ## [0.2.0](https://github.com/rgoshen-snhu/WeighToGo/compare/v0.1.0...v0.2.0) (2026-05-30)
 
 
