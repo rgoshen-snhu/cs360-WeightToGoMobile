@@ -6,6 +6,14 @@
 > - **FR-W-2 §6.2** cross-reference points at the actual cursor ADR (ADR-0015) instead of the prior "planned ADR-0014 (finalized in M3)" text.
 >
 > The document body is otherwise identical to v1.
+>
+> **Post-Milestone 3 reconciliation (2026-05-29):** Appendix A §17.2 updated to
+> reflect the actual on-disk ADRs — ADR-0016–0018 are the M2 security
+> remediations (security headers, CSRF validation, refresh coalescing) and
+> ADR-0019–0023 are the delivered M3 algorithm and data-structure decisions
+> (milestone detection, preferences storage, composite indexes, streak
+> detection, TTL caching). §13.2.1 deliverable 4 annotated to note cursor
+> pagination shipped in M2.
 
 # Weigh to Go! Web Application
 
@@ -1726,7 +1734,7 @@ Milestone 3 introduces algorithmic complexity that the architecture is designed 
 1. **Goal management.** All FR-G requirements implemented with database persistence.
 2. **Achievement detection.** All FR-Ach requirements with milestone detection running on every weight entry.
 3. **Streak detection.** FR-Ach-3 with an efficient single-pass longest-run scan over a set-backed sorted date sequence (see ADR-0022 for the algorithm choice and the longest-run vs. rolling-window rationale).
-4. **Cursor-based pagination.** FR-W-2 upgraded from naive to cursor-based with full ADR documentation.
+4. **Cursor-based pagination.** FR-W-2 cursor-based pagination with full ADR documentation — delivered ahead of schedule in M2 (ADR-0015); listed here for milestone-scope continuity.
 5. **TTL-based caching layer.** NFR-P-5 implemented for rate-of-change calculations.
 6. **Weekly rate of change.** FR-D-3 using two indexed lookups against composite indexes.
 7. **Charts on dashboard.** FR-D-2 with Recharts or equivalent.
@@ -1868,11 +1876,16 @@ The following ADRs are written as their decisions are made. They build on the ex
 | ADR-0013 | Refresh Token Rotation with Family-Based Revocation | M2 |
 | ADR-0014 | TanStack Query for Server State | M2 |
 | ADR-0015 | Opaque Compound Cursor for Weight-Entry Pagination | M2 |
-| ADR-0016 | TTL-Based Server-Side Caching Strategy | M3 (planned) |
-| ADR-0017 | Milestone Detection Algorithm | M3 (planned) |
-| ADR-0018 | Composite Index Strategy for Trend Queries | M3 (planned) |
-| ADR-0019 | Audit Log Schema and Write Strategy | M4 (planned) |
-| ADR-0020 | CHECK Constraint Inventory and Database-Level Validation Policy | M4 (planned) |
+| ADR-0016 | Security Header Policy (HSTS + CSP) | M2 |
+| ADR-0017 | CSRF Origin/Referer Validation for State-Changing Requests | M2 |
+| ADR-0018 | Concurrent Refresh Token Coalescing | M2 |
+| ADR-0019 | Milestone Detection Algorithm | M3 |
+| ADR-0020 | Preferences Storage Data Structure | M3 |
+| ADR-0021 | Composite Index Strategy for Weight-History Reads | M3 |
+| ADR-0022 | Streak Detection Algorithm | M3 |
+| ADR-0023 | TTL-Based Server-Side Caching Strategy | M3 |
+
+*Planned M4 ADRs (audit log schema and write strategy, CHECK-constraint and database-level validation policy, indexing strategy) will be numbered ADR-0024 onward as they are written.*
 
 ---
 

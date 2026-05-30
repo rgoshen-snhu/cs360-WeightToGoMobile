@@ -208,14 +208,15 @@ The web rebuild is specified by the
 [Software Requirements Specification](docs/specs/WeighToGo_Web_SRS_v2.md), which
 is the authoritative source for its architecture, requirements, API, and quality
 gates. Milestone 2 (auth + weight-entry vertical slice + dashboard) is complete
-and tagged `v0.1.0`; Milestones 3 and 4 add algorithms/data-structures and
-database enhancements respectively, with the full web rebuild reaching `v1.0.0`
-at final capstone submission.
+and tagged `v0.1.0`; Milestone 3 (goals, achievements with milestone and streak
+detection, preferences, dashboard aggregation, and trend analytics) is complete
+and released as `v0.2.0`. Milestone 4 adds database enhancements, with the full
+web rebuild reaching `v1.0.0` at final capstone submission.
 
 | Layer | Technology | Version |
 |-------|------------|---------|
 | Frontend framework | React | 19 |
-| Frontend language | TypeScript | 5+ (strict mode) |
+| Frontend language | TypeScript | 6 (strict mode) |
 | Frontend build tool | Vite | 8 |
 | Frontend UI | Material UI | 9 |
 | Frontend server state | TanStack Query | 5 |
@@ -227,14 +228,20 @@ at final capstone submission.
 | Backend migrations | Alembic | latest |
 | Database | PostgreSQL | 16 (via Docker) |
 
-**What's working (Milestone 2):**
+**What's working (Milestones 2–3):**
 
 - Full user authentication (register, login, logout, token refresh, account lockout)
 - Weight entry CRUD: create, list (paginated), get, update, soft-delete
-- Dashboard summary: latest entry, total entry count
-- Frontend: weight history page, weight entry form (create/edit), dashboard cards
+- Goals: set, update, abandon, and goal history (achieved/abandoned)
+- Achievements: milestone detection and streak detection, with an accessible
+  in-app achievement notification
+- User preferences: global weight unit (lbs/kg) and notification toggles
+- Dashboard: latest entry, total entry count, weekly rate of change, and a
+  weight-trend chart; preference-driven unit conversion for display
+- Performance: composite indexes for weight-history reads and a TTL cache for
+  the dashboard summary
 - Cookie-based session auth, rate limiting, RFC 7807 error responses, WCAG 2.1 AA
-- 277 backend tests (pytest) · 241 frontend test cases (Vitest) · 5 E2E specs (Playwright)
+- 592 backend tests (pytest) · 377 frontend test cases (Vitest) · 19 E2E specs (Playwright)
 
 See the [Software Requirements Specification](docs/specs/WeighToGo_Web_SRS_v2.md)
 for the full milestone roadmap.
@@ -333,9 +340,12 @@ is now preserved in maintenance-only status.
 **Web rebuild** — delivered across milestones:
 
 - **Milestone 2** — polyglot monorepo restructure, three-pattern backend
-  architecture, and an authentication plus weight-entry vertical slice.
-- **Milestone 3** — algorithms and data-structures enhancements, including
-  trend analytics and time-series pagination.
+  architecture, and an authentication plus weight-entry vertical slice
+  (`v0.1.0`).
+- **Milestone 3** — algorithms and data-structures enhancements: goal
+  management, milestone and streak detection, user preferences, dashboard
+  aggregation with rate-of-change and a weight-trend chart, composite indexes,
+  and TTL caching (`v0.2.0`).
 - **Milestone 4** — database enhancements.
 
 See the [SRS](docs/specs/WeighToGo_Web_SRS_v2.md) for the full milestone roadmap

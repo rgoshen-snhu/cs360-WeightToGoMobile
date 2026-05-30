@@ -6,7 +6,17 @@
   "packages": {
     ".": {
       "release-type": "simple",
-      "release-as": "0.1.0",
+      "extra-files": [
+        {
+          "type": "generic",
+          "path": "web/backend/src/weighttogo/main.py"
+        },
+        {
+          "type": "json",
+          "path": "docs/api/openapi.json",
+          "jsonpath": "$.info.version"
+        }
+      ],
       "changelog-sections": [
         { "type": "feat", "section": "Added" },
         { "type": "fix", "section": "Fixed" },

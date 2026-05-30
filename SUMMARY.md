@@ -7,6 +7,59 @@ issues were resolved.
 
 ---
 
+## [2026-05-29 22:05] Commit Summary
+
+**Change Type:** Chore (release automation)
+**Scope:** release-please configuration
+
+**Summary:**
+Removed the `release-as: "0.1.0"` pin from release-please-config.json so versions
+are driven automatically by conventional commits (feat → minor, fix → patch,
+BREAKING CHANGE → major). Wired the version into release-please via extra-files:
+a generic updater for web/backend/src/weighttogo/main.py (annotated with
+`x-release-please-version`) and a json updater for docs/api/openapi.json
+`$.info.version`, so both stay in sync with each release without manual edits.
+
+**Rationale:**
+The `release-as` pin forced every release to 0.1.0 — already tagged — so
+release-please kept re-proposing the "release 0.1.0" PR (#78) on every push and
+overrode automatic semantic versioning entirely. Removing the pin restores
+conventional-commit-driven versioning; the accumulated M3 `feat:` commits since
+v0.1.0 produce a 0.2.0 minor bump automatically. extra-files keeps the hardcoded
+app and snapshot versions managed by the release pipeline rather than by hand.
+
+**References:**
+- Issue: GH-57
+
+---
+
+## [2026-05-29 21:46] Commit Summary
+
+**Change Type:** Docs
+**Scope:** Milestone Three closeout documentation (READMEs, SRS, OpenAPI, narrative)
+
+**Summary:**
+M3 (v0.2.0) closeout documentation pass. Refreshed the root README (web feature
+set, current test counts 592 BE / 377 FE / 19 E2E, roadmap, TypeScript 6),
+pointed docs/README at the M3 plan, added the missing DDR-0007/0008 index rows,
+and created the four missing stack READMEs (android/, web/, web/frontend/,
+web/backend/). Regenerated docs/api/openapi.json from the live app (9 → 16 paths;
+goals, achievements, and preferences routes now included). Reconciled SRS v2
+Appendix A §17.2 to the on-disk ADRs (0016–0018 are the M2 security remediations;
+0019–0023 are the delivered M3 decisions) and annotated §13.2.1 deliverable 4
+(cursor pagination shipped in M2). Added the Milestone Three narrative.
+
+**Rationale:**
+The README set and OpenAPI snapshot had drifted behind the M3 feature work, and
+the DDR index and SRS ADR table no longer matched the records on disk. Closeout
+is the deliberate step to reconcile documentation against reality before tagging
+the release.
+
+**References:**
+- Issue: GH-57
+
+---
+
 ## [2026-05-29 13:55] Commit Summary
 
 **Change Type:** Fix
