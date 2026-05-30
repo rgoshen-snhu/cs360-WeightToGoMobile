@@ -31,4 +31,10 @@ describe('useGoals', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(result.current.data?.goals).toEqual([]);
   });
+
+  it('requests history goals when called with { history: true }', async () => {
+    const { result } = renderHook(() => useGoals({ history: true }), { wrapper });
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(goalClientModule.goalClient.list).toHaveBeenCalledWith({ history: true });
+  });
 });
