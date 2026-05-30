@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from fastapi.testclient import TestClient
 
+from weighttogo.auth.interface.router import limiter
+
 
 def _register_and_login(client: TestClient, email: str = "ach@example.com") -> None:
     client.post(
@@ -90,3 +92,25 @@ def test_list_achievements_returns_newest_first(client: TestClient) -> None:
     assert len(items) >= 2
     earned = [i["earned_at"] for i in items]
     assert earned == sorted(earned, reverse=True)
+
+
+# ── Rate limiting (30/minute, matching the goals list endpoint) ───────────────
+
+
+def test_list_achievements_returns_429_after_limit(client: TestClient) -> None:
+    """The 31st GET /achievements within a minute from the same IP must return 429."""
+    # ARRANGE: authenticate while the limiter is disabled.
+    _register_and_login(client, "ach-rate-limit@example.com")
+
+    # ACT: enable the limiter and exceed the 30/minute threshold.
+    limiter.enabled = True
+    try:
+        statuses = []
+        for _ in range(31):
+            r = client.get("/api/v1/achievements")
+            statuses.append(r.status_code)
+    finally:
+        limiter.enabled = False
+
+    # ASSERT: at least one request past the limit was throttled.
+    assert 429 in statuses, f"expected 429 in: {statuses}"

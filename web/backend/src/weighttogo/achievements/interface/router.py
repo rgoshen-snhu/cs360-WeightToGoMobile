@@ -3,12 +3,12 @@
 from __future__ import annotations
 
 import structlog
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 
 from weighttogo.achievements.infrastructure.repositories import SqlAlchemyAchievementRepository
 from weighttogo.achievements.interface.schemas import AchievementListResponse, AchievementResponse
-from weighttogo.auth.interface.router import get_current_user_id
+from weighttogo.auth.interface.router import get_current_user_id, limiter
 from weighttogo.shared.db import get_db_session
 
 logger = structlog.stdlib.get_logger(__name__)
@@ -29,13 +29,19 @@ def _ach_repo(session: Session) -> SqlAlchemyAchievementRepository:
     response_model=AchievementListResponse,
     summary="List achievements for the current user (FR-Ach-4)",
 )
+@limiter.limit("30/minute")
 def list_achievements(
+    request: Request,
     session: Session = Depends(get_db_session),
     current_user_id: int = Depends(get_current_user_id),
 ) -> AchievementListResponse:
     """Return the most recent achievements for the authenticated user.
 
+    Rate-limited to 30 requests/minute to match the goals list endpoint, so both
+    authenticated listing endpoints share a rate-limit posture (defense-in-depth).
+
     Args:
+        request: The incoming HTTP request (required by slowapi).
         session: The active database session.
         current_user_id: The authenticated user's ID.
 
