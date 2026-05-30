@@ -102,6 +102,6 @@ class IAchievementRepository(Protocol):
 
         Returns:
             At most *limit* ``Achievement`` entities, ordered by
-            ``earned_at DESC``.
+            ``earned_at DESC, id DESC`` (deterministic tie-break).
         """
         ...

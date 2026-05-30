@@ -174,3 +174,62 @@ def test_list_for_user_respects_limit(db_session: Session) -> None:
 
     goals = repo.list_for_user(user_id=1, limit=2)
     assert len(goals) == 2
+
+
+def test_list_for_user_excludes_active_when_include_active_false(
+    db_session: Session,
+) -> None:
+    # ARRANGE: one abandoned (past) goal and one active goal for the same user
+    repo = SqlAlchemyGoalRepository(db_session)
+    first = repo.save(_make_goal())
+    db_session.commit()
+    first.abandon()
+    repo.save(first)
+    db_session.commit()
+    repo.save(_make_goal())  # new active goal
+    db_session.commit()
+
+    # ACT
+    history = repo.list_for_user(user_id=1, limit=50, include_active=False)
+    everything = repo.list_for_user(user_id=1, limit=50)
+
+    # ASSERT
+    assert len(history) == 1
+    assert history[0].is_active is False
+    assert len(everything) == 2
+
+
+def test_list_for_user_orders_by_created_at_then_id_desc(
+    db_session: Session,
+) -> None:
+    # ARRANGE: two past goals sharing the SAME created_at. created_at is a
+    # Python-side default with no server_default, so same-instant ties must
+    # fall back to goal_id DESC for a deterministic order. Both goals are
+    # abandoned to satisfy the one-active-goal-per-user partial unique index.
+    repo = SqlAlchemyGoalRepository(db_session)
+    same_instant = datetime(2026, 1, 1, tzinfo=UTC)
+
+    first = _make_goal()
+    first.created_at = same_instant
+    saved_first = repo.save(first)
+    db_session.commit()
+    saved_first.abandon()
+    repo.save(saved_first)
+    db_session.commit()
+
+    second = _make_goal()
+    second.created_at = same_instant
+    saved_second = repo.save(second)
+    db_session.commit()
+    saved_second.abandon()
+    repo.save(saved_second)
+    db_session.commit()
+
+    # ACT
+    goals = repo.list_for_user(user_id=1, limit=50)
+
+    # ASSERT: deterministic — the later-inserted (higher goal_id) row comes first
+    assert [g.goal_id for g in goals] == [
+        saved_second.goal_id,
+        saved_first.goal_id,
+    ]

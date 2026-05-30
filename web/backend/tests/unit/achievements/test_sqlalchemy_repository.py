@@ -205,3 +205,42 @@ def test_list_for_user_returns_achievements_newest_first(session: Session) -> No
     results = repo.list_for_user(session._test_user_id, limit=10)  # type: ignore[attr-defined]
     assert results[0].threshold == Decimal("10")
     assert results[1].threshold == Decimal("5")
+
+
+def test_list_for_user_orders_by_earned_at_then_id_desc(session: Session) -> None:
+    from weighttogo.achievements.infrastructure.repositories import SqlAlchemyAchievementRepository
+
+    # ARRANGE: two achievements with the SAME earned_at; higher id must sort first
+    repo = SqlAlchemyAchievementRepository(session)
+    same_instant = datetime(2026, 1, 1, tzinfo=UTC)
+    first = repo.save(
+        Achievement(
+            achievement_id=None,
+            user_id=session._test_user_id,  # type: ignore[attr-defined]
+            goal_id=session._test_goal_id,  # type: ignore[attr-defined]
+            achievement_type=AchievementType.MILESTONE,
+            threshold=Decimal("5"),
+            earned_at=same_instant,
+        )
+    )
+    second = repo.save(
+        Achievement(
+            achievement_id=None,
+            user_id=session._test_user_id,  # type: ignore[attr-defined]
+            goal_id=session._test_goal_id,  # type: ignore[attr-defined]
+            achievement_type=AchievementType.GOAL_REACHED,
+            threshold=None,
+            earned_at=same_instant,
+        )
+    )
+    assert first is not None
+    assert second is not None
+
+    # ACT
+    rows = repo.list_for_user(session._test_user_id, limit=50)  # type: ignore[attr-defined]
+
+    # ASSERT: deterministic — the later-inserted (higher id) row comes first
+    assert [r.achievement_id for r in rows] == [
+        second.achievement_id,
+        first.achievement_id,
+    ]

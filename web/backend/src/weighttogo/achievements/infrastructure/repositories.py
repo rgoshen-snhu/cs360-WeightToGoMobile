@@ -162,12 +162,14 @@ class SqlAlchemyAchievementRepository:
             limit: Maximum number of achievements to return.
 
         Returns:
-            At most *limit* ``Achievement`` entities, ordered by ``earned_at DESC``.
+            At most *limit* ``Achievement`` entities, ordered by
+            ``earned_at DESC, id DESC`` (deterministic tie-break so achievements
+            earned in the same instant have a stable order).
         """
         rows = (
             self._session.query(AchievementModel)
             .filter_by(user_id=user_id)
-            .order_by(AchievementModel.earned_at.desc())
+            .order_by(AchievementModel.earned_at.desc(), AchievementModel.id.desc())
             .limit(limit)
             .all()
         )

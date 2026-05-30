@@ -57,8 +57,11 @@ export const goalClient = {
   /** Return the active goal with progress, or null-goal envelope. */
   getActive: () => fetchJson<ActiveGoalResponse>(`${BASE}/active`, { method: 'GET' }),
 
-  /** Return all goals (active and historical). */
-  list: () => fetchJson<GoalListResponse>(BASE, { method: 'GET' }),
+  /** Return goals (active and historical). Pass `{ history: true }` for past goals only. */
+  list: (options?: { history?: boolean }) =>
+    fetchJson<GoalListResponse>(options?.history ? `${BASE}?history=true` : BASE, {
+      method: 'GET',
+    }),
 
   /** Update target_value / target_date on an existing goal. */
   update: (goalId: number, body: GoalUpdatePayload) =>

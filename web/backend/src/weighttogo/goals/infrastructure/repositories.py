@@ -131,23 +131,27 @@ class SqlAlchemyGoalRepository:
         row = self._session.query(GoalModel).filter_by(user_id=user_id, is_active=True).first()
         return _goal_to_domain(row) if row else None
 
-    def list_for_user(self, user_id: int, *, limit: int) -> list[Goal]:
-        """Return the most recent goals (active and historical) for *user_id*.
+    def list_for_user(self, user_id: int, *, limit: int, include_active: bool = True) -> list[Goal]:
+        """Return the most recent goals for *user_id*, newest first.
 
-        Results are ordered by ``created_at DESC``.
+        Results are ordered by ``created_at DESC, goal_id DESC``. The
+        ``goal_id`` tie-break is required because ``created_at`` is a
+        Python-side default with no DB ``server_default``, so goals persisted
+        in the same instant would otherwise have a non-deterministic order.
 
         Args:
             user_id: The owning user's ID.
             limit: Maximum number of goals to materialise.
+            include_active: When ``False``, exclude the active goal so only past
+                (achieved or abandoned) goals are returned (FR-G-5 history view).
 
         Returns:
             At most *limit* ``Goal`` entities for the user, newest first.
         """
+        query = self._session.query(GoalModel).filter_by(user_id=user_id)
+        if not include_active:
+            query = query.filter(GoalModel.is_active.is_(False))
         rows = (
-            self._session.query(GoalModel)
-            .filter_by(user_id=user_id)
-            .order_by(GoalModel.created_at.desc())
-            .limit(limit)
-            .all()
+            query.order_by(GoalModel.created_at.desc(), GoalModel.goal_id.desc()).limit(limit).all()
         )
         return [_goal_to_domain(r) for r in rows]
