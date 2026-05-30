@@ -21,3 +21,5 @@ the next available number.
 | [0004](0004-weight-table-action-button-conversion.md) | Weight Table Action Button Conversion | Accepted | 2026-05-28 | Web |
 | [0005](0005-goal-progress-visualization.md) | Goal Progress Visualization | Accepted | 2026-05-28 | Web |
 | [0006](0006-weight-trend-chart.md) | Weight Trend Chart | Accepted | 2026-05-29 | Web |
+| [0007](0007-achievement-notification-ui.md) | Achievement Notification UI | Accepted | 2026-05-29 | Web |
+| [0008](0008-settings-page-layout.md) | Settings Page Layout | Accepted | 2026-05-29 | Web |

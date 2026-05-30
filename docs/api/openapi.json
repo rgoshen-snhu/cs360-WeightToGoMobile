@@ -434,13 +434,361 @@
         }
       }
     },
+    "/api/v1/goals": {
+      "post": {
+        "tags": [
+          "goals"
+        ],
+        "summary": "Set a new active goal (FR-G-1)",
+        "description": "Create an active goal for the authenticated user.\n\nArgs:\n    request: The incoming HTTP request (required by slowapi).\n    payload: Validated request body.\n    session: The active database session.\n    current_user_id: The authenticated user's ID.\n\nReturns:\n    The newly created goal.\n\nRaises:\n    HTTPException: 409 when the user already has an active goal.",
+        "operationId": "create_goal_api_v1_goals_post",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GoalCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GoalResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "goals"
+        ],
+        "summary": "List goals for the current user (capped at 100)",
+        "description": "Return recent goals for the authenticated user, newest first.\n\nBy default this returns active and historical goals. When *history* is true,\nonly past (achieved or abandoned) goals are returned \u2014 the FR-G-5 history\nview. Results are capped at *limit* (max 100) to prevent unbounded DB reads\nand serialization cost on accounts with large goal histories.\n\nArgs:\n    request: The incoming HTTP request (required by slowapi).\n    limit: Maximum number of goals to return (1 \u2013 100, default 50).\n    history: When true, exclude the active goal so only past goals are\n        returned (FR-G-5).\n    session: The active database session.\n    current_user_id: The authenticated user's ID.\n\nReturns:\n    A list of at most *limit* goals, newest first.",
+        "operationId": "list_goals_api_v1_goals_get",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "description": "Maximum goals to return (1\u2013100).",
+              "default": 50,
+              "title": "Limit"
+            },
+            "description": "Maximum goals to return (1\u2013100)."
+          },
+          {
+            "name": "history",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "When true, return only past (achieved or abandoned) goals (FR-G-5).",
+              "default": false,
+              "title": "History"
+            },
+            "description": "When true, return only past (achieved or abandoned) goals (FR-G-5)."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GoalListResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/goals/active": {
+      "get": {
+        "tags": [
+          "goals"
+        ],
+        "summary": "Get the active goal with progress (FR-G-2, FR-D-4)",
+        "description": "Return the authenticated user's active goal and progress.\n\n200 is returned even when no active goal exists \u2014 the ``goal`` field\nwill be ``None``.  404 is reserved for IDOR on /{goal_id}.\n\nArgs:\n    session: The active database session.\n    current_user_id: The authenticated user's ID.\n\nReturns:\n    The active goal with progress, or a null-goal envelope.",
+        "operationId": "get_active_goal_api_v1_goals_active_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActiveGoalResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/goals/{goal_id}": {
+      "put": {
+        "tags": [
+          "goals"
+        ],
+        "summary": "Update a goal's target value or target date (FR-G-3)",
+        "description": "Update an active goal owned by the authenticated user.\n\nOnly ``target_value`` and ``target_date`` are mutable (FR-G-3).\n\nArgs:\n    request: The incoming HTTP request (required by slowapi).\n    goal_id: The goal's primary key.\n    payload: Validated request body.\n    session: The active database session.\n    current_user_id: The authenticated user's ID.\n\nReturns:\n    The updated goal.\n\nRaises:\n    HTTPException: 404 when the goal does not exist or belongs to another user.",
+        "operationId": "update_goal_api_v1_goals__goal_id__put",
+        "parameters": [
+          {
+            "name": "goal_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Goal Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GoalUpdateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GoalResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "goals"
+        ],
+        "summary": "Abandon a goal (soft-deactivate)",
+        "description": "Abandon a goal owned by the authenticated user.\n\nIdempotent at the domain level: abandoning an already-inactive goal\nsucceeds.\n\nArgs:\n    request: The incoming HTTP request (required by slowapi).\n    goal_id: The goal's primary key.\n    session: The active database session.\n    current_user_id: The authenticated user's ID.\n\nReturns:\n    Empty 204 response on success.\n\nRaises:\n    HTTPException: 404 when the goal does not exist or belongs to another user.",
+        "operationId": "abandon_goal_api_v1_goals__goal_id__delete",
+        "parameters": [
+          {
+            "name": "goal_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Goal Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/achievements": {
+      "get": {
+        "tags": [
+          "achievements"
+        ],
+        "summary": "List achievements for the current user (FR-Ach-4)",
+        "description": "Return the most recent achievements for the authenticated user.\n\nArgs:\n    session: The active database session.\n    current_user_id: The authenticated user's ID.\n\nReturns:\n    List of up to 50 achievements, newest first.",
+        "operationId": "list_achievements_api_v1_achievements_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AchievementListResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/achievements/{achievement_id}": {
+      "get": {
+        "tags": [
+          "achievements"
+        ],
+        "summary": "Get a single achievement (IDOR-safe)",
+        "description": "Retrieve a single achievement scoped to the authenticated user.\n\nReturns 404 for achievements owned by other users (IDOR guard per SRS \u00a77).\n\nArgs:\n    achievement_id: The achievement primary key.\n    session: The active database session.\n    current_user_id: The authenticated user's ID.\n\nReturns:\n    The matching achievement.\n\nRaises:\n    HTTPException: 404 when not found or owned by another user.",
+        "operationId": "get_achievement_api_v1_achievements__achievement_id__get",
+        "parameters": [
+          {
+            "name": "achievement_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Achievement Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AchievementResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/preferences": {
+      "get": {
+        "tags": [
+          "preferences"
+        ],
+        "summary": "Get all preferences for the current user (FR-P-1, FR-P-3)",
+        "description": "Return the fully-resolved preference set, merging lazy defaults.\n\nArgs:\n    request: The incoming HTTP request (required by slowapi limiter).\n    session: The active database session.\n    current_user_id: The authenticated user's ID.\n\nReturns:\n    All four preferences with defaults applied for any missing rows.",
+        "operationId": "get_preferences_api_v1_preferences_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PreferencesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/preferences/{key}": {
+      "put": {
+        "tags": [
+          "preferences"
+        ],
+        "summary": "Update one preference; return the full resolved set (FR-P-1, FR-P-3)",
+        "description": "Update a single preference and return all four resolved values.\n\nUnknown keys yield 422 automatically (PreferenceKey path-param type).\nInvalid values yield 422 via InvalidPreferenceValueError.\n\nArgs:\n    key: The preference key to update (path parameter).\n    body: Request body containing the new value.\n    request: The incoming HTTP request (required by slowapi limiter).\n    session: The active database session.\n    current_user_id: The authenticated user's ID.\n\nReturns:\n    The fully-resolved preference set after the write.",
+        "operationId": "update_preference_api_v1_preferences__key__put",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/PreferenceKey"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePreferenceRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PreferencesResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/dashboard/summary": {
       "get": {
         "tags": [
           "dashboard"
         ],
-        "summary": "Dashboard summary (FR-D-1)",
-        "description": "Return the dashboard summary for the authenticated user.\n\nArgs:\n    session: The active database session.\n    current_user_id: The authenticated user's ID.\n\nReturns:\n    ``DashboardSummaryResponse`` with latest entry, entry count, and null goal.\n\nRaises:\n    HTTPException: 401 when no valid access token is present.",
+        "summary": "Dashboard summary (FR-D-1, FR-D-2, FR-D-3, FR-D-4)",
+        "description": "Return the dashboard summary for the authenticated user.\n\nArgs:\n    session: The active database session.\n    current_user_id: The authenticated user's ID.\n\nReturns:\n    ``DashboardSummaryResponse`` with latest entry, entry count, active goal\n    progress, the weekly rate of change, and the trend series.\n\nRaises:\n    HTTPException: 401 when no valid access token is present.",
         "operationId": "get_dashboard_summary_api_v1_dashboard_summary_get",
         "responses": {
           "200": {
@@ -482,6 +830,110 @@
   },
   "components": {
     "schemas": {
+      "AchievementListResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AchievementResponse"
+            },
+            "type": "array",
+            "title": "Items"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "title": "AchievementListResponse",
+        "description": "Response envelope for the list achievements endpoint (SRS \u00a79.7)."
+      },
+      "AchievementResponse": {
+        "properties": {
+          "achievement_id": {
+            "type": "integer",
+            "title": "Achievement Id"
+          },
+          "goal_id": {
+            "type": "integer",
+            "title": "Goal Id"
+          },
+          "achievement_type": {
+            "type": "string",
+            "title": "Achievement Type"
+          },
+          "threshold": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Threshold"
+          },
+          "earned_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Earned At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "achievement_id",
+          "goal_id",
+          "achievement_type",
+          "threshold",
+          "earned_at"
+        ],
+        "title": "AchievementResponse",
+        "description": "Response body for a single achievement.\n\nAttributes:\n    achievement_id: The surrogate primary key.\n    goal_id: The goal this achievement belongs to.\n    achievement_type: ``'goal_reached'`` or ``'milestone'``.\n    threshold: The lb threshold crossed (milestones only); ``None`` for\n        ``goal_reached`` achievements.\n    earned_at: UTC timestamp when the achievement was recorded."
+      },
+      "ActiveGoalResponse": {
+        "properties": {
+          "goal": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/GoalResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "progress_percent": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Progress Percent"
+          },
+          "current_value": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Current Value"
+          }
+        },
+        "type": "object",
+        "required": [
+          "goal",
+          "progress_percent",
+          "current_value"
+        ],
+        "title": "ActiveGoalResponse",
+        "description": "Response body for GET /api/v1/goals/active (SRS \u00a79.6).\n\nThe ``goal`` field is ``None`` when no active goal exists (200 is still\nreturned \u2014 404 is reserved for IDOR on /{goal_id}).\n\nAttributes:\n    goal: The active goal, or ``None``.\n    progress_percent: Progress toward the goal in [0, 100], or ``None``\n        when there is no active goal or no weight entries yet.\n    current_value: The latest weight entry value in the goal's unit,\n        or ``None`` when no entries exist."
+      },
       "DashboardSummaryResponse": {
         "properties": {
           "latest_entry": {
@@ -499,17 +951,244 @@
             "title": "Total Entries"
           },
           "active_goal": {
-            "type": "null",
-            "title": "Active Goal"
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ActiveGoalResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "rate_of_change": {
+            "$ref": "#/components/schemas/RateOfChangeResponse"
+          },
+          "trend": {
+            "items": {
+              "$ref": "#/components/schemas/TrendPointResponse"
+            },
+            "type": "array",
+            "title": "Trend",
+            "default": []
           }
         },
         "type": "object",
         "required": [
           "latest_entry",
-          "total_entries"
+          "total_entries",
+          "rate_of_change"
         ],
         "title": "DashboardSummaryResponse",
-        "description": "Response body for GET /api/v1/dashboard/summary (SRS \u00a79.5, FR-D-1).\n\nAttributes:\n    latest_entry: The user's most recent active weight entry, or ``None``\n        when no entries exist.\n    total_entries: Count of non-deleted weight entries.\n    active_goal: Always ``None`` in M2 (SRS \u00a76.7, \u00a713.1.4 deferred to M3)."
+        "description": "Response body for GET /api/v1/dashboard/summary (SRS \u00a79.5).\n\nCovers FR-D-1 (summary), FR-D-4 (goal progress), FR-D-3 (rate of change),\nand FR-D-2 (trend series).\n\nAttributes:\n    latest_entry: The user's most recent active weight entry, or ``None``.\n    total_entries: Count of non-deleted weight entries.\n    active_goal: The active goal with progress, or ``None`` when no active\n        goal exists.\n    rate_of_change: The weekly rate of weight change.\n    trend: The full weight series, oldest first, for the trend chart."
+      },
+      "GoalCreateRequest": {
+        "properties": {
+          "target_value": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 1500.0,
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              }
+            ],
+            "title": "Target Value"
+          },
+          "target_unit": {
+            "type": "string",
+            "enum": [
+              "lbs",
+              "kg"
+            ],
+            "title": "Target Unit"
+          },
+          "start_value": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 1500.0,
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              }
+            ],
+            "title": "Start Value"
+          },
+          "goal_type": {
+            "type": "string",
+            "enum": [
+              "lose",
+              "gain"
+            ],
+            "title": "Goal Type"
+          },
+          "target_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Date"
+          }
+        },
+        "type": "object",
+        "required": [
+          "target_value",
+          "target_unit",
+          "start_value",
+          "goal_type"
+        ],
+        "title": "GoalCreateRequest",
+        "description": "Request body for POST /api/v1/goals (SRS \u00a79.6).\n\nAttributes:\n    target_value: Target weight; positive, \u2264 1500.\n    target_unit: Weight unit \u2014 ``'lbs'`` or ``'kg'``.\n    start_value: Starting weight reference; positive, \u2264 1500.\n    goal_type: Either ``'lose'`` or ``'gain'``.\n    target_date: Optional date by which to reach the goal."
+      },
+      "GoalListResponse": {
+        "properties": {
+          "goals": {
+            "items": {
+              "$ref": "#/components/schemas/GoalResponse"
+            },
+            "type": "array",
+            "title": "Goals"
+          }
+        },
+        "type": "object",
+        "required": [
+          "goals"
+        ],
+        "title": "GoalListResponse",
+        "description": "Response body for GET /api/v1/goals.\n\nAttributes:\n    goals: All goals (active and historical), newest first."
+      },
+      "GoalResponse": {
+        "properties": {
+          "goal_id": {
+            "type": "integer",
+            "title": "Goal Id"
+          },
+          "user_id": {
+            "type": "integer",
+            "title": "User Id"
+          },
+          "target_value": {
+            "type": "number",
+            "title": "Target Value"
+          },
+          "target_unit": {
+            "type": "string",
+            "title": "Target Unit"
+          },
+          "start_value": {
+            "type": "number",
+            "title": "Start Value"
+          },
+          "goal_type": {
+            "type": "string",
+            "title": "Goal Type"
+          },
+          "target_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Date"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active"
+          },
+          "is_achieved": {
+            "type": "boolean",
+            "title": "Is Achieved"
+          },
+          "achieved_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Achieved At"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "goal_id",
+          "user_id",
+          "target_value",
+          "target_unit",
+          "start_value",
+          "goal_type",
+          "target_date",
+          "is_active",
+          "is_achieved",
+          "achieved_at",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "GoalResponse",
+        "description": "Response body for a single goal (SRS \u00a79.6).\n\nAttributes:\n    goal_id: Surrogate primary key.\n    user_id: The owning user's ID.\n    target_value: Target weight as a JSON number.\n    target_unit: Weight unit.\n    start_value: Starting weight.\n    goal_type: ``'lose'`` or ``'gain'``.\n    target_date: Optional target date.\n    is_active: Whether the goal is currently in progress.\n    is_achieved: Whether the goal has been reached.\n    achieved_at: UTC timestamp of achievement, or ``None``.\n    created_at: UTC timestamp of creation.\n    updated_at: UTC timestamp of last update."
+      },
+      "GoalUpdateRequest": {
+        "properties": {
+          "target_value": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 1500.0,
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              }
+            ],
+            "title": "Target Value"
+          },
+          "target_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Date"
+          }
+        },
+        "type": "object",
+        "required": [
+          "target_value"
+        ],
+        "title": "GoalUpdateRequest",
+        "description": "Request body for PUT /api/v1/goals/{goal_id} (FR-G-3).\n\nOnly ``target_value`` and ``target_date`` are mutable; goal_type and\nstart_value are immutable once set (SRS \u00a76.3 FR-G-3).\n\nAttributes:\n    target_value: New target weight; positive, \u2264 1500.\n    target_date: New target date, or ``None`` to clear it."
       },
       "HTTPValidationError": {
         "properties": {
@@ -546,6 +1225,95 @@
         "title": "LoginRequest",
         "description": "Request body for POST /api/v1/auth/login (SRS \u00a79.3.2, FR-A-2).\n\nAttributes:\n    email: The user's email address; normalised to lowercase at the boundary.\n    password: The plain-text password."
       },
+      "PreferenceKey": {
+        "type": "string",
+        "enum": [
+          "weight_unit",
+          "notify_achievement",
+          "notify_milestone",
+          "notify_streak"
+        ],
+        "title": "PreferenceKey",
+        "description": "Known preference keys stored in the user_preferences EAV table."
+      },
+      "PreferencesResponse": {
+        "properties": {
+          "weight_unit": {
+            "type": "string",
+            "enum": [
+              "lbs",
+              "kg"
+            ],
+            "title": "Weight Unit"
+          },
+          "notify_achievement": {
+            "type": "boolean",
+            "title": "Notify Achievement"
+          },
+          "notify_milestone": {
+            "type": "boolean",
+            "title": "Notify Milestone"
+          },
+          "notify_streak": {
+            "type": "boolean",
+            "title": "Notify Streak"
+          }
+        },
+        "type": "object",
+        "required": [
+          "weight_unit",
+          "notify_achievement",
+          "notify_milestone",
+          "notify_streak"
+        ],
+        "title": "PreferencesResponse",
+        "description": "Response body for GET /api/v1/preferences and PUT /api/v1/preferences/{key}.\n\nAll four preferences are always present (lazy defaults merged in the\napplication layer before this schema is constructed).\n\nAttributes:\n    weight_unit: Global weight-unit preference \u2014 'lbs' or 'kg'.\n    notify_achievement: Whether to show achievement alerts.\n    notify_milestone: Whether to show milestone alerts.\n    notify_streak: Whether to show streak alerts."
+      },
+      "RateOfChangeResponse": {
+        "properties": {
+          "weekly_rate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Weekly Rate"
+          },
+          "unit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unit"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          }
+        },
+        "type": "object",
+        "required": [
+          "weekly_rate",
+          "unit",
+          "reason"
+        ],
+        "title": "RateOfChangeResponse",
+        "description": "Weekly rate of weight change (SRS \u00a76.7, FR-D-3).\n\nAttributes:\n    weekly_rate: Signed weight change per week as a JSON number (SRS \u00a73.2\n        micro-decision 1), or ``None`` when there is insufficient data.\n    unit: The weight unit of ``weekly_rate``, or ``None``.\n    reason: A short reason when ``weekly_rate`` is ``None`` (e.g.\n        ``'insufficient_data'``); ``None`` otherwise."
+      },
       "RegisterRequest": {
         "properties": {
           "email": {
@@ -574,6 +1342,52 @@
         ],
         "title": "RegisterRequest",
         "description": "Request body for POST /api/v1/auth/register (SRS \u00a79.3.1, FR-A-1).\n\nAttributes:\n    email: RFC 5322 email address; normalised to lowercase at the boundary.\n    password: Plain-text password meeting complexity requirements.\n    display_name: Human-readable name (2\u201350 chars, trimmed)."
+      },
+      "TrendPointResponse": {
+        "properties": {
+          "observation_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Observation Date"
+          },
+          "weight_value": {
+            "type": "number",
+            "title": "Weight Value"
+          },
+          "weight_unit": {
+            "type": "string",
+            "title": "Weight Unit"
+          }
+        },
+        "type": "object",
+        "required": [
+          "observation_date",
+          "weight_value",
+          "weight_unit"
+        ],
+        "title": "TrendPointResponse",
+        "description": "A single point in the weight trend series (SRS \u00a76.7, FR-D-2).\n\nAttributes:\n    observation_date: Calendar date of the measurement.\n    weight_value: Recorded weight as a JSON number (SRS \u00a73.2 micro-decision 1).\n    weight_unit: Either ``'lbs'`` or ``'kg'``."
+      },
+      "UpdatePreferenceRequest": {
+        "properties": {
+          "value": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Value"
+          }
+        },
+        "type": "object",
+        "required": [
+          "value"
+        ],
+        "title": "UpdatePreferenceRequest",
+        "description": "Request body for PUT /api/v1/preferences/{key}.\n\nThe domain normalises the value per key, so a heterogeneous type is\naccepted here (bool | str). Invalid values return 422.\n\nAttributes:\n    value: The new preference value."
       },
       "UserResponse": {
         "properties": {
@@ -764,6 +1578,14 @@
             "type": "string",
             "format": "date-time",
             "title": "Updated At"
+          },
+          "newly_earned_achievements": {
+            "items": {
+              "$ref": "#/components/schemas/AchievementResponse"
+            },
+            "type": "array",
+            "title": "Newly Earned Achievements",
+            "default": []
           }
         },
         "type": "object",

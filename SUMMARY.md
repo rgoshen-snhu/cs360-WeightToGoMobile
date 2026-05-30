@@ -7,6 +7,33 @@ issues were resolved.
 
 ---
 
+## [2026-05-29 21:46] Commit Summary
+
+**Change Type:** Docs
+**Scope:** Milestone Three closeout documentation (READMEs, SRS, OpenAPI, narrative)
+
+**Summary:**
+M3 (v0.2.0) closeout documentation pass. Refreshed the root README (web feature
+set, current test counts 592 BE / 377 FE / 19 E2E, roadmap, TypeScript 6),
+pointed docs/README at the M3 plan, added the missing DDR-0007/0008 index rows,
+and created the four missing stack READMEs (android/, web/, web/frontend/,
+web/backend/). Regenerated docs/api/openapi.json from the live app (9 → 16 paths;
+goals, achievements, and preferences routes now included). Reconciled SRS v2
+Appendix A §17.2 to the on-disk ADRs (0016–0018 are the M2 security remediations;
+0019–0023 are the delivered M3 decisions) and annotated §13.2.1 deliverable 4
+(cursor pagination shipped in M2). Added the Milestone Three narrative.
+
+**Rationale:**
+The README set and OpenAPI snapshot had drifted behind the M3 feature work, and
+the DDR index and SRS ADR table no longer matched the records on disk. Closeout
+is the deliberate step to reconcile documentation against reality before tagging
+the release.
+
+**References:**
+- Issue: GH-57
+
+---
+
 ## [2026-05-29 13:55] Commit Summary
 
 **Change Type:** Fix
