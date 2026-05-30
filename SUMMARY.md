@@ -7,6 +7,38 @@ issues were resolved.
 
 ---
 
+## [2026-05-30 10:45] Commit Summary
+
+**Change Type:** Enhancement
+**Scope:** Achievements API (web backend)
+
+**Summary:**
+Applied a `30/minute` per-IP rate limit to `GET /api/v1/achievements`
+(`list_achievements`), mirroring the goals list endpoint. Reused the shared
+slowapi `limiter` from `auth/interface/router.py` and added the `request: Request`
+parameter slowapi requires for key extraction; the `get_achievement` detail route
+was left untouched (out of scope). Added one integration test
+(`test_list_achievements_returns_429_after_limit`) that authenticates with the
+limiter disabled, then enables it and asserts the 31st request returns 429.
+Backend gate green: ruff, ruff format, mypy clean; 591 passed / 4 skipped (the
+PostgreSQL-only index tests); coverage 97%.
+
+**Rationale:**
+The achievements listing was the only authenticated list endpoint without a
+limiter, leaving an asymmetric scraping/enumeration surface flagged by the PR #76
+security review. Matching the goals endpoint's existing `30/minute` policy keeps
+both listing endpoints consistent (defense-in-depth) and reuses the centralized
+key function (trusted-proxy aware) rather than introducing a second limiter,
+honoring DRY. The limit is consistency-driven, not an SRS NFR-S-5 mandate
+(NFR-S-5 scopes only the auth endpoints), so the code comments cite the goals
+parity rationale rather than that requirement ID.
+
+**References:**
+- Issue: GH-79
+- PR #76 (security review that surfaced the gap)
+
+---
+
 ## [2026-05-30 09:12] Commit Summary
 
 **Change Type:** Refactor
