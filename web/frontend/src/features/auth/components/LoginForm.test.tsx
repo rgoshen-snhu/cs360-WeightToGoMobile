@@ -5,6 +5,7 @@ import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
 import { theme } from '../../../theme/theme';
+import { AUTH_INVALID_CREDENTIALS } from '../messages';
 import { LoginForm } from './LoginForm';
 
 function Wrapper({ children }: { children: React.ReactNode }) {
@@ -65,11 +66,11 @@ describe('LoginForm', () => {
   it('renders a form-level alert for the formError prop', () => {
     render(
       <Wrapper>
-        <LoginForm onSubmit={vi.fn()} status="idle" formError="Invalid credentials." />
+        <LoginForm onSubmit={vi.fn()} status="idle" formError={AUTH_INVALID_CREDENTIALS} />
       </Wrapper>,
     );
     const alert = screen.getByRole('alert');
-    expect(alert).toHaveTextContent(/invalid credentials/i);
+    expect(alert).toHaveTextContent(AUTH_INVALID_CREDENTIALS);
   });
 
   it('disables the submit button while submitting', () => {
