@@ -7,6 +7,32 @@ issues were resolved.
 
 ---
 
+## [2026-05-29 22:05] Commit Summary
+
+**Change Type:** Chore (release automation)
+**Scope:** release-please configuration
+
+**Summary:**
+Removed the `release-as: "0.1.0"` pin from release-please-config.json so versions
+are driven automatically by conventional commits (feat → minor, fix → patch,
+BREAKING CHANGE → major). Wired the version into release-please via extra-files:
+a generic updater for web/backend/src/weighttogo/main.py (annotated with
+`x-release-please-version`) and a json updater for docs/api/openapi.json
+`$.info.version`, so both stay in sync with each release without manual edits.
+
+**Rationale:**
+The `release-as` pin forced every release to 0.1.0 — already tagged — so
+release-please kept re-proposing the "release 0.1.0" PR (#78) on every push and
+overrode automatic semantic versioning entirely. Removing the pin restores
+conventional-commit-driven versioning; the accumulated M3 `feat:` commits since
+v0.1.0 produce a 0.2.0 minor bump automatically. extra-files keeps the hardcoded
+app and snapshot versions managed by the release pipeline rather than by hand.
+
+**References:**
+- Issue: GH-57
+
+---
+
 ## [2026-05-29 21:46] Commit Summary
 
 **Change Type:** Docs
