@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from weighttogo.shared.cache import TTLCache
+from weighttogo.shared.cache import DEFAULT_TTL_SECONDS, TTLCache
 
 
 def test_get_returns_none_on_miss() -> None:
@@ -62,3 +62,73 @@ def test_expired_entry_is_evicted_not_just_hidden() -> None:
 
     # ASSERT — the underlying store no longer holds the key
     assert 1 not in cache._store  # noqa: SLF001 — white-box storage check
+
+
+def test_invalidate_removes_entry() -> None:
+    # ARRANGE
+    cache: TTLCache[int, str] = TTLCache()
+    cache.set(1, "summary")
+
+    # ACT
+    cache.invalidate(1)
+
+    # ASSERT
+    assert cache.get(1) is None
+
+
+def test_invalidate_absent_key_is_noop() -> None:
+    # ARRANGE
+    cache: TTLCache[int, str] = TTLCache()
+
+    # ACT — must not raise
+    cache.invalidate(99)
+
+    # ASSERT
+    assert cache.get(99) is None
+
+
+def test_clear_removes_all_entries() -> None:
+    # ARRANGE
+    cache: TTLCache[int, str] = TTLCache()
+    cache.set(1, "a")
+    cache.set(2, "b")
+
+    # ACT
+    cache.clear()
+
+    # ASSERT
+    assert cache.get(1) is None
+    assert cache.get(2) is None
+
+
+def test_set_overwrites_existing_value_and_refreshes_ttl() -> None:
+    # ARRANGE
+    clock = {"t": 1000.0}
+    cache: TTLCache[int, str] = TTLCache(ttl_seconds=30.0, now=lambda: clock["t"])
+    cache.set(1, "old")
+
+    # ACT — overwrite later resets the deadline to 1050
+    clock["t"] = 1020.0
+    cache.set(1, "new")
+    clock["t"] = 1045.0
+
+    # ASSERT — still live and holding the new value
+    assert cache.get(1) == "new"
+
+
+def test_invalidate_one_key_leaves_others() -> None:
+    # ARRANGE
+    cache: TTLCache[int, str] = TTLCache()
+    cache.set(1, "a")
+    cache.set(2, "b")
+
+    # ACT
+    cache.invalidate(1)
+
+    # ASSERT
+    assert cache.get(1) is None
+    assert cache.get(2) == "b"
+
+
+def test_default_ttl_constant_is_thirty_seconds() -> None:
+    assert DEFAULT_TTL_SECONDS == 30.0
